@@ -1,0 +1,132 @@
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+generator Client {
+    provider = "prisma-client-js"
+}
+
+enum VerificationMethod {
+    DNS_TXT
+    WELL_KNOWN_FILE
+    META_TAG
+}
+
+enum ScanType {
+    PASSIVE
+    ACTIVE
+}
+
+enum ScanStatus {
+    PENDING
+    RUNNING
+    COMPLETED
+    FAILED
+    CANCELLED
+}
+
+enum TestCategory {
+    JWT
+    RATE_LIMIT
+    BOT
+    FAKE_USER
+    SQL_INJECTION
+    XSS
+    CSRF
+    SECURITY_HEADERS
+    CORS
+    SSRF
+    BROKEN_ACCESS_CONTROL
+    SESSION_COOKIE
+    FILE_UPLOAD
+    PATH_TRAVERSAL
+    OPEN_REDIRECT
+    TLS_SSL
+    INFO_DISCLOSURE
+    CLICKJACKING
+    DEPENDENCY_CVE
+    API_MASS_ASSIGNMENT
+    COMMAND_INJECTION_XXE
+}
+
+enum Severity {
+    INFO
+    LOW
+    MEDIUM
+    HIGH
+    CRITICAL
+}
+
+enum TestStatus {
+    PASSED
+    FAILED
+    SKIPPED
+    ERROR
+}
+
+model User {
+    id        String    @id @default(uuid())
+    email     String    @unique
+    password  String
+    createdAt String
+    websites  Website[]
+}
+
+model Website {
+    id                 String              @id @default(uuid())
+    url                String
+    ownerId            String
+    owner              User                @relation(fields: [ownerId], references: [id])
+    isVerified         Boolean
+    verificationMethod VerificationMethod?
+    verificationToken  String?
+    verifiedAt         DateTime?
+    scans              Scan[]
+    createdAt          DateTime            @default(now())
+
+    @@unique([url, ownerId])
+}
+
+model Scan {
+    id          String       @id @default(uuid())
+    websiteId   String
+    website     Website      @relation(fields: [websiteId], references: [id])
+    scanType    ScanType
+    status      ScanStatus   @default(PENDING)
+    startedAt   DateTime?
+    completedAt DateTime?
+    aiSummary   String?
+    testResults TestResult[]
+    createdAt   DateTime     @default(now())
+}
+
+model TestResult {
+    id              String          @id @default(uuid())
+    scanId          String
+    scan            Scan            @relation(fields: [scanId], references: [id])
+    category        TestCategory
+    status          TestStatus
+    severity        Severity?
+    rawResult       Json
+    aiSuggstion     String
+    startedAt       DateTime?
+    completedAt     DateTime?
+    vulnerabilities Vulnerability[]
+
+    @@index([scanId, category])
+}
+
+model Vulnerability {
+    id           String     @id @default(uuid())
+    testResultId String
+    testResult   TestResult @relation(fields: [testResultId], references: [id])
+    title        String
+    description  String
+    severity     Severity
+    evidence     Json?
+    remediation  String?
+    createdAt    DateTime   @default(now())
+
+    @@index([testResultId])
+}
