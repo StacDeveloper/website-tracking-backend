@@ -28,11 +28,25 @@ export class ScanService {
 
         for (const category of PASSIVE_TEST) {
             await this.passiveQueue.add(
-                "run-test",
+                "run-test-Passive-Queue",
                 { scanId: scan.id, websiteId, url: website.url, category },
                 { jobId: `${scan.id}-${category}`, attempts: 2 }
             )
+            await this.activeQueue.add(
+                "run-test-Active-Queue",
+                {
+                    scanId: scan.id, websiteId, url: website.url, category, config: {
+                        loginEndPoint: website.loginEndPoint,
+                        registerEndPoint: website.registerEndPoint,
+                        uploadEndPoint: website.uploadEndPoint,
+                        sampleResourceUrl: website.sampleResourceUrl,
+                        massAssignEndPoint: website.massAssignEndpoint
+                    }
+                },
+                { jobId: `${scan.id}-${category}`, attempts: 1 },
+            )
         }
+
         await this.prisma.scan.update({
             where: { id: scan.id },
             data: { status: ScanStatus.RUNNING, startedAt: new Date() }

@@ -85,6 +85,14 @@ model Website {
     scans              Scan[]
     createdAt          DateTime            @default(now())
 
+
+
+    loginEndPoint String?
+    registerEndPoint String?
+    uploadEndPoint String?
+    sampleResourceUrl String?
+    massAssignEndpoint String?
+
     @@unique([url, ownerId])
 }
 
