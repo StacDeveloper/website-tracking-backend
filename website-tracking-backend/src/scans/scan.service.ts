@@ -3,7 +3,7 @@ import { BadRequestException, Injectable, NotFoundException } from "@nestjs/comm
 import { ScanStatus, ScanType } from "@prisma/client";
 import { Queue } from "bullmq";
 import { PrismaService } from "prisma/prisma.service";
-import { PASSIVE_TEST } from "./scan.test-catogory";
+import { ACTIVE_TEST, PASSIVE_TEST } from "./scan.test-catogory";
 
 @Injectable()
 export class ScanService {
@@ -32,19 +32,24 @@ export class ScanService {
                 { scanId: scan.id, websiteId, url: website.url, category },
                 { jobId: `${scan.id}-${category}`, attempts: 2 }
             )
-            await this.activeQueue.add(
-                "run-test-Active-Queue",
-                {
-                    scanId: scan.id, websiteId, url: website.url, category, config: {
-                        loginEndPoint: website.loginEndPoint,
-                        registerEndPoint: website.registerEndPoint,
-                        uploadEndPoint: website.uploadEndPoint,
-                        sampleResourceUrl: website.sampleResourceUrl,
-                        massAssignEndPoint: website.massAssignEndpoint
-                    }
-                },
-                { jobId: `${scan.id}-${category}`, attempts: 1 },
-            )
+
+            if (website.isVerified) {
+                for(const category of ACTIVE_TEST){
+                    await this.activeQueue.add(
+                        "run-test-Active-Queue",
+                        {
+                            scanId: scan.id, websiteId, url: website.url, category, config: {
+                                loginEndPoint: website.loginEndPoint,
+                                registerEndPoint: website.registerEndPoint,
+                                uploadEndPoint: website.uploadEndPoint,
+                                sampleResourceUrl: website.sampleResourceUrl,
+                                massAssignEndPoint: website.massAssignEndpoint
+                            }
+                        },
+                        { jobId: `${scan.id}-${category}`, attempts: 1 },
+                    )
+                }
+            }
         }
 
         await this.prisma.scan.update({

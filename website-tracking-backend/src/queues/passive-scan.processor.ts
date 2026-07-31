@@ -3,10 +3,37 @@ import { TestCategory, TestStatus } from "@prisma/client";
 import { Job } from "bullmq";
 import { PrismaService } from "prisma/prisma.service";
 import { TryCatch } from "src/lib/trycatch";
+import { SecurityHeadersService } from "src/tests/active-queue-test/securityheaders.service";
+import { ClickJackingService } from "src/tests/passive-queue-test/clickjacking.service";
+import { CorsService } from "src/tests/passive-queue-test/cors.service";
+import { CsrfService } from "src/tests/passive-queue-test/csrf.service";
+import { DependancyCVEService } from "src/tests/passive-queue-test/dependancecve.service";
+import { InfoDisclosureService } from "src/tests/passive-queue-test/infodisclosure.service";
+import { JwtSerice } from "src/tests/passive-queue-test/jwt.service";
+import { OpenRedirectService } from "src/tests/passive-queue-test/openredirect.service";
+import { PathTransversalService } from "src/tests/passive-queue-test/pathtransversal.service";
+import { SessionCookieService } from "src/tests/passive-queue-test/sessioncookie.service";
+import { SSRFService } from "src/tests/passive-queue-test/ssrf.service";
+import { TlsSslService } from "src/tests/passive-queue-test/tls-sls.service";
 
-@Processor("passive-scan")
+@Processor("passive-scan", { concurrency: 10 })
 export class PassiveProcessor extends WorkerHost {
-    constructor(private prisma: PrismaService, private securityHeaders: SecurityHeadersService, private tlsSSl: TlsSslService) { super() }
+    constructor(
+        private prisma: PrismaService,
+        private securityHeaders: SecurityHeadersService,
+        private tlsSSl: TlsSslService,
+        private cors: CorsService,
+        private clickJacking: ClickJackingService,
+        private infoDisclosure: InfoDisclosureService,
+        private sessionCookie: SessionCookieService,
+        private openRedirect: OpenRedirectService,
+        private pathTransversal: PathTransversalService,
+        private ssrf: SSRFService,
+        private csrf: CsrfService,
+        private jwt: JwtSerice,
+        private dependencycve: DependancyCVEService
+
+    ) { super() }
 
     async process(job: Job) {
         const { scanId, url, category } = job.data
@@ -16,9 +43,9 @@ export class PassiveProcessor extends WorkerHost {
                 data: {
                     scanId,
                     category,
-                    status: result.status,
-                    severity: result.severity,
-                    rawResult: result.data
+                    status: result!.status,
+                    severity: result!.severity,
+                    rawResult: result!.data
                 }
             })
         } catch (err: any) {
@@ -36,12 +63,19 @@ export class PassiveProcessor extends WorkerHost {
 
     private async runTest(category: TestCategory, url: string) {
         switch (category) {
-            case TestCategory.SECURITY_HEADERS:
-                return this.securityHeaders.run(url)
-            case TestCategory.TLS_SSL:
-                return this.tlsSSl.run(url)
-            default:
-                return { status: TestStatus.SKIPPED, severity: null, data: {} }
+            case TestCategory.SECURITY_HEADERS: return this.securityHeaders.run(url);
+            case TestCategory.TLS_SSL: return this.tlsSSl.run(url);
+            case TestCategory.CORS: return this.cors.run(url);
+            case TestCategory.CLICKJACKING: return this.clickJacking.run(url);
+            case TestCategory.INFO_DISCLOSURE: return this.infoDisclosure.run(url);
+            case TestCategory.SESSION_COOKIE: return this.sessionCookie.run(url);
+            case TestCategory.OPEN_REDIRECT: return this.openRedirect.run(url);
+            case TestCategory.PATH_TRAVERSAL: return this.pathTransversal.run(url);
+            case TestCategory.SSRF: return this.ssrf.run(url);
+            case TestCategory.CSRF: return this.csrf.run(url);
+            case TestCategory.JWT: return this.jwt.run(url);
+            case TestCategory.DEPENDENCY_CVE: return this.dependencycve.run(url);
+            default: return { status: TestStatus.SKIPPED, severity: null, data: { status: null, severity: null, data: null } };
         }
     }
     private async checkScanCompletion(scanId: string) {
@@ -49,5 +83,14 @@ export class PassiveProcessor extends WorkerHost {
             where: { id: scanId },
             include: { testResults: true }
         })
+        if (!scan) return
+
+        const expectedCound = scan.scanType === "ACTIVE" ? 21 : 12
+        if (scan.testResults.length >= expectedCound) {
+            await this.prisma.scan.update({
+                where: { id: scanId },
+                data: { status: "COMPLETED", completedAt: new Date() }
+            })
+        }
     }
 }
