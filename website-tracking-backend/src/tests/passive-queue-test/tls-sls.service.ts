@@ -1,11 +1,18 @@
 import { Injectable } from "@nestjs/common";
 import { Severity, TestStatus } from "@prisma/client";
 import * as tls from "tls"
+
+interface ScanResult {
+    status: TestStatus,
+    severity: Severity | null,
+    data: any
+}
+
 @Injectable()
 export class TlsSslService {
     async run(url: string) {
         const host = new URL(url).hostname
-        return new Promise((resolve) => {
+        return new Promise<ScanResult>((resolve) => {
             const socket = tls.connect({ host, port: 443, servername: host, timeout: 5000 }, () => {
                 const cert = socket.getPeerCertificate()
                 const protocoal = socket.getProtocol()

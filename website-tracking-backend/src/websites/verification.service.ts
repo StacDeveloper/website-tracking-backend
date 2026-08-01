@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { VerificationMethod } from "@prisma/client";
 import { randomBytes } from "crypto";
-import { PrismaService } from "prisma/prisma.service";
+import { PrismaService } from "../prisma/prisma.service";
 import * as dns from "dns/promises"
 import axios from "axios";
 

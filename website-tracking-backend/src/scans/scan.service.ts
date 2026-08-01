@@ -2,7 +2,7 @@ import { InjectQueue } from "@nestjs/bullmq";
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { ScanStatus, ScanType } from "@prisma/client";
 import { Queue } from "bullmq";
-import { PrismaService } from "prisma/prisma.service";
+import { PrismaService } from "../prisma/prisma.service";
 import { ACTIVE_TEST, PASSIVE_TEST } from "./scan.test-catogory";
 
 @Injectable()

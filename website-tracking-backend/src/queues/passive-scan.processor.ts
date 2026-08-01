@@ -1,23 +1,22 @@
 import { Processor, WorkerHost } from "@nestjs/bullmq";
 import { TestCategory, TestStatus } from "@prisma/client";
 import { Job } from "bullmq";
-import { PrismaService } from "prisma/prisma.service";
-import { TryCatch } from "src/lib/trycatch";
-import { SecurityHeadersService } from "src/tests/active-queue-test/securityheaders.service";
-import { ClickJackingService } from "src/tests/passive-queue-test/clickjacking.service";
-import { CorsService } from "src/tests/passive-queue-test/cors.service";
-import { CsrfService } from "src/tests/passive-queue-test/csrf.service";
-import { DependancyCVEService } from "src/tests/passive-queue-test/dependancecve.service";
-import { InfoDisclosureService } from "src/tests/passive-queue-test/infodisclosure.service";
-import { JwtSerice } from "src/tests/passive-queue-test/jwt.service";
-import { OpenRedirectService } from "src/tests/passive-queue-test/openredirect.service";
-import { PathTransversalService } from "src/tests/passive-queue-test/pathtransversal.service";
-import { SessionCookieService } from "src/tests/passive-queue-test/sessioncookie.service";
-import { SSRFService } from "src/tests/passive-queue-test/ssrf.service";
-import { TlsSslService } from "src/tests/passive-queue-test/tls-sls.service";
+import { PrismaService } from "../prisma/prisma.service";
+import { SecurityHeadersService } from '../tests/passive-queue-test/securityheaders.service';
+import { TlsSslService } from '../tests/passive-queue-test/tls-sls.service';
+import { CorsService } from '../tests/passive-queue-test/cors.service';
+import { ClickJackingService } from '../tests/passive-queue-test/clickjacking.service';
+import { InfoDisclosureService } from '../tests/passive-queue-test/infodisclosure.service';
+import { SessionCookieService } from '../tests/passive-queue-test/sessioncookie.service';
+import { OpenRedirectService } from '../tests/passive-queue-test/openredirect.service';
+import { PathTransversalService } from '../tests/passive-queue-test/pathtransversal.service';
+import { SSRFService } from '../tests/passive-queue-test/ssrf.service';
+import { CsrfService } from '../tests/passive-queue-test/csrf.service';
+import { JwtSerice } from '../tests/passive-queue-test/jwt.service';
+import { DependancyCVEService } from "../tests/passive-queue-test/dependancecve.service";
 
 @Processor("passive-scan", { concurrency: 10 })
-export class PassiveProcessor extends WorkerHost {
+export class PassiveScanProcessor extends WorkerHost {
     constructor(
         private prisma: PrismaService,
         private securityHeaders: SecurityHeadersService,
@@ -45,7 +44,8 @@ export class PassiveProcessor extends WorkerHost {
                     category,
                     status: result!.status,
                     severity: result!.severity,
-                    rawResult: result!.data
+                    rawResult: result!.data,
+                    aiSuggstion: ""
                 }
             })
         } catch (err: any) {
@@ -54,7 +54,8 @@ export class PassiveProcessor extends WorkerHost {
                     scanId,
                     category,
                     status: TestStatus.ERROR,
-                    rawResult: { error: err.message }
+                    rawResult: { error: err.message },
+                    aiSuggstion: ""
                 }
             })
         }

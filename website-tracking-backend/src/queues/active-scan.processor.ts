@@ -1,19 +1,20 @@
 import { Processor, WorkerHost } from "@nestjs/bullmq";
 import { TestCategory, TestStatus } from "@prisma/client";
 import { Job } from "bullmq";
-import { PrismaService } from "prisma/prisma.service";
-import { ApiMassManagementService } from "src/tests/active-queue-test/apimanagement.service";
-import { BotService } from "src/tests/active-queue-test/bot.service";
-import { BrokenAccessService } from "src/tests/active-queue-test/broken.service";
-import { CommandInjectionService } from "src/tests/active-queue-test/commandinjection.service";
-import { FakeUserService } from "src/tests/active-queue-test/fakeuser.service";
-import { FileUploadService } from "src/tests/active-queue-test/fileupload.service";
-import { RateLimitService } from "src/tests/active-queue-test/ratelimit.service";
-import { XssService } from "src/tests/active-queue-test/xss.service";
-import { SqlInjectionService } from "src/tests/passive-queue-test/sqlinjection.service";
+import { PrismaService } from "../prisma/prisma.service";
+import { SqlInjectionService } from '../tests/active-queue-test/sqlinjection.service';
+import { XssService } from '../tests/active-queue-test/xss.service';
+import { RateLimitService } from '../tests/active-queue-test/ratelimit.service';
+import { BotService } from '../tests/active-queue-test/bot.service';
+import { FakeUserService } from '../tests/active-queue-test/fakeuser.service';
+import { FileUploadService } from '../tests/active-queue-test/fileupload.service';
+import { CommandInjectionService } from "../tests/active-queue-test/commandinjection.service";
+import { BrokenAccessService } from "../tests/active-queue-test/broken.service";
+import { ApiMassManagementService } from "../tests/active-queue-test/apimanagement.service";
 
-@Processor("active-test", { concurrency: 2 })
-export class ActiveClassProcessor extends WorkerHost {
+
+@Processor("active-scan", { concurrency: 2 })
+export class ActiveScanProcessor extends WorkerHost {
     constructor(
         private prisma: PrismaService,
         private sqlInjection: SqlInjectionService,
@@ -38,7 +39,8 @@ export class ActiveClassProcessor extends WorkerHost {
                     category,
                     status: result!.status,
                     severity: result!.severity,
-                    rawResult: result!.data
+                    rawResult: result!.data,
+                    aiSuggstion:""
                 }
             })
         } catch (error: any) {
@@ -47,7 +49,8 @@ export class ActiveClassProcessor extends WorkerHost {
                     scanId,
                     category,
                     status: TestStatus.ERROR,
-                    rawResult: { error: error.message }
+                    rawResult: { error: error.message },
+                    aiSuggstion:""
                 }
             })
         }

@@ -1,11 +1,10 @@
-import { BullModule } from "@nestjs/bullmq";
 import { Module } from "@nestjs/common";
+import { QueueModule } from "../queues/queue.module"; 
+import { ScanService } from "./scan.service";
 
 @Module({
-    imports: [BullModule.registerQueue(
-        { name: "passive-scan" },
-        { name: "active-scan" },
-    )],
-    exports: [BullModule]
+   imports:[QueueModule],
+   providers:[ScanService],
+   exports:[ScanService]
 })
 export class ScanModule { }

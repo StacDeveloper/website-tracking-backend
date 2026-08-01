@@ -13,8 +13,9 @@ export class DependancyCVEService {
         const wpVersionMatch = body.match(/wp-content.*?ver=([\d.]+)/i)
 
 
+
         const fingerPrints = [
-            server && { name: server.split("/")[0], version: server.split("/")[1] },
+            typeof server === "string" && { name: server.split("/")[0], version: server.split("/")[1] },
             poweredBy && { name: poweredBy.split("/")[0], version: poweredBy.split("/")[1] },
             wpVersionMatch && { name: "Wordpress", version: wpVersionMatch[1] }
         ].filter(Boolean)
