@@ -14,6 +14,9 @@ import { SSRFService } from '../tests/passive-queue-test/ssrf.service';
 import { CsrfService } from '../tests/passive-queue-test/csrf.service';
 import { JwtSerice } from '../tests/passive-queue-test/jwt.service';
 import { DependancyCVEService } from "../tests/passive-queue-test/dependancecve.service";
+import { pubsub } from "./pubsub.provider";
+
+
 
 @Processor("passive-scan", { concurrency: 10 })
 export class PassiveScanProcessor extends WorkerHost {
@@ -59,7 +62,9 @@ export class PassiveScanProcessor extends WorkerHost {
                 }
             })
         }
-        await this.checkScanCompletion(scanId)
+
+        const updatedScan = await this.checkScanCompletion(scanId)
+        await pubsub.publish("scanUpdated", { scanUpdated: updatedScan })
     }
 
     private async runTest(category: TestCategory, url: string) {
@@ -88,10 +93,11 @@ export class PassiveScanProcessor extends WorkerHost {
 
         const expectedCound = scan.scanType === "ACTIVE" ? 21 : 12
         if (scan.testResults.length >= expectedCound) {
-            await this.prisma.scan.update({
+            return await this.prisma.scan.update({
                 where: { id: scanId },
                 data: { status: "COMPLETED", completedAt: new Date() }
             })
         }
+        return scan
     }
 }

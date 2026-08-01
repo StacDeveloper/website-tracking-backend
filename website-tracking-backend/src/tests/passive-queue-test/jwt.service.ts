@@ -47,9 +47,9 @@ export class JwtSerice {
 
     }
     private async extractToken(res): Promise<string | null> {
-        const authHeader = res.header["authorization"]
-        if (authHeader?.startsWith("Bearer ")) return authHeader.split("")[1]
-        const cookies: string[] = res.header["set-cookie"] || []
+        const authHeader = res.headers["authorization"]
+        if (authHeader?.startsWith("Bearer ")) return authHeader.split(" ")[1]
+        const cookies: string[] = res.headers["set-cookie"] || []
         const jwtCookie = cookies.find((cok) => cok.includes("token=") || cok.includes("jwt="))
         if (jwtCookie) return jwtCookie.split("=")[1].split(";")[0]
         return null

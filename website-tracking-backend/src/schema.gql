@@ -1,0 +1,36 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Mutation {
+  startScan(userId: ID!, websiteId: ID!): StartScanResponse!
+}
+
+type Query {
+  scanStatus(scanId: ID!): ScanType!
+}
+
+type ScanType {
+  aiSummary: String
+  id: ID!
+  scanType: String!
+  status: String!
+  testResults: [TestResultType!]
+}
+
+type StartScanResponse {
+  message: String!
+  scan: ScanType!
+  skippedActiveTest: Boolean!
+}
+
+type Subscription {
+  scanUpdated(scanId: ID!): ScanType!
+}
+
+type TestResultType {
+  category: String!
+  id: ID!
+  severity: String
+  status: String!
+}

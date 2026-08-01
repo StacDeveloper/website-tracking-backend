@@ -1,0 +1,35 @@
+import { Args, Mutation, Resolver, ID, Query, Subscription } from "@nestjs/graphql";
+import { ScanService } from "./scan.service";
+import { ScanType, StartScanResponse } from "./scan.graphql";
+import { pubsub } from "../queues/pubsub.provider";
+
+
+@Resolver()
+export class ScanResolver {
+    constructor(private scansService: ScanService) { }
+
+    @Mutation(() => StartScanResponse)
+    async startScan(
+        @Args("websiteId", { type: () => ID }) websiteId: string,
+        @Args("userId", { type: () => ID }) userId: string
+    ) {
+        return this.scansService.startScan(websiteId, userId)
+    }
+
+
+    @Query(() => ScanType)
+    async scanStatus(
+        @Args("scanId", { type: () => ID }) scanId: string
+    ) {
+        return this.scansService.getScanStatus(scanId)
+    }
+
+    @Subscription(() => ScanType, {
+        filter: (payload, variables) => payload.scanUpdated.id === variables.scanId
+    })
+    scanUpdated(@Args("scanId", { type: () => ID }) scanId: string) {
+        return pubsub.asyncIterableIterator("scanUpdated")
+    }
+
+
+}

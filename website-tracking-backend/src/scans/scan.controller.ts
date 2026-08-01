@@ -5,7 +5,7 @@ import { ScanService } from "./scan.service";
 export class ScanController {
     constructor(private scanService: ScanService) { }
 
-    @Post(":/websiteId/:userId")
+    @Post(":websiteId/:userId")
     start(@Param("websiteId") wesbiteId: string, @Param("userId") userId: string) {
         return this.scanService.startScan(wesbiteId, userId)
     }

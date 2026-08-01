@@ -11,7 +11,7 @@ import { FileUploadService } from '../tests/active-queue-test/fileupload.service
 import { CommandInjectionService } from "../tests/active-queue-test/commandinjection.service";
 import { BrokenAccessService } from "../tests/active-queue-test/broken.service";
 import { ApiMassManagementService } from "../tests/active-queue-test/apimanagement.service";
-
+import { pubsub } from "./pubsub.provider";
 
 @Processor("active-scan", { concurrency: 2 })
 export class ActiveScanProcessor extends WorkerHost {
@@ -40,7 +40,7 @@ export class ActiveScanProcessor extends WorkerHost {
                     status: result!.status,
                     severity: result!.severity,
                     rawResult: result!.data,
-                    aiSuggstion:""
+                    aiSuggstion: ""
                 }
             })
         } catch (error: any) {
@@ -50,10 +50,12 @@ export class ActiveScanProcessor extends WorkerHost {
                     category,
                     status: TestStatus.ERROR,
                     rawResult: { error: error.message },
-                    aiSuggstion:""
+                    aiSuggstion: ""
                 }
             })
         }
+        const updatedScan = await this.checkScanCompletion(scanId)
+        await pubsub.publish("scanUpdated", { scanUpdated: updatedScan })
     }
 
     private async runTest(category: TestCategory, url: string, config) {
@@ -78,5 +80,22 @@ export class ActiveScanProcessor extends WorkerHost {
                 return this.rateLimit.run(url)
         }
     }
+    private async checkScanCompletion(scanId: string) {
+        const scan = await this.prisma.scan.findUnique({
+            where: { id: scanId },
+            include: { testResults: true },
+        });
+        if (!scan) return null;
 
+        const expectedCount = scan.scanType === 'ACTIVE' ? 21 : 12;
+        if (scan.testResults.length >= expectedCount && scan.status !== 'COMPLETED') {
+            return this.prisma.scan.update({
+                where: { id: scanId },
+                data: { status: 'COMPLETED', completedAt: new Date() },
+                include: { testResults: true },
+            });
+        }
+        return scan;
+
+    }
 }
