@@ -15,6 +15,7 @@ import { CsrfService } from '../tests/passive-queue-test/csrf.service';
 import { JwtSerice } from '../tests/passive-queue-test/jwt.service';
 import { DependancyCVEService } from "../tests/passive-queue-test/dependancecve.service";
 import { pubsub } from "./pubsub.provider";
+import { AiSuggestionService } from "../ai-report/aisuggession.service";
 
 
 
@@ -33,7 +34,8 @@ export class PassiveScanProcessor extends WorkerHost {
         private ssrf: SSRFService,
         private csrf: CsrfService,
         private jwt: JwtSerice,
-        private dependencycve: DependancyCVEService
+        private dependencycve: DependancyCVEService,
+        private aiSuggestionService: AiSuggestionService
 
     ) { super() }
 
@@ -64,6 +66,9 @@ export class PassiveScanProcessor extends WorkerHost {
         }
 
         const updatedScan = await this.checkScanCompletion(scanId)
+        if (updatedScan?.status === "COMPLETED") {
+            await this.aiSuggestionService.generateSuggestion(scanId)
+        }
         await pubsub.publish("scanUpdated", { scanUpdated: updatedScan })
     }
 

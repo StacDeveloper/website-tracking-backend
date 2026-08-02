@@ -12,6 +12,7 @@ import { CommandInjectionService } from "../tests/active-queue-test/commandinjec
 import { BrokenAccessService } from "../tests/active-queue-test/broken.service";
 import { ApiMassManagementService } from "../tests/active-queue-test/apimanagement.service";
 import { pubsub } from "./pubsub.provider";
+import { AiSuggestionService } from "../ai-report/aisuggession.service";
 
 @Processor("active-scan", { concurrency: 2 })
 export class ActiveScanProcessor extends WorkerHost {
@@ -25,7 +26,8 @@ export class ActiveScanProcessor extends WorkerHost {
         private fileUpload: FileUploadService,
         private cmdInjectionXxe: CommandInjectionService,
         private brokenAccessControl: BrokenAccessService,
-        private apiMassAssignMent: ApiMassManagementService
+        private apiMassAssignMent: ApiMassManagementService,
+        private aiSuggestion: AiSuggestionService
     ) { super() }
 
     async process(job: Job) {
@@ -55,6 +57,9 @@ export class ActiveScanProcessor extends WorkerHost {
             })
         }
         const updatedScan = await this.checkScanCompletion(scanId)
+        if (updatedScan?.status === "COMPLETED") {
+            await this.aiSuggestion.generateSuggestion(scanId)
+        }
         await pubsub.publish("scanUpdated", { scanUpdated: updatedScan })
     }
 
