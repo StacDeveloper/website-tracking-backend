@@ -58,10 +58,10 @@ export class ActiveScanProcessor extends WorkerHost {
         await pubsub.publish("scanUpdated", { scanUpdated: updatedScan })
     }
 
-    private async runTest(category: TestCategory, url: string, config) {
+    private async runTest(category: TestCategory, url: string, config: any) {
         switch (category) {
             case TestCategory.SQL_INJECTION:
-                return this.sqlInjection.run(url)
+                return this.sqlInjection.run(url, config?.loginEndPoint)
             case TestCategory.XSS:
                 return this.xss.run(url)
             case TestCategory.BOT:
@@ -69,9 +69,9 @@ export class ActiveScanProcessor extends WorkerHost {
             case TestCategory.FAKE_USER:
                 return this.fakeUser.run(url, config?.registerEndPoint)
             case TestCategory.FILE_UPLOAD:
-                return this.fileUpload.run(url)
+                return this.fileUpload.run(config?.uploadEndPoint)
             case TestCategory.BROKEN_ACCESS_CONTROL:
-                return this.brokenAccessControl.run(url)
+                return this.brokenAccessControl.run(config?.sampleResourceUrl)
             case TestCategory.COMMAND_INJECTION_XXE:
                 return this.cmdInjectionXxe.run(url)
             case TestCategory.API_MASS_ASSIGNMENT:

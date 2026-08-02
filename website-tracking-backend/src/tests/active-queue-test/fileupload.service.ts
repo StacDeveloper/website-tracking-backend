@@ -5,18 +5,16 @@ import axios from "axios";
 
 @Injectable()
 export class FileUploadService {
-    async run(uploadEndPoint?: string) {
+    async run( uploadEndPoint?: string) {
         if (!uploadEndPoint) {
             return { status: TestStatus.FAILED, severity: null, data: { reason: "No upload endpoint configured" } }
         }
 
         const findings: {}[] = []
         const content = Buffer.from('<?php echo "scantool-test"; ?>');
-        const blob = new Blob([content], {
-            type: "application/x-http-php"
-        })
+
         const form = new FormData()
-        form.append("file", blob, "test.php")
+        form.append("file", content, "test.php")
 
         const res = await axios.post(uploadEndPoint, form, {
             headers: form.getHeaders(),

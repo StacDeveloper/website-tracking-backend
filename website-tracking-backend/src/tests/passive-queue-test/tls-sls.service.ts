@@ -11,6 +11,9 @@ interface ScanResult {
 @Injectable()
 export class TlsSslService {
     async run(url: string) {
+        if (!url.startsWith("https")) {
+            return { status: TestStatus.SKIPPED, severity: null, data: { reason: "Not an HTTPS URL" } }
+        }
         const host = new URL(url).hostname
         return new Promise<ScanResult>((resolve) => {
             const socket = tls.connect({ host, port: 443, servername: host, timeout: 5000 }, () => {

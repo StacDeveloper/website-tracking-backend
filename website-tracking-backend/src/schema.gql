@@ -2,6 +2,11 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
 type Mutation {
   startScan(userId: ID!, websiteId: ID!): StartScanResponse!
 }
@@ -29,8 +34,10 @@ type Subscription {
 }
 
 type TestResultType {
+  aiSuggestion: String
   category: String!
   id: ID!
+  rawResult: JSON
   severity: String
   status: String!
 }

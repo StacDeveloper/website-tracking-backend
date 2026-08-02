@@ -6,13 +6,13 @@ import axios from "axios";
 export class RateLimitService {
     async run(url: string) {
         const REQUEST_COUNT = 30;
-        const request = Array.from({ length: REQUEST_COUNT }, () => {
+        const request = Array.from({ length: REQUEST_COUNT }, () =>
             axios.get(url, { timeout: 5000, validateStatus: () => true })
-        })
+        )
         const responses: any = await Promise.allSettled(request)
-        const statuses = responses.map((res) => (res.status === "fulfilled" ? res.value.status : 0))
+        const statuses = responses.map((res) => res.status === "fulfilled" ? res.value.status : 0)
         const got429 = statuses.some((status) => status === 429)
-        const allSucceeded = statuses.every((status) => status >= 200 && status > 400)
+        const allSucceeded = statuses.every((status) => status >= 200 && status < 400)
         return {
             status: got429 ? TestStatus.PASSED : TestStatus.FAILED,
             severity: got429 ? null : Severity.HIGH,

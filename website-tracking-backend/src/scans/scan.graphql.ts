@@ -1,11 +1,13 @@
 import { ObjectType, Field, ID } from "@nestjs/graphql"
-
+import GraphQLJSON from "graphql-type-json";
 @ObjectType()
 export class TestResultType {
     @Field(() => ID) id: string;
     @Field() category: string;
     @Field() status: string;
     @Field({ nullable: true }) severity?: string;
+    @Field(() => GraphQLJSON, { nullable: true }) rawResult?: any;
+    @Field({ nullable: true }) aiSuggestion?: string;
 }
 
 @ObjectType()
