@@ -10,10 +10,10 @@ export class ScanResolver {
 
     @Mutation(() => StartScanResponse)
     async startScan(
-        @Args("websiteId", { type: () => ID }) websiteId: string,
+        @Args("url", { type: () => ID }) url: string,
         @Args("userId", { type: () => ID }) userId: string
     ) {
-        return this.scansService.startScan(websiteId, userId)
+        return this.scansService.startScan(url, userId)
     }
 
 

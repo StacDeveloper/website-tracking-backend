@@ -12,15 +12,21 @@ export class ScanService {
         @InjectQueue("active-scan") private activeQueue: Queue,
     ) { }
 
-    async startScan(websiteId: string, userId: string) {
-        const website = await this.prisma.website.findUnique({
-            where: { id: websiteId }
+    async startScan(url: string, userId: string) {
+
+        const website = await this.prisma.website.upsert({
+            where: { url_ownerId: { url, ownerId: userId } },
+            update: {},
+            create: {
+                url,
+                ownerId: userId,
+                isVerified: false
+            }
         })
-        if (!website) throw new NotFoundException("Website not found");
-        if (website.ownerId !== userId) throw new BadRequestException("You are not the owner of this website")
+
         const scan = await this.prisma.scan.create({
             data: {
-                websiteId,
+                websiteId: website.id,
                 scanType: website.isVerified ? ScanType.ACTIVE : ScanType.PASSIVE,
                 status: ScanStatus.PENDING
             }
@@ -29,26 +35,26 @@ export class ScanService {
         for (const category of PASSIVE_TEST) {
             await this.passiveQueue.add(
                 "run-test-Passive-Queue",
-                { scanId: scan.id, websiteId, url: website.url, category },
+                { scanId: scan.id, website, url: website.url, category },
                 { jobId: `${scan.id}-${category}`, attempts: 2 }
             )
 
-            if (website.isVerified) {
-                for(const category of ACTIVE_TEST){
-                    await this.activeQueue.add(
-                        "run-test-Active-Queue",
-                        {
-                            scanId: scan.id, websiteId, url: website.url, category, config: {
-                                loginEndPoint: website.loginEndPoint,
-                                registerEndPoint: website.registerEndPoint,
-                                uploadEndPoint: website.uploadEndPoint,
-                                sampleResourceUrl: website.sampleResourceUrl,
-                                massAssignEndPoint: website.massAssignEndpoint
-                            }
-                        },
-                        { jobId: `${scan.id}-${category}`, attempts: 1 },
-                    )
-                }
+        }
+        if (website.isVerified) {
+            for (const category of ACTIVE_TEST) {
+                await this.activeQueue.add(
+                    "run-test-Active-Queue",
+                    {
+                        scanId: scan.id, website, url: website.url, category, config: {
+                            loginEndPoint: website.loginEndPoint,
+                            registerEndPoint: website.registerEndPoint,
+                            uploadEndPoint: website.uploadEndPoint,
+                            sampleResourceUrl: website.sampleResourceUrl,
+                            massAssignEndPoint: website.massAssignEndpoint
+                        }
+                    },
+                    { jobId: `${scan.id}-${category}`, attempts: 1 },
+                )
             }
         }
 
