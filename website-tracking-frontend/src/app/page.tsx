@@ -1,66 +1,25 @@
 "use client"
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { features, footerItems } from "./assets/assets";
+import { FadeIn } from "@/lib/FadeIn";
 import {
   CircleCheckBig,
   Zap,
   Link2,
   ArrowRight,
-  Gauge,
-  Search,
-  ShieldCheck,
-  Bug,
   Moon,
   Sun,
-  Lock,
-  BarChart3,
-  Clock,
 } from "lucide-react";
 import Link from "next/link";
 
-const features = [
-  { icon: Gauge, title: "Performance Test", description: "Analyze loading speed and performance metrics.", color: "text-purple-400", bg: "bg-purple-500/10" },
-  { icon: Search, title: "SEO Analysis", description: "Get insights to improve your search engine rankings.", color: "text-emerald-400", bg: "bg-emerald-500/10" },
-  { icon: ShieldCheck, title: "Accessibility", description: "Ensure your website is usable by everyone.", color: "text-sky-400", bg: "bg-sky-500/10" },
-  { icon: Bug, title: "Bug Detection", description: "Find potential issues and errors on your site.", color: "text-orange-400", bg: "bg-orange-500/10" },
-];
 
-const footerItems = [
-  { icon: Zap, title: "Fast & Accurate", description: "Get results in seconds with detailed insights.", color: "text-indigo-400", bg: "bg-indigo-500/10" },
-  { icon: Lock, title: "Secure & Private", description: "Your data is never stored or shared with anyone.", color: "text-sky-400", bg: "bg-sky-500/10" },
-  { icon: BarChart3, title: "Detailed Reports", description: "Get comprehensive reports with actionable insights.", color: "text-gray-400", bg: "bg-white/5" },
-  { icon: Clock, title: "History & Tracking", description: "Track your tests history and monitor progress.", color: "text-pink-400", bg: "bg-pink-500/10" },
-];
-
-const FadeIn = ({ delay = 0, children, className = "" }: { delay?: number, children?: any, className?: string }) => {
-  const [show, setShow] = useState(false);
-
-  useEffect(() => {
-    const t = setTimeout(() => setShow(true), delay);
-    return () => clearTimeout(t);
-  }, [delay]);
-
-  return (
-    <div
-      className={className}
-      style={{
-        opacity: show ? 1 : 0,
-        transform: show ? "translateY(0)" : "translateY(16px)",
-        transition: "opacity 0.6s ease-out, transform 0.6s ease-out",
-      }}
-    >
-      {children}
-    </div>
-  );
-};
 
 const HomePage = () => {
   const [url, setUrl] = useState("");
   const [theme, setTheme] = useState("dark");
   const isDark = theme === "dark";
 
-  // Central color tokens, swapped per theme. Using inline styles (rather
-  // than Tailwind dark: classes) keeps this in sync everywhere with one
-  // source of truth and sidesteps any Tailwind dark-mode config entirely.
+
   const c = {
     bg: isDark ? "#050510" : "#f7f7fb",
     panelBg: isDark ? "rgba(12,12,26,0.8)" : "rgba(255,255,255,0.9)",
@@ -240,17 +199,21 @@ const HomePage = () => {
           style={{ borderColor: c.footerBorder, backgroundColor: c.cardBg }}
         >
           <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-6 py-14 sm:grid-cols-2 lg:grid-cols-4 lg:px-8">
-            {footerItems.map((item, i) => (
-              <FadeIn key={i} delay={i * 80} className="flex items-start gap-4">
-                <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${item.bg}`}>
-                  <item.icon className={`h-5 w-5 ${item.color}`} strokeWidth={2} />
-                </span>
-                <div>
-                  <h4 className="text-sm font-semibold" style={{ color: c.textPrimary }}>{item.title}</h4>
-                  <p className="mt-1 text-sm" style={{ color: c.textMuted }}>{item.description}</p>
-                </div>
-              </FadeIn>
-            ))}
+            {footerItems.map((item, i) => {
+              const Item = item.icon
+              return (
+                <FadeIn key={i} delay={i * 80} className="flex items-start gap-4">
+                  <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${item.bg}`}>
+                    <Item className={`h-5 w-5 ${item.color}`} strokeWidth={2} />
+                  </span>
+                  <div>
+                    <h4 className="text-sm font-semibold" style={{ color: c.textPrimary }}>{item.title}</h4>
+                    <p className="mt-1 text-sm" style={{ color: c.textMuted }}>{item.description}</p>
+                  </div>
+                </FadeIn>
+              )
+
+            })}
           </div>
         </section>
       </div>
