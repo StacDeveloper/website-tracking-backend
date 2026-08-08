@@ -4,14 +4,20 @@ import { useColorContext } from "@/app/context/useColorContext";
 import { CardShell } from "@/lib/Cardshell";
 import { SectionLabel } from "@/lib/SectionLabel";
 import { AlertTriangle, ArrowRight, ChevronRight, Copy, ExternalLink, Sparkles } from "lucide-react";
-import { useState } from "react";
 
-const TestDetailView = ({ test }: { test: Test }) => {
-    const [selectedTest, setSelectedTest] = useState<Test | null>(null)
-    const [detailTab, setDetailTab] = useState("Overview");
-    const sev = severityMeta[test.severity];
-    const [codeLang, setCodeLang] = useState("Node.js (mysql2)");
+
+interface TestDetailViewProps {
+    test: Test
+    setSelectedTest: React.Dispatch<React.SetStateAction<Test | null>>
+    setDetailTab: React.Dispatch<React.SetStateAction<string>>
+    detailTab: string
+    setCodeLang: React.Dispatch<React.SetStateAction<string>>
+    codeLang: string
+}
+
+const TestDetailView = ({ test, setSelectedTest, setDetailTab, detailTab, codeLang, setCodeLang }: TestDetailViewProps) => {
     const { c } = useColorContext()
+    const sev = severityMeta[test.severity];
     return (
         <div className="px-8 pb-16">
             <div className="mb-4 flex items-center gap-1.5 text-sm" style={{ color: c.textMuted }}>

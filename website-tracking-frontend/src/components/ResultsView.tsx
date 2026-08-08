@@ -1,24 +1,31 @@
 "use client"
-import { activeTests, allTests, passiveTests, severityMeta } from "@/app/assets/assets";
+
+import { activeTests, allTests, passiveTests, severityMeta, Test } from "@/app/assets/assets";
 import { useColorContext } from "@/app/context/useColorContext";
 import { CardShell } from "@/lib/Cardshell";
 import { Search, X } from "lucide-react";
 import { useMemo } from "react";
 
-const ResultsListView = (
-    { resultsTab, setResultsTab, query, setQuery, openTest }:
-        { resultsTab: string, setResultsTab: React.Dispatch<React.SetStateAction<string>>, query: string, setQuery: React.Dispatch<React.SetStateAction<string>>, openTest: any }
-) => {
-    const filteredRows = useMemo(() => {
-        const base = resultsTab === "all" ? allTests : resultsTab === "Active" ? activeTests : passiveTests;
-        return base.filter((row) => row.name.toLowerCase().includes(query.toLowerCase()));
-    }, [resultsTab, query]);
+
+interface ResultViewProps {
+    resultsTab: string
+    setResultsTab: React.Dispatch<React.SetStateAction<string>>
+    query: string
+    setQuery: React.Dispatch<React.SetStateAction<string>>
+    openTest: (test: Test) => void
+}
+
+const ResultsListView = ({ resultsTab, setResultsTab, query, setQuery, openTest }: ResultViewProps) => {
     const { c } = useColorContext()
     const resultTabsList = [
         { label: "All Tests", value: "all", count: allTests.length },
         { label: "Active", value: "Active", count: activeTests.length },
         { label: "Passive", value: "Passive", count: passiveTests.length },
-    ]
+    ];
+    const filteredRows = useMemo(() => {
+        const base = resultsTab === "all" ? allTests : resultsTab === "Active" ? activeTests : passiveTests;
+        return base.filter((row) => row.name.toLowerCase().includes(query.toLowerCase()));
+    }, [resultsTab, query]);
     return <>
         <div className="px-8 pb-16">
             <h1 className="mb-1 text-xl font-bold">

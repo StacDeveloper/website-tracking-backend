@@ -37,14 +37,14 @@ export const NavItems: {
         { label: "Integrations", icon: Share2 },
         { label: "Settings", icon: Settings },
     ]
-    export const detailTabs = ["Overview", "Request / Response", "Evidence", "AI Suggestion", "References"];
+export const detailTabs = ["Overview", "Request / Response", "Evidence", "AI Suggestion", "References"];
 
 export const severityMeta: Record<string, { text: string; bg: string; dot: string; ring: string }> = {
-  Critical: { text: "text-red-400", bg: "bg-red-500/10", dot: "bg-red-500", ring: "#ef4444" },
-  High: { text: "text-orange-400", bg: "bg-orange-500/10", dot: "bg-orange-500", ring: "#f97316" },
-  Medium: { text: "text-amber-400", bg: "bg-amber-500/10", dot: "bg-amber-500", ring: "#f59e0b" },
-  Low: { text: "text-sky-400", bg: "bg-sky-500/10", dot: "bg-sky-500", ring: "#38bdf8" },
-  Info: { text: "text-cyan-400", bg: "bg-cyan-500/10", dot: "bg-cyan-500", ring: "#22d3ee" },
+    Critical: { text: "text-red-400", bg: "bg-red-500/10", dot: "bg-red-500", ring: "#ef4444" },
+    High: { text: "text-orange-400", bg: "bg-orange-500/10", dot: "bg-orange-500", ring: "#f97316" },
+    Medium: { text: "text-amber-400", bg: "bg-amber-500/10", dot: "bg-amber-500", ring: "#f59e0b" },
+    Low: { text: "text-sky-400", bg: "bg-sky-500/10", dot: "bg-sky-500", ring: "#38bdf8" },
+    Info: { text: "text-cyan-400", bg: "bg-cyan-500/10", dot: "bg-cyan-500", ring: "#22d3ee" },
 };
 
 export const summaryCards: {
@@ -117,8 +117,9 @@ export const passiveTests = [
     { name: "Fake User Detection", desc: "Checks for fake user registration vulnerabilities.", icon: UserX, iconBg: "bg-cyan-500/10", iconColor: "text-cyan-400", type: "Passive", severity: "Info", issues: 0 },
 ];
 
+
 export const allTests = [...activeTests, ...passiveTests]
-export const severityCount = { Critical: 5, High: 8, Medium: 6, low: 2, Info: 7 }
+export const severityCount = { Critical: 5, High: 8, Medium: 6, Low: 2, Info: 7 }
 export const totalIssues = Object.values(severityCount).reduce((a, b) => a + b, 0)
 
 export const topIssues = [
@@ -162,29 +163,29 @@ export const liveOutputLines = [
 
 export const codeSamples: Record<string, string> = {
     "Node.js (mysql2)": `const mysql = require('mysql2/promise');
- 
-// Instead of this (vulnerable):
-// const query = "SELECT * FROM users WHERE id = " + req.query.id;
- 
-// Use this (safe):
-const [rows] = await connection.execute(
-  'SELECT * FROM users WHERE id = ?',
-  [req.query.id]
-);`,
+    
+    // Instead of this (vulnerable):
+    // const query = "SELECT * FROM users WHERE id = " + req.query.id;
+    
+    // Use this (safe):
+    const [rows] = await connection.execute(
+        'SELECT * FROM users WHERE id = ?',
+        [req.query.id]
+        );`,
     "PHP (PDO)": `$stmt = $pdo->prepare(
-  'SELECT * FROM users WHERE id = :id'
-);
-$stmt->execute(['id' => $_GET['id']]);
-$user = $stmt->fetch();`,
+            'SELECT * FROM users WHERE id = :id'
+            );
+            $stmt->execute(['id' => $_GET['id']]);
+            $user = $stmt->fetch();`,
     "Java (JDBC)": `String sql = "SELECT * FROM users WHERE id = ?";
-PreparedStatement stmt = conn.prepareStatement(sql);
-stmt.setInt(1, userId);
-ResultSet rs = stmt.executeQuery();`,
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();`,
     "Python (psycopg2)": `cur.execute(
-  "SELECT * FROM users WHERE id = %s",
-  (user_id,)
-)
-user = cur.fetchone()`,
+                "SELECT * FROM users WHERE id = %s",
+                (user_id,)
+                )
+                user = cur.fetchone()`,
 };
 
 export type Test = (typeof activeTests)[number]

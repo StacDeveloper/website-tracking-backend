@@ -1,17 +1,15 @@
 "use client"
-import { severityCount, severityMeta, topIssues, totalIssues } from '@/app/assets/assets';
-import { useColorContext } from '@/app/context/useColorContext';
-import { CardShell } from '@/lib/Cardshell';
-import { DonutChart } from '@/lib/DonutChart';
-import { SectionLabel } from '@/lib/SectionLabel';
-import { Download, Globe, ShieldAlert } from 'lucide-react';
-import { useState } from 'react';
+import { severityCount, severityMeta, topIssues, totalIssues } from "@/app/assets/assets";
+import { useColorContext } from "@/app/context/useColorContext";
+import { CardShell } from "@/lib/Cardshell";
+import { DonutChart } from "@/lib/DonutChart";
+import { SectionLabel } from "@/lib/SectionLabel";
+import { Download, Globe, ShieldAlert } from "lucide-react";
 
-
-export const OverviewView = () => {
-    const [activeNav, setActiveNav] = useState<string | null>(null)
+const OverviewView = ({ setActiveNav }: { setActiveNav: React.Dispatch<React.SetStateAction<string>> }) => {
     const { c } = useColorContext()
-    return (
+    return <>
+
         <div className="px-8 pb-16">
             <div className="mb-6 flex items-center justify-between">
                 <h1 className="text-xl font-bold">Overview</h1>
@@ -50,9 +48,17 @@ export const OverviewView = () => {
                         <DonutChart counts={severityCount} accent={c.cardBg} />
                         <div className="flex flex-col gap-2">
                             {Object.entries(severityCount).map(([label, value]) => (
-                                <span key={label} className="flex items-center gap-2 text-sm" style={{ color: c.textSecondary }}>
-                                    <span className={`h-2 w-2 rounded-full ${severityMeta[label].dot}`} />
-                                    {label} &nbsp;
+                                <span
+                                    key={label}
+                                    className="flex items-center gap-2 text-sm"
+                                    style={{ color: c.textSecondary }}
+                                >
+                                    <span
+                                        className={`h-2 w-2 rounded-full ${severityMeta[label].dot}`}
+                                    />
+
+                                    <span>{label}</span>
+
                                     <span style={{ color: c.textFaint }}>
                                         {value} ({Math.round((value / totalIssues) * 100)}%)
                                     </span>
@@ -143,5 +149,6 @@ export const OverviewView = () => {
                 </CardShell>
             </div>
         </div>
-    );
+    </>
 }
+export default OverviewView

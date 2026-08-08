@@ -5,13 +5,14 @@ import { createContext, ReactNode, useContext, useState } from "react"
 export type c = Record<string, string>
 
 
-interface ColorContextProps{
-    c:c,
-    theme:string,
-    isDark:boolean
+interface ColorContextProps {
+    c: c,
+    theme: string,
+    isDark: boolean,
+    setTheme: React.Dispatch<React.SetStateAction<string>>
 }
 
-const ColorContext = createContext< ColorContextProps | undefined>(undefined)
+const ColorContext = createContext<ColorContextProps | undefined>(undefined)
 
 export const useColorContext = () => {
     const context = useContext(ColorContext)
@@ -42,7 +43,8 @@ export const ColorContextProvider = ({ children }: { children: ReactNode }) => {
     const value: any = {
         theme,
         c,
-        isDark
+        isDark,
+        setTheme
     }
 
     return <ColorContext.Provider value={value}>
