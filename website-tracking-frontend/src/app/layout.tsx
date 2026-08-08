@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { ColorContextProvider } from "./context/useColorContext";
 
 export const metadata: Metadata = {
   title: "WebTest — Test your website. Get real insights.",
@@ -14,7 +15,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="font-sans antialiased">{children}</body>
+      <body className="font-sans antialiased">
+        <ColorContextProvider>
+          {children}
+        </ColorContextProvider>
+      </body>
     </html>
   );
 }

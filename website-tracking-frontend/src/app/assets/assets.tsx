@@ -1,4 +1,4 @@
-import { BarChart3, Bug, Clock, Gauge, LucideIcon, Search, ShieldCheck, Zap, Lock, LayoutGrid, Plus, History, ClipboardList, Bookmark, Share2, Settings, ShieldAlert, Info, Globe, Ban, FlaskConical, Cookie, FolderTree, Link2 } from "lucide-react";
+import { BarChart3, Bug, Clock, Gauge, LucideIcon, Search, ShieldCheck, Zap, Lock, LayoutGrid, Plus, History, ClipboardList, Bookmark, Share2, Settings, ShieldAlert, Info, Globe, Ban, FlaskConical, Cookie, FolderTree, Link2, Database, FileCode2, Upload, Terminal, KeyRound, UserCog, RefreshCw, Server, ExternalLink, KeySquare, PackageSearch, Bot, UserX } from "lucide-react";
 
 export const features: {
     icon: LucideIcon,
@@ -37,15 +37,15 @@ export const NavItems: {
         { label: "Integrations", icon: Share2 },
         { label: "Settings", icon: Settings },
     ]
+    export const detailTabs = ["Overview", "Request / Response", "Evidence", "AI Suggestion", "References"];
 
-export const severityMeta: Record<string, { text: string, bg: string, dot: string }> = {
-    Critical: { text: "text-red-400", bg: "bg-red-500/10", dot: "bg-red-500" },
-    High: { text: "text-orange-400", bg: "bg-orange-500/10", dot: "bg-orange-500" },
-    Medium: { text: "text-amber-400", bg: "bg-amber-500/10", dot: "bg-amber-500" },
-    Low: { text: "text-sky-400", bg: "bg-sky-500/10", dot: "bg-sky-500" },
-    Info: { text: "text-cyan-400", bg: "bg-cyan-500/10", dot: "bg-cyan-500" },
-
-}
+export const severityMeta: Record<string, { text: string; bg: string; dot: string; ring: string }> = {
+  Critical: { text: "text-red-400", bg: "bg-red-500/10", dot: "bg-red-500", ring: "#ef4444" },
+  High: { text: "text-orange-400", bg: "bg-orange-500/10", dot: "bg-orange-500", ring: "#f97316" },
+  Medium: { text: "text-amber-400", bg: "bg-amber-500/10", dot: "bg-amber-500", ring: "#f59e0b" },
+  Low: { text: "text-sky-400", bg: "bg-sky-500/10", dot: "bg-sky-500", ring: "#38bdf8" },
+  Info: { text: "text-cyan-400", bg: "bg-cyan-500/10", dot: "bg-cyan-500", ring: "#22d3ee" },
+};
 
 export const summaryCards: {
     label: string,
@@ -89,3 +89,102 @@ export const resultTabs: { label: string, value: string, count: number }[] = [
     { label: "Active", value: "Active", count: 11 },
     { label: "Passive", value: "Passive", count: 10 },
 ]
+export const detailsTab: string[] = ["Overview", "Request / Response", "Evidence", "AI Suggestion", "References"];
+export const activeTests = [
+    { name: "SQL Injection", desc: "Detects SQL injection vulnerabilities.", icon: Database, iconBg: "bg-red-500/10", iconColor: "text-red-400", type: "Active", severity: "Critical", issues: 2 },
+    { name: "XSS (Cross Site Scripting)", desc: "Finds reflected, stored and DOM based XSS.", icon: FileCode2, iconBg: "bg-orange-500/10", iconColor: "text-orange-400", type: "Active", severity: "High", issues: 1 },
+    { name: "File Upload", desc: "Checks for insecure file upload vulnerabilities.", icon: Upload, iconBg: "bg-orange-500/10", iconColor: "text-orange-400", type: "Active", severity: "High", issues: 2 },
+    { name: "Command Injection", desc: "Detects OS command injection vulnerabilities.", icon: Terminal, iconBg: "bg-red-500/10", iconColor: "text-red-400", type: "Active", severity: "Critical", issues: 1 },
+    { name: "Broken Access Control", desc: "Identifies broken access control issues.", icon: KeyRound, iconBg: "bg-orange-500/10", iconColor: "text-orange-400", type: "Active", severity: "High", issues: 2 },
+    { name: "API Mass Assignment", desc: "Checks for mass assignment vulnerabilities.", icon: UserCog, iconBg: "bg-amber-500/10", iconColor: "text-amber-400", type: "Active", severity: "Medium", issues: 1 },
+    { name: "CSRF", desc: "Checks for Cross Site Request Forgery.", icon: RefreshCw, iconBg: "bg-amber-500/10", iconColor: "text-amber-400", type: "Active", severity: "Medium", issues: 1 },
+    { name: "SSRF", desc: "Server Side Request Forgery detection.", icon: Server, iconBg: "bg-orange-500/10", iconColor: "text-orange-400", type: "Active", severity: "High", issues: 1 },
+    { name: "Open Redirect", desc: "Checks for unvalidated redirects.", icon: ExternalLink, iconBg: "bg-amber-500/10", iconColor: "text-amber-400", type: "Active", severity: "Medium", issues: 1 },
+    { name: "Path Traversal", desc: "Checks for directory traversal vulnerabilities.", icon: FolderTree, iconBg: "bg-red-500/10", iconColor: "text-red-400", type: "Active", severity: "Critical", issues: 1 },
+    { name: "Rate Limit", desc: "Checks if rate limiting is properly implemented.", icon: Gauge, iconBg: "bg-amber-500/10", iconColor: "text-amber-400", type: "Active", severity: "Medium", issues: 1 },
+];
+
+export const passiveTests = [
+    { name: "Security Headers", desc: "Checks for missing or misconfigured security headers.", icon: ShieldCheck, iconBg: "bg-purple-500/10", iconColor: "text-purple-400", type: "Passive", severity: "High", issues: 3 },
+    { name: "TLS/SSL", desc: "Validates SSL/TLS configuration and certificate setup.", icon: Lock, iconBg: "bg-emerald-500/10", iconColor: "text-emerald-400", type: "Passive", severity: "Medium", issues: 1 },
+    { name: "CORS", desc: "Checks for permissive Cross-Origin Resource Sharing.", icon: Globe, iconBg: "bg-purple-500/10", iconColor: "text-purple-400", type: "Passive", severity: "High", issues: 2 },
+    { name: "Clickjacking", desc: "Detects if your site is vulnerable to clickjacking attacks.", icon: ShieldAlert, iconBg: "bg-pink-500/10", iconColor: "text-pink-400", type: "Passive", severity: "High", issues: 1 },
+    { name: "Information Disclosure", desc: "Checks for sensitive information exposure.", icon: FileCode2, iconBg: "bg-sky-500/10", iconColor: "text-sky-400", type: "Passive", severity: "Medium", issues: 2 },
+    { name: "Session Cookie", desc: "Checks cookie attributes for session management.", icon: KeySquare, iconBg: "bg-fuchsia-500/10", iconColor: "text-fuchsia-400", type: "Passive", severity: "Medium", issues: 1 },
+    { name: "JWT Security", desc: "Analyzes JSON Web Token implementation.", icon: KeySquare, iconBg: "bg-fuchsia-500/10", iconColor: "text-fuchsia-400", type: "Passive", severity: "Medium", issues: 1 },
+    { name: "Dependency CVE", desc: "Checks for known vulnerabilities in dependencies.", icon: PackageSearch, iconBg: "bg-rose-500/10", iconColor: "text-rose-400", type: "Passive", severity: "Medium", issues: 1 },
+    { name: "Bot Detection", desc: "Checks if bot protection mechanisms exist.", icon: Bot, iconBg: "bg-sky-500/10", iconColor: "text-sky-400", type: "Passive", severity: "Low", issues: 1 },
+    { name: "Fake User Detection", desc: "Checks for fake user registration vulnerabilities.", icon: UserX, iconBg: "bg-cyan-500/10", iconColor: "text-cyan-400", type: "Passive", severity: "Info", issues: 0 },
+];
+
+export const allTests = [...activeTests, ...passiveTests]
+export const severityCount = { Critical: 5, High: 8, Medium: 6, low: 2, Info: 7 }
+export const totalIssues = Object.values(severityCount).reduce((a, b) => a + b, 0)
+
+export const topIssues = [
+    { name: "Missing Security Headers", count: 3 },
+    { name: "CORS Misconfiguration", count: 2 },
+    { name: "SQL Injection", count: 2 },
+    { name: "XSS Detected", count: 1 },
+]
+
+export const runningTests = [
+    { name: "Security Headers", icon: ShieldCheck, status: "Completed" },
+    { name: "TLS/SSL", icon: Lock, status: "Completed" },
+    { name: "CORS", icon: Globe, status: "Completed" },
+    { name: "Clickjacking", icon: ShieldAlert, status: "Completed" },
+    { name: "Information Disclosure", icon: FileCode2, status: "Completed" },
+    { name: "Session Cookie", icon: KeySquare, status: "Completed" },
+    { name: "SQL Injection", icon: Database, status: "In Progress" },
+    { name: "XSS (Cross Site Scripting)", icon: FileCode2, status: "Pending" },
+    { name: "File Upload", icon: Upload, status: "Pending" },
+    { name: "Command Injection", icon: Terminal, status: "Pending" },
+]
+
+export const liveOutputLines = [
+    "[12:42:10] Starting scan...",
+    "[12:42:10] Target: https://example.com",
+    "[12:42:11] [Security Headers] Checking...",
+    "[12:42:11] [Security Headers] Completed",
+    "[12:42:12] [TLS/SSL] Checking certificate...",
+    "[12:42:12] [TLS/SSL] Completed",
+    "[12:42:13] [CORS] Analyzing...",
+    "[12:42:13] [CORS] Completed",
+    "[12:42:14] [Clickjacking] Checking...",
+    "[12:42:14] [Clickjacking] Completed",
+    "[12:42:15] [Information Disclosure] Checking...",
+    "[12:42:15] [Information Disclosure] Completed",
+    "[12:42:16] [Session Cookie] Checking...",
+    "[12:42:16] [Session Cookie] Completed",
+    "[12:42:17] [SQL Injection] Testing payloads...",
+    "[12:42:18] [SQL Injection] Testing payload 12/36",
+];
+
+export const codeSamples: Record<string, string> = {
+    "Node.js (mysql2)": `const mysql = require('mysql2/promise');
+ 
+// Instead of this (vulnerable):
+// const query = "SELECT * FROM users WHERE id = " + req.query.id;
+ 
+// Use this (safe):
+const [rows] = await connection.execute(
+  'SELECT * FROM users WHERE id = ?',
+  [req.query.id]
+);`,
+    "PHP (PDO)": `$stmt = $pdo->prepare(
+  'SELECT * FROM users WHERE id = :id'
+);
+$stmt->execute(['id' => $_GET['id']]);
+$user = $stmt->fetch();`,
+    "Java (JDBC)": `String sql = "SELECT * FROM users WHERE id = ?";
+PreparedStatement stmt = conn.prepareStatement(sql);
+stmt.setInt(1, userId);
+ResultSet rs = stmt.executeQuery();`,
+    "Python (psycopg2)": `cur.execute(
+  "SELECT * FROM users WHERE id = %s",
+  (user_id,)
+)
+user = cur.fetchone()`,
+};
+
+export type Test = (typeof activeTests)[number]
