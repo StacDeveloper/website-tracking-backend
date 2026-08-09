@@ -1,9 +1,9 @@
 "use client"
 import { severityCount, severityMeta, topIssues, totalIssues } from "@/app/assets/assets";
 import { useColorContext } from "@/app/context/useColorContext";
-import { CardShell } from "@/lib/Cardshell";
-import { DonutChart } from "@/lib/DonutChart";
-import { SectionLabel } from "@/lib/SectionLabel";
+import { CardShell } from "@/lib/Reusable-Components/Cardshell";
+import { DonutChart } from "@/lib/Reusable-Components/DonutChart";
+import { SectionLabel } from "@/lib/Reusable-Components/SectionLabel";
 import { Download, Globe, ShieldAlert } from "lucide-react";
 
 const OverviewView = ({ setActiveNav }: { setActiveNav: React.Dispatch<React.SetStateAction<string>> }) => {

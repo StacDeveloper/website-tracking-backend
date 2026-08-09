@@ -1,7 +1,7 @@
 "use client"
 import { useState } from "react";
 import { features, footerItems } from "./assets/assets";
-import { FadeIn } from "@/lib/FadeIn";
+import { FadeIn } from "@/lib/Reusable-Components/FadeIn";
 import {
   CircleCheckBig,
   Zap,

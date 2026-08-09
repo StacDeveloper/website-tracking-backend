@@ -1,8 +1,8 @@
 "use client"
 import { codeSamples, detailTabs, severityMeta, Test } from "@/app/assets/assets";
 import { useColorContext } from "@/app/context/useColorContext";
-import { CardShell } from "@/lib/Cardshell";
-import { SectionLabel } from "@/lib/SectionLabel";
+import { CardShell } from "@/lib/Reusable-Components/Cardshell";
+import { SectionLabel } from "@/lib/Reusable-Components/SectionLabel";
 import { AlertTriangle, ArrowRight, ChevronRight, Copy, ExternalLink, Sparkles } from "lucide-react";
 
 

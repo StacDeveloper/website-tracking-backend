@@ -2,7 +2,7 @@
 
 import { activeTests, allTests, passiveTests, severityMeta, Test } from "@/app/assets/assets";
 import { useColorContext } from "@/app/context/useColorContext";
-import { CardShell } from "@/lib/Cardshell";
+import { CardShell } from "@/lib/Reusable-Components/Cardshell";
 import { Search, X } from "lucide-react";
 import { useMemo } from "react";
 

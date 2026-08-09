@@ -1,8 +1,8 @@
 import { liveOutputLines, runningTests } from "@/app/assets/assets";
 import { useColorContext } from "@/app/context/useColorContext";
-import { CardShell } from "@/lib/Cardshell";
-import { SectionLabel } from "@/lib/SectionLabel";
-import { StatusPill } from "@/lib/StatusPill";
+import { CardShell } from "@/lib/Reusable-Components/Cardshell";
+import { SectionLabel } from "@/lib/Reusable-Components/SectionLabel";
+import { StatusPill } from "@/lib/Reusable-Components/StatusPill";
 import { Loader2, XCircle } from "lucide-react";
 
 

@@ -1,4 +1,4 @@
-import { BarChart3, Bug, Clock, Gauge, LucideIcon, Search, ShieldCheck, Zap, Lock, LayoutGrid, Plus, History, ClipboardList, Bookmark, Share2, Settings, ShieldAlert, Info, Globe, Ban, FlaskConical, Cookie, FolderTree, Link2, Database, FileCode2, Upload, Terminal, KeyRound, UserCog, RefreshCw, Server, ExternalLink, KeySquare, PackageSearch, Bot, UserX } from "lucide-react";
+import { BarChart3, Bug, Clock, Gauge, LucideIcon, Search, ShieldCheck, Zap, Lock, LayoutGrid, Plus, History, ClipboardList, Bookmark, Share2, Settings, ShieldAlert, Info, Globe, Ban, FlaskConical, Cookie, FolderTree, Link2, Database, FileCode2, Upload, Terminal, KeyRound, UserCog, RefreshCw, Server, ExternalLink, KeySquare, PackageSearch, Bot, UserX, ShoppingCart, FileText, Layers, Smartphone, User, Palette, Bell, Users, CreditCard, AlertOctagon } from "lucide-react";
 
 export const features: {
     icon: LucideIcon,
@@ -189,3 +189,60 @@ export const codeSamples: Record<string, string> = {
 };
 
 export type Test = (typeof activeTests)[number]
+
+export const historyRows = [
+    { target: "https://example.com", icon: Globe, iconBg: "bg-indigo-500/10", iconColor: "text-indigo-400", tests: 21, score: 78, issues: 21, status: "Completed", date: "3 May 2025, 12:42 PM" },
+    { target: "https://api.example.com", icon: Server, iconBg: "bg-sky-500/10", iconColor: "text-sky-400", tests: 21, score: 91, issues: 7, status: "Completed", date: "1 May 2025, 10:15 AM" },
+    { target: "https://shop.example.com", icon: ShoppingCart, iconBg: "bg-orange-500/10", iconColor: "text-orange-400", tests: 21, score: 64, issues: 34, status: "Completed", date: "29 Apr 2025, 4:30 PM" },
+    { target: "https://blog.example.com", icon: FileText, iconBg: "bg-emerald-500/10", iconColor: "text-emerald-400", tests: 21, score: 82, issues: 15, status: "Completed", date: "27 Apr 2025, 9:20 AM" },
+    { target: "https://staging.example.com", icon: Layers, iconBg: "bg-fuchsia-500/10", iconColor: "text-fuchsia-400", tests: 21, score: 48, issues: 52, status: "Completed", date: "25 Apr 2025, 2:10 PM" },
+    { target: "https://myapp.example.com", icon: Smartphone, iconBg: "bg-white/5", iconColor: "text-gray-400", tests: 21, score: 73, issues: 19, status: "Failed", date: "23 Apr 2025, 11:05 AM" },
+    { target: "https://test.example.com", icon: Globe, iconBg: "bg-white/5", iconColor: "text-gray-400", tests: 21, score: 88, issues: 9, status: "Completed", date: "20 Apr 2025, 3:45 PM" },
+]
+
+export const savedTargetLists = [
+    { domain: "example.com", desc: "Production Website", icon: Globe, iconBg: "bg-indigo-500/10", iconColor: "text-indigo-400", lastTested: "3 May 2025", score: 78, tests: 21 },
+    { domain: "api.example.com", desc: "Main API Server", icon: Server, iconBg: "bg-sky-500/10", iconColor: "text-sky-400", lastTested: "1 May 2025", score: 91, tests: 18 },
+    { domain: "shop.example.com", desc: "E-commerce Platform", icon: ShoppingCart, iconBg: "bg-red-500/10", iconColor: "text-red-400", lastTested: "29 Apr 2025", score: 64, tests: 21 },
+    { domain: "blog.example.com", desc: "Company Blog", icon: FileText, iconBg: "bg-emerald-500/10", iconColor: "text-emerald-400", lastTested: "27 Apr 2025", score: 82, tests: 14 },
+    { domain: "staging.example.com", desc: "Staging Environment", icon: Layers, iconBg: "bg-fuchsia-500/10", iconColor: "text-fuchsia-400", lastTested: "25 Apr 2025", score: 48, tests: 19 },
+    { domain: "myapp.example.com", desc: "Web Application", icon: Smartphone, iconBg: "bg-cyan-500/10", iconColor: "text-cyan-400", lastTested: "23 Apr 2025", score: 73, tests: 21 },
+]
+
+export const settingsNav = [
+    { label: "General", icon: Settings },
+  { label: "Account", icon: User },
+  { label: "Appearance", icon: Palette },
+  { label: "Testing", icon: Gauge },
+  { label: "Notifications", icon: Bell },
+  { label: "Integrations", icon: Share2 },
+  { label: "Team", icon: Users },
+  { label: "Billing", icon: CreditCard },
+  { label: "Danger Zone", icon: AlertOctagon },
+]
+
+export const accentColors = ["#6366f1", "#0ea5e9", "#10b981", "#22c55e", "#f59e0b", "#ef4444", "#ec4899"]
+
+export const individualTestOptions = [
+  "SQL Injection",
+  "XSS (Cross Site Scripting)",
+  "Command Injection",
+  "Broken Access Control",
+  "Security Misconfiguration",
+  "Sensitive Data Exposure",
+  "CSRF",
+  "SSRF",
+  "Open Redirect",
+  "Path Traversal",
+  "Rate Limit",
+  "API Mass Assignment",
+  "File Upload",
+  "Security Headers",
+  "TLS/SSL",
+  "CORS",
+  "Clickjacking",
+  "Information Disclosure",
+  "Session Cookie",
+  "JWT Security",
+  "Dependency CVE",
+];

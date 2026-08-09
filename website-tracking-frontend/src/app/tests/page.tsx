@@ -1,70 +1,26 @@
 "use client";
 
-import { useMemo, useState, type ReactNode, type FormEvent } from "react";
+import { useState, type ReactNode } from "react";
 import {
   CircleCheckBig,
-  LayoutGrid,
-  Plus,
-  History,
-  ClipboardList,
-  Bookmark,
-  Share2,
-  Settings,
   Moon,
   Sun,
-  ChevronRight,
-  Globe,
-  ExternalLink,
-  Download,
-  Search,
-  X,
-  Lock,
-  ShieldCheck,
-  ShieldAlert,
-  Database,
-  FileCode2,
-  Upload,
-  Terminal,
-  KeyRound,
-  UserCog,
-  RefreshCw,
-  Server,
-  FolderTree,
-  Gauge,
-  KeySquare,
-  PackageSearch,
-  Bot,
-  UserX,
   Crown,
   Headphones,
-  Loader2,
-  Circle,
-  CircleDashed,
-  Copy,
-  Sparkles,
-  AlertTriangle,
-  ArrowRight,
-  Play,
-  XCircle,
 } from "lucide-react";
-import { activeTests, allTests, codeSamples, detailTabs, liveOutputLines, NavItems, passiveTests, runningTests, severityCount, severityMeta, Test, topIssues, totalIssues } from "../assets/assets";
-import { CardShell } from "@/lib/Cardshell";
-import { SectionLabel } from "@/lib/SectionLabel";
-import { DonutChart } from "@/lib/DonutChart";
-import { StatusPill } from "@/lib/StatusPill";
-import { useColorContext } from "../context/useColorContext";
-import OverviewView from "@/components/Overview";
-import ResultsListView from "@/components/ResultsView";
-import TestDetailView from "@/components/TestDetailView";
-import NewTestView from "@/components/NewTestView";
-import ScanningView from "@/components/ScanningView";
-
+import ScanningView from "@/tabs/ScanningView";
+import OverviewView from "@/tabs/Overview";
+import NewTestView from "@/tabs/NewTestView";
+import TestDetailView from "@/tabs/TestDetailView";
+import ResultsListView from "@/tabs/ResultsView";
+import HistoryView from "@/tabs/HistoryView";
+import SavedTargetsView from "@/tabs/SavedTargetsView";
+import SettingsView from "@/tabs/SettingsView";
+import { accentColors, individualTestOptions, NavItems, Test } from "../assets/assets";
 
 
 export default function WebTestApp() {
-
-  const { c, theme, isDark, setTheme } = useColorContext()
-
+  const [theme, setTheme] = useState("dark");
   const [activeNav, setActiveNav] = useState("Overview");
   const [resultsTab, setResultsTab] = useState("all");
   const [query, setQuery] = useState("");
@@ -74,15 +30,68 @@ export default function WebTestApp() {
   const [newTestUrl, setNewTestUrl] = useState("");
   const [codeLang, setCodeLang] = useState("Node.js (mysql2)");
 
+  // New Test form state
+  const [newTestType, setNewTestType] = useState<"Active" | "Passive">("Active");
+  const [selectedTestNames, setSelectedTestNames] = useState<Set<string>>(new Set(individualTestOptions));
+
+  // History state
+  const [historyQuery, setHistoryQuery] = useState("");
+
+  // Saved Targets state
+  const [savedQuery, setSavedQuery] = useState("");
+
+  // Settings state
+  const [settingsTab, setSettingsTab] = useState("General");
+  const [fullName, setFullName] = useState("Admin User");
+  const [email, setEmail] = useState("admin@example.com");
+  const [accentColor, setAccentColor] = useState(accentColors[0]);
+  const [defaultTestType, setDefaultTestType] = useState("Active Tests");
+  const [requestTimeout, setRequestTimeout] = useState("30 sec");
+  const [maxConcurrency, setMaxConcurrency] = useState("5");
+  const [followRedirects, setFollowRedirects] = useState(true);
+  const [notifyScanCompleted, setNotifyScanCompleted] = useState(false);
+  const [notifyCritical, setNotifyCritical] = useState(true);
+  const [notifyWeekly, setNotifyWeekly] = useState(true);
+
+  const isDark = theme === "dark";
+
+  const c = {
+    mainBg: isDark ? "#050510" : "#f7f7fb",
+    sidebarBg: isDark ? "#0a0a16" : "#ffffff",
+    cardBg: isDark ? "#0c0c1a" : "#ffffff",
+    cardBg2: isDark ? "#10101f" : "#fafafe",
+    cardBorder: isDark ? "rgba(255,255,255,0.08)" : "rgba(15,15,26,0.08)",
+    textPrimary: isDark ? "#ffffff" : "#0f0f1a",
+    textSecondary: isDark ? "#d1d5db" : "#4b5563",
+    textMuted: isDark ? "#9ca3af" : "#6b7280",
+    textFaint: isDark ? "#6b7280" : "#9ca3af",
+    activeNavBg: isDark ? "rgba(129,140,248,0.15)" : "rgba(79,70,229,0.1)",
+    accent: isDark ? "#818cf8" : "#4f46e5",
+    inputBg: isDark ? "rgba(255,255,255,0.03)" : "rgba(15,15,26,0.03)",
+    toggleBg: isDark ? "rgba(255,255,255,0.06)" : "rgba(15,15,26,0.06)",
+    codeBg: isDark ? "#050510" : "#0f0f1a",
+  };
+
+
 
   const openTest = (test: Test) => {
     setSelectedTest(test);
     setDetailTab("Overview");
   };
 
-  const startScan = (e: FormEvent) => {
-    e.preventDefault();
+  const startScan = () => {
     setScanning(true);
+  };
+
+
+
+  const toggleTestName = (name: string) => {
+    setSelectedTestNames((prev) => {
+      const next = new Set(prev);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
+      return next;
+    });
   };
 
 
@@ -93,9 +102,15 @@ export default function WebTestApp() {
   } else if (activeNav === "Overview") {
     mainContent = <OverviewView setActiveNav={setActiveNav} />;
   } else if (activeNav === "New Test") {
-    mainContent = <NewTestView newTestUrl={newTestUrl} setNewTestUrl={setNewTestUrl} startScan={startScan} />;
+    mainContent = <NewTestView newTestType={newTestType} newTestUrl={newTestUrl} selectedTestNames={selectedTestNames} setNewTestType={setNewTestType} setNewTestUrl={setNewTestUrl} setSelectedTestNames={setSelectedTestNames} startScan={startScan} toggleTestName={toggleTestName} />;
   } else if (activeNav === "Results") {
-    mainContent = selectedTest ? <TestDetailView codeLang={codeLang} detailTab={detailTab} setCodeLang={setCodeLang} setDetailTab={setDetailTab} setSelectedTest={setSelectedTest} test={selectedTest} /> : <ResultsListView openTest={openTest} query={query} resultsTab={resultsTab} setResultsTab={setResultsTab} setQuery={setQuery} />;
+    mainContent = selectedTest ? <TestDetailView test={selectedTest} codeLang={codeLang} detailTab={detailTab} setCodeLang={setCodeLang} setDetailTab={setDetailTab} setSelectedTest={setSelectedTest} /> : <ResultsListView openTest={openTest} query={query} resultsTab={resultsTab} setQuery={setQuery} setResultsTab={setResultsTab} />;
+  } else if (activeNav === "History") {
+    mainContent = <HistoryView historyQuery={historyQuery} setHistoryQuery={setHistoryQuery} />;
+  } else if (activeNav === "Saved Targets") {
+    mainContent = <SavedTargetsView savedQuery={savedQuery} setNewTestUrl={setNewTestUrl} setSavedQuery={setSavedQuery} startScan={startScan} />;
+  } else if (activeNav === "Settings") {
+    mainContent = <SettingsView accentColor={accentColor} defaultTestType={defaultTestType} email={email} followRedirects={followRedirects} fullName={fullName} maxConcurrency={maxConcurrency} notifyCritical={notifyCritical} notifyScanCompleted={notifyScanCompleted} notifyWeekly={notifyWeekly} requestTimeout={requestTimeout} setAccentColor={setAccentColor} setDefaultTestType={setDefaultTestType} setEmail={setEmail} setFollowRedirects={setFollowRedirects} setFullName={setFullName} setMaxConcurrency={setMaxConcurrency} setNotifyCritical={setNotifyCritical} setNotifyScanCompleted={setNotifyScanCompleted} setNotifyWeekly={setNotifyWeekly} setRequestTimeout={setRequestTimeout} setSettingsTab={setSettingsTab} settingsTab={settingsTab} />;
   } else {
     mainContent = (
       <div className="flex flex-col items-center justify-center px-8 py-32 text-center">
