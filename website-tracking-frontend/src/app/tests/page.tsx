@@ -17,10 +17,10 @@ import HistoryView from "@/tabs/HistoryView";
 import SavedTargetsView from "@/tabs/SavedTargetsView";
 import SettingsView from "@/tabs/SettingsView";
 import { accentColors, individualTestOptions, NavItems, Test } from "../assets/assets";
+import { useColorContext } from "../context/useColorContext";
 
 
 export default function WebTestApp() {
-  const [theme, setTheme] = useState("dark");
   const [activeNav, setActiveNav] = useState("Overview");
   const [resultsTab, setResultsTab] = useState("all");
   const [query, setQuery] = useState("");
@@ -53,24 +53,7 @@ export default function WebTestApp() {
   const [notifyCritical, setNotifyCritical] = useState(true);
   const [notifyWeekly, setNotifyWeekly] = useState(true);
 
-  const isDark = theme === "dark";
-
-  const c = {
-    mainBg: isDark ? "#050510" : "#f7f7fb",
-    sidebarBg: isDark ? "#0a0a16" : "#ffffff",
-    cardBg: isDark ? "#0c0c1a" : "#ffffff",
-    cardBg2: isDark ? "#10101f" : "#fafafe",
-    cardBorder: isDark ? "rgba(255,255,255,0.08)" : "rgba(15,15,26,0.08)",
-    textPrimary: isDark ? "#ffffff" : "#0f0f1a",
-    textSecondary: isDark ? "#d1d5db" : "#4b5563",
-    textMuted: isDark ? "#9ca3af" : "#6b7280",
-    textFaint: isDark ? "#6b7280" : "#9ca3af",
-    activeNavBg: isDark ? "rgba(129,140,248,0.15)" : "rgba(79,70,229,0.1)",
-    accent: isDark ? "#818cf8" : "#4f46e5",
-    inputBg: isDark ? "rgba(255,255,255,0.03)" : "rgba(15,15,26,0.03)",
-    toggleBg: isDark ? "rgba(255,255,255,0.06)" : "rgba(15,15,26,0.06)",
-    codeBg: isDark ? "#050510" : "#0f0f1a",
-  };
+  const { c, isDark, theme, setTheme } = useColorContext()
 
 
 
