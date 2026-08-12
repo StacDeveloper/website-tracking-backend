@@ -34,6 +34,7 @@
     "@openrouter/sdk": "^1.2.4",
     "@prisma/client": "^6.19.3",
     "axios": "^1.18.1",
+    "better-auth": "^1.6.27",
     "bullmq": "^5.81.2",
     "form-data": "^4.0.6",
     "graphql": "^17.0.2",
