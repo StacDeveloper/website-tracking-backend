@@ -1,9 +1,13 @@
 "use client"
 
-import { Bug, Gauge, Search, ShieldCheck } from "lucide-react"
 import { createContext, type ReactNode, useContext } from "react"
 
-const BackendContext = createContext(null)
+
+interface BackendContextProps {
+
+}
+
+const BackendContext = createContext<BackendContextProps | null>(null)
 
 export const useBackendContext = () => {
     const context = useContext(BackendContext)
@@ -12,7 +16,7 @@ export const useBackendContext = () => {
 }
 
 export const BackendContextProvider = ({ children }: { children: ReactNode }) => {
-    
+
 
 
 
