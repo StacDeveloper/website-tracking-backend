@@ -11,6 +11,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 import GraphQLJSON from 'graphql-type-json';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -32,7 +33,8 @@ import GraphQLJSON from 'graphql-type-json';
     PrismaModule,
     QueueModule,
     ScanModule,
-    WebsitesModule
+    WebsitesModule,
+    AuthModule
   ],
   controllers: [AppController],
   providers: [AppService],

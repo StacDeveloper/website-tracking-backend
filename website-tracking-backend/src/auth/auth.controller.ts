@@ -1,6 +1,7 @@
 import { All, Controller, Req, Res } from "@nestjs/common";
 import { Request, Response } from 'express';
 import { toNodeHandler } from "better-auth/node"
+import { auth } from "./auth";
 
 
 @Controller("/api/auth")

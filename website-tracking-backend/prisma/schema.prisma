@@ -66,11 +66,66 @@ enum TestStatus {
 }
 
 model User {
-    id        String    @id @default(uuid())
-    email     String    @unique
-    password  String
-    createdAt String
-    websites  Website[]
+    id            String   @id @default(uuid())
+    email         String   @unique
+    password      String?
+    name          String?
+    emailVerified Boolean  @default(false)
+    image         String?
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @default(now()) @updatedAt
+
+    websites Website[]
+    sessions Session[]
+    accounts Account[]
+}
+
+model Session{
+    id String @id
+    expiresAt DateTime
+    token String 
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    ipAddress String?
+    userAgent String?
+    userId String
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([token])
+    @@index([userId])
+    @@map("session")
+}
+
+model Account{
+    id String @id 
+    accountId String
+    providerId String 
+    userId String 
+    user User @relation(fields: [userId], references: [id])
+    accessToken String?
+    refreshToken String?
+    idToken String?
+    accessTokenExpiresAt DateTime?
+    refreshTokenExpiresAt DateTime?
+    scope String?
+    password String?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([userId]) 
+    @@map("account")
+}
+
+model Verification{
+    id String @id
+    identifier String 
+    value String 
+    expiresAt DateTime 
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([identifier])
+    @@map("verification")
 }
 
 model Website {
@@ -85,12 +140,10 @@ model Website {
     scans              Scan[]
     createdAt          DateTime            @default(now())
 
-
-
-    loginEndPoint String?
-    registerEndPoint String?
-    uploadEndPoint String?
-    sampleResourceUrl String?
+    loginEndPoint      String?
+    registerEndPoint   String?
+    uploadEndPoint     String?
+    sampleResourceUrl  String?
     massAssignEndpoint String?
 
     @@unique([url, ownerId])
