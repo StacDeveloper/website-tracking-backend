@@ -19,7 +19,7 @@ export default function LoginPage() {
     const [showConfirm, setShowConfirm] = useState(false);
     const [agreed, setAgreed] = useState(true);
     const [loginPage, setLoginPage] = useState(false)
-
+    const url = process.env.NEXT_PUBLIC_BACKEND_URL!
 
     function getPasswordStrength(password: string) {
         let score = 0;
@@ -37,23 +37,51 @@ export default function LoginPage() {
             e.preventDefault();
             setError("");
             setLoading(true);
-            const { error: authError } = await signIn.email({ email, password, callbackURL: "/disclaimer" });
+
+            const { error: authError } = await signIn.email({
+                email,
+                password,
+            });
+
             setLoading(false);
-            if (authError) setError(authError.message ?? "Login failed. Check your credentials.");
-            // On success, RouteGuard picks up the new session and redirects itself.
+
+            if (authError) {
+                setError(
+                    authError.message ??
+                    "Login failed. Check your credentials."
+                );
+                return;
+            }
+
+            return;
         }
+
+        // Signup
         e.preventDefault();
         setError("");
+
         if (!agreed) return;
+
         if (password !== confirmPassword) {
             setError("Passwords don't match.");
             return;
         }
+
         setLoading(true);
-        const { error: authError } = await signUp.email({ name, email, password, callbackURL: "/disclaimer" });
+
+        const { error: authError } = await signUp.email({
+            name,
+            email,
+            password,
+            
+        });
+
         setLoading(false);
-        if (authError) setError(authError.message ?? "Sign up failed.");
-        // On success, RouteGuard picks up the new session and redirects itself.
+
+        if (authError) {
+            setError(authError.message ?? "Sign up failed.");
+            return;
+        }
     }
 
     const strength = useMemo(() => getPasswordStrength(password), [password]);

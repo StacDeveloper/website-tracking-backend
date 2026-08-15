@@ -151,7 +151,7 @@ export default function DisclaimerPage() {
             disabled={!agreed}
             className="flex shrink-0 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-indigo-500 to-indigo-600 px-6 py-3 text-sm font-semibold text-white transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-40"
           >
-            <ShieldCheck className="h-4 w-4" /> I Agree &amp; Continue
+            <ShieldCheck className="h-4 w-4" /> <span>I Agree &amp; Continue</span>
           </button>
         </div>
 

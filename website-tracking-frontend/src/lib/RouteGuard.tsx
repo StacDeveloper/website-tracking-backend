@@ -1,11 +1,11 @@
 "use client"
-
+import { type ReactNode } from "react";
 import { useAuthContext } from "@/app/context/useAuthContext";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-export function RouteGuard({ children }: { children: React.ReactNode }) {
+export function RouteGuard({ children }: { children: ReactNode }) {
     const { isAuthenticated, hasAcceptedDisclaimer, isLoading } = useAuthContext();
     const pathname = usePathname();
     const router = useRouter();
