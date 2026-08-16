@@ -41,7 +41,8 @@ export default function LoginPage() {
             const { error: authError } = await signIn.email({
                 email,
                 password,
-            });
+                callbackURL: `${window.location.origin}/disclaimer            
+                `});
 
             setLoading(false);
 
@@ -73,7 +74,8 @@ export default function LoginPage() {
             name,
             email,
             password,
-            
+            callbackURL: `${window.location.origin}/disclaimer`
+
         });
 
         setLoading(false);

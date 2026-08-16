@@ -17,7 +17,7 @@ const providers = [
 
 export function SocialAuthButtons() {
     const handleSocial = (provider: "google" | "github" | "discord") => {
-        signIn.social({ provider, callbackURL: "/disclaimer" })
+        signIn.social({ provider, callbackURL: `${window.location.origin}/disclaimer` })
     }
 
     return (
