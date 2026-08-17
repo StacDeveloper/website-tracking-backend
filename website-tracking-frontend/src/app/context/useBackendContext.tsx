@@ -21,7 +21,6 @@ export const useBackendContext = () => {
 
 export const BackendContextProvider = ({ children }: { children: ReactNode }) => {
 
-    const {} = useSession()
     const [tests, setTests] = useState<Test[]>([])
 
     const getMyTests = async (userId: string) => {
@@ -30,8 +29,8 @@ export const BackendContextProvider = ({ children }: { children: ReactNode }) =>
             credentials: "include",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                query: `query MyScans($userId: ID!) {
-          myScans(userId: $userId) {
+                query: `query getAllTests() {
+          myScans() {
             id
             status
             scanType
@@ -44,12 +43,12 @@ export const BackendContextProvider = ({ children }: { children: ReactNode }) =>
               aiSuggestion
             }
           }
-        }`,
-                variables: { userId }
+        }`
             })
         })
 
         const { data, errors } = await res.json()
+        setTests(data)
         if (errors) throw new Error(errors[0].message)
         console.log(data)
 
