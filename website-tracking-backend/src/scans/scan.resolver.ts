@@ -2,12 +2,16 @@ import { Args, Mutation, Resolver, ID, Query, Subscription } from "@nestjs/graph
 import { ScanService } from "./scan.service";
 import { ScanType, StartScanResponse } from "./scan.graphql";
 import { pubsub } from "../queues/pubsub.provider";
+import { UseGuards } from "@nestjs/common";
+import { AuthGuard } from "src/auth/auth.guard";
+
 
 
 @Resolver()
 export class ScanResolver {
     constructor(private scansService: ScanService) { }
 
+    @UseGuards(AuthGuard)
     @Mutation(() => StartScanResponse)
     async startScan(
         @Args("url", { type: () => ID }) url: string,
@@ -16,7 +20,7 @@ export class ScanResolver {
         return this.scansService.startScan(url, userId)
     }
 
-
+    @UseGuards(AuthGuard)
     @Query(() => ScanType)
     async scanStatus(
         @Args("scanId", { type: () => ID }) scanId: string
@@ -30,6 +34,10 @@ export class ScanResolver {
     scanUpdated(@Args("scanId", { type: () => ID }) scanId: string) {
         return pubsub.asyncIterableIterator("scanUpdated")
     }
-
+    @UseGuards(AuthGuard)
+    @Query(() => [ScanType])
+    async getAlluserTests(@Args("userId", { type: () => ID }) userId: string) {
+        return this.scansService.getMyTests(userId)
+    }
 
 }

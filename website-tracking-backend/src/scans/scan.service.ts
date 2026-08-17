@@ -1,9 +1,10 @@
 import { InjectQueue } from "@nestjs/bullmq";
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { ScanStatus, ScanType } from "@prisma/client";
 import { Queue } from "bullmq";
 import { PrismaService } from "../prisma/prisma.service";
 import { ACTIVE_TEST, PASSIVE_TEST } from "./scan.test-catogory";
+
 
 @Injectable()
 export class ScanService {
@@ -74,6 +75,20 @@ export class ScanService {
             where: { id: scanId },
             include: { testResults: true }
         })
+    }
+
+
+
+    async getMyTests(userId: string) {
+        const tests = await this.prisma.scan.findMany({
+            where: { website: { ownerId: userId } },
+            include: { testResults: true },
+            orderBy: { createdAt: "desc" }
+        })
+        if (!tests || tests.length === 0) {
+            return { success: false, message: !tests ? "Tests not found would you like to create your 1st web test" : "No test has been made for user" }
+        }
+        return tests
     }
 }
 

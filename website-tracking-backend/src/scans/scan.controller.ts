@@ -15,5 +15,9 @@ export class ScanController {
         return this.scanService.getScanStatus(scanId)
     }
 
+    @Get("getAllTets")
+    getAllTets(@Param("userId") userId: string) {
+        return this.scanService.getMyTests(userId)
+    }
 
 }

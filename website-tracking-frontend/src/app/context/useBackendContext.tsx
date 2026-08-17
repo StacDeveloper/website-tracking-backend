@@ -1,12 +1,16 @@
 "use client"
 
-import { createContext, type ReactNode, useContext } from "react"
+import { createContext, type ReactNode, useContext, useEffect, useState } from "react"
+import { Test } from "../assets/assets"
+import { useSession } from "@/auth/auth"
+
 
 
 interface BackendContextProps {
 
 }
 
+const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/graphql`! || "http://localhost:4000/graphql"
 const BackendContext = createContext<BackendContextProps | null>(null)
 
 export const useBackendContext = () => {
@@ -17,10 +21,42 @@ export const useBackendContext = () => {
 
 export const BackendContextProvider = ({ children }: { children: ReactNode }) => {
 
+    const {} = useSession()
+    const [tests, setTests] = useState<Test[]>([])
 
+    const getMyTests = async (userId: string) => {
+        const res = await fetch(url, {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                query: `query MyScans($userId: ID!) {
+          myScans(userId: $userId) {
+            id
+            status
+            scanType
+            aiSummary
+            testResults {
+              category
+              status
+              severity
+              rawResult
+              aiSuggestion
+            }
+          }
+        }`,
+                variables: { userId }
+            })
+        })
 
+        const { data, errors } = await res.json()
+        if (errors) throw new Error(errors[0].message)
+        console.log(data)
 
-    const value: any = {}
+        
+
+    }
+    const value: any = { getMyTests }
 
     return <BackendContext.Provider value={value}>
         {children}

@@ -12,6 +12,7 @@ type Mutation {
 }
 
 type Query {
+  getAlluserTests(userId: ID!): [ScanType!]!
   scanStatus(scanId: ID!): ScanType!
 }
 

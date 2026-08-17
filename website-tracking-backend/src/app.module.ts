@@ -28,7 +28,8 @@ import { AuthModule } from './auth/auth.module';
       autoSchemaFile: join(process.cwd(), "src/schema.gql"),
       sortSchema: true,
       installSubscriptionHandlers: true,
-      resolvers: { JSON: GraphQLJSON }
+      resolvers: { JSON: GraphQLJSON },
+      context: ({ req, res }) => ({ req, res })
     }),
     PrismaModule,
     QueueModule,
