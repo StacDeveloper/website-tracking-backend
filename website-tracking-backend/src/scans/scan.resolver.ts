@@ -4,6 +4,7 @@ import { ScanType, StartScanResponse } from "./scan.graphql";
 import { pubsub } from "../queues/pubsub.provider";
 import { UseGuards } from "@nestjs/common";
 import { AuthGuard } from "src/auth/auth.guard";
+import { CurrentUser } from "src/auth/currrent-user.decorator";
 
 
 
@@ -15,9 +16,9 @@ export class ScanResolver {
     @Mutation(() => StartScanResponse)
     async startScan(
         @Args("url", { type: () => ID }) url: string,
-        @Args("userId", { type: () => ID }) userId: string
+        @CurrentUser() user: any
     ) {
-        return this.scansService.startScan(url, userId)
+        return this.scansService.startScan(url, user.id)
     }
 
     @UseGuards(AuthGuard)
@@ -36,8 +37,8 @@ export class ScanResolver {
     }
     @UseGuards(AuthGuard)
     @Query(() => [ScanType])
-    async getAlluserTests(@Args("userId", { type: () => ID }) userId: string) {
-        return this.scansService.getMyTests(userId)
+    async getAlluserTests(@CurrentUser() user: any) {
+        return this.scansService.getMyTests(user.id)
     }
 
 }

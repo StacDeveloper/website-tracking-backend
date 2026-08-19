@@ -2,7 +2,6 @@
 
 import { createContext, type ReactNode, useContext, useEffect, useState } from "react"
 import { Test } from "../assets/assets"
-import { useSession } from "@/auth/auth"
 
 
 
