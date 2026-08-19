@@ -22,14 +22,20 @@ export const BackendContextProvider = ({ children }: { children: ReactNode }) =>
 
     const [tests, setTests] = useState<Test[]>([])
 
-    const getMyTests = async (userId: string) => {
-        const res = await fetch(url, {
+    useEffect(() => {
+        getMyTests()
+    }, [])
+
+
+    const getMyTests = async () => {
+        const res = await fetch("http://localhost:4000/graphql", {
             method: "POST",
             credentials: "include",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                query: `query getAllTests() {
-          myScans() {
+                query: `
+        query {
+          getAlluserTests {
             id
             status
             scanType
@@ -42,16 +48,17 @@ export const BackendContextProvider = ({ children }: { children: ReactNode }) =>
               aiSuggestion
             }
           }
-        }`
+        }
+      `,
             })
         })
 
         const { data, errors } = await res.json()
-        setTests(data)
+        console.log(data)
         if (errors) throw new Error(errors[0].message)
         console.log(data)
 
-        
+
 
     }
     const value: any = { getMyTests }

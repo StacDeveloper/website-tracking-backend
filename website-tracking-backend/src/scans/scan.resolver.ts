@@ -3,8 +3,8 @@ import { ScanService } from "./scan.service";
 import { ScanType, StartScanResponse } from "./scan.graphql";
 import { pubsub } from "../queues/pubsub.provider";
 import { UseGuards } from "@nestjs/common";
-import { AuthGuard } from "src/auth/auth.guard";
-import { CurrentUser } from "src/auth/currrent-user.decorator";
+import { AuthGuard } from "../auth/auth.guard";
+import { CurrentUser } from "../auth/currrent-user.decorator"; 
 
 
 
@@ -24,9 +24,10 @@ export class ScanResolver {
     @UseGuards(AuthGuard)
     @Query(() => ScanType)
     async scanStatus(
-        @Args("scanId", { type: () => ID }) scanId: string
+        @Args("scanId", { type: () => ID }) scanId: string,
+        @CurrentUser() user: any,
     ) {
-        return this.scansService.getScanStatus(scanId)
+        return this.scansService.getScanStatus(scanId, user.id)
     }
 
     @Subscription(() => ScanType, {

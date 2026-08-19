@@ -1,5 +1,5 @@
 import { InjectQueue } from "@nestjs/bullmq";
-import { Injectable } from "@nestjs/common";
+import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { ScanStatus, ScanType } from "@prisma/client";
 import { Queue } from "bullmq";
 import { PrismaService } from "../prisma/prisma.service";
@@ -70,11 +70,14 @@ export class ScanService {
         }
 
     }
-    async getScanStatus(scanId: string) {
-        return this.prisma.scan.findUnique({
+    async getScanStatus(scanId: string, userId: string) {
+        const status = await this.prisma.scan.findUnique({
             where: { id: scanId },
-            include: { testResults: true }
+            include: { testResults: true, website: true }
         })
+        if (!status) throw new NotFoundException("Scan not found")
+        if (status.website.ownerId !== userId) throw new ForbiddenException("You dont have access to this scan")
+        return status
     }
 
 
@@ -90,5 +93,6 @@ export class ScanService {
         }
         return tests
     }
+
 }
 
