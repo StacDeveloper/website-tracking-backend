@@ -6,7 +6,9 @@ import { Test } from "../assets/assets"
 
 
 interface BackendContextProps {
-
+    tests: Test | null,
+    setTests: React.Dispatch<React.SetStateAction<Test | null>>
+    getMyTests: () => void
 }
 
 const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/graphql`! || "http://localhost:4000/graphql"
@@ -54,14 +56,13 @@ export const BackendContextProvider = ({ children }: { children: ReactNode }) =>
         })
 
         const { data, errors } = await res.json()
-        console.log(data)
+        setTests(data.getAlluserTests)
         if (errors) throw new Error(errors[0].message)
-        console.log(data)
 
 
 
     }
-    const value: any = { getMyTests }
+    const value: any = { tests, setTests }
 
     return <BackendContext.Provider value={value}>
         {children}

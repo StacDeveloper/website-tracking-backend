@@ -1,6 +1,7 @@
 "use client"
 
 import { activeTests, allTests, passiveTests, severityMeta, Test } from "@/app/assets/assets";
+import { useBackendContext } from "@/app/context/useBackendContext";
 import { useColorContext } from "@/app/context/useColorContext";
 import { CardShell } from "@/lib/Reusable-Components/Cardshell";
 import { Search, X } from "lucide-react";
@@ -15,17 +16,50 @@ interface ResultViewProps {
     openTest: (test: Test) => void
 }
 
+interface ResultRow {
+    id: string
+    name: string
+    severity: keyof typeof severityMeta
+    issues: number
+    desc: string
+    scanType: string
+    status: string
+    aiSummary?: string
+}
+
 const ResultsListView = ({ resultsTab, setResultsTab, query, setQuery, openTest }: ResultViewProps) => {
+    const { tests } = useBackendContext()
+
+    const resultsRow = useMemo<ResultRow[]>(() => {
+        if (!tests) return []
+        return tests.flatMap((test: any) => test.testResults.map((result: any, index: number) => ({
+            id: `${test.id}-${index}`,
+            name: result.category,
+            severity: result.severity,
+            issues: result.status === "VULNERABLE" ? 1 : 0,
+            desc: result.aiSuggestion || "No description available",
+            scanType: test.scanType,
+            status: result.status,
+            aiSummary: test.aiSummary,
+        })))
+    }, [tests])
+
     const { c } = useColorContext()
     const resultTabsList = [
-        { label: "All Tests", value: "all", count: allTests.length },
-        { label: "Active", value: "Active", count: activeTests.length },
-        { label: "Passive", value: "Passive", count: passiveTests.length },
+        { label: "All Tests", value: "all", count: resultsRow.length },
+        { label: "Active", value: "Active", count: resultsRow.filter((row) => row.scanType === "Active").length },
+        { label: "Passive", value: "Passive", count: resultsRow.filter((row) => row.scanType === "Passive").length },
     ];
     const filteredRows = useMemo(() => {
-        const base = resultsTab === "all" ? allTests : resultsTab === "Active" ? activeTests : passiveTests;
-        return base.filter((row) => row.name.toLowerCase().includes(query.toLowerCase()));
-    }, [resultsTab, query]);
+        let base = resultsRow;
+        if (resultsTab === "Active") {
+            base = base.filter((row) => row.scanType === "Active")
+        }
+        if (resultsTab === "Passive") {
+            base = base.filter((row) => row.scanType === "Passive")
+        }
+        return base.filter((row) => row.name.toLowerCase().includes(query.toLowerCase()))
+    }, [resultsTab, resultsRow, query]);
     return <>
         <div className="px-8 pb-16">
             <h1 className="mb-1 text-xl font-bold">
