@@ -56,6 +56,7 @@ export const BackendContextProvider = ({ children }: { children: ReactNode }) =>
         })
 
         const { data, errors } = await res.json()
+        console.log(data)
         setTests(data.getAlluserTests)
         if (errors) throw new Error(errors[0].message)
 
