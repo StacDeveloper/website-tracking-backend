@@ -132,6 +132,7 @@ const defaultCategory = {
     bg: "bg-slate-500/10",
 };
 
+
 const ResultsListView = ({
     resultsTab,
     setResultsTab,
@@ -142,14 +143,8 @@ const ResultsListView = ({
     const { tests } = useBackendContext();
     const { c } = useColorContext();
 
-    /**
-     * Convert backend GraphQL response:
-     *
-     * getAlluserTests[]
-     *    └── testResults[]
-     *
-     * into a flat array that the UI can render.
-     */
+   
+    
     const resultsRow = useMemo<ResultRow[]>(() => {
         if (!Array.isArray(tests)) {
             return [];
@@ -163,11 +158,7 @@ const ResultsListView = ({
             return test.testResults.map((result: any, index: number) => {
                 const category = result.category ?? "UNKNOWN";
 
-                /**
-                 * Backend severity is currently null.
-                 * We use "Info" as a safe fallback so
-                 * severityMeta[row.severity] never becomes undefined.
-                 */
+               
                 const severity =
                     result.severity &&
                     severityMeta[result.severity as keyof typeof severityMeta]
@@ -214,15 +205,7 @@ const ResultsListView = ({
         });
     }, [tests]);
 
-    /**
-     * Tabs
-     *
-     * Backend returns:
-     * "PASSIVE"
-     * "ACTIVE"
-     *
-     * So we compare against uppercase values.
-     */
+  
     const resultTabsList = [
         {
             label: "All Tests",
@@ -245,9 +228,7 @@ const ResultsListView = ({
         },
     ];
 
-    /**
-     * Search + tab filtering
-     */
+   
     const filteredRows = useMemo(() => {
         let base = resultsRow;
 
@@ -393,16 +374,10 @@ const ResultsListView = ({
                     }}
                 >
                     {filteredRows.map((row) => {
-                        /**
-                         * Get severity metadata safely.
-                         */
                         const sev =
                             severityMeta[row.severity] ??
                             severityMeta.Info;
-
-                        /**
-                         * Get category metadata.
-                         */
+                        
                         const category =
                             categoryMeta[row.category] ??
                             defaultCategory;
