@@ -39,6 +39,7 @@ export const BackendContextProvider = ({ children }: { children: ReactNode }) =>
 
     useEffect(() => {
         getHistoryOfUser()
+        getMyTests()
     }, [])
 
     const url = "http://localhost:4000/graphql"

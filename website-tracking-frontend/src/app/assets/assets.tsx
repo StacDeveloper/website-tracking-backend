@@ -227,10 +227,8 @@ export const individualTestOptions = [
     "SQL Injection",
     "XSS (Cross Site Scripting)",
     "Command Injection",
-    "Broken Access Control",
     "Security Misconfiguration",
     "Sensitive Data Exposure",
-    "CSRF",
     "SSRF",
     "Open Redirect",
     "Path Traversal",
@@ -243,8 +241,6 @@ export const individualTestOptions = [
     "Clickjacking",
     "Information Disclosure",
     "Session Cookie",
-    "JWT Security",
-    "Dependency CVE",
 ];
 
 export const categoryMeta: Record<
@@ -327,3 +323,12 @@ export const categoryMeta: Record<
         bg: "bg-red-500/10",
     },
 };
+
+export const historyIcons = [
+    { icon: ShieldCheck, bg: "bg-purple-500/10", color: "text-purple-400" },
+    { icon: Globe, bg: "bg-blue-500/10", color: "text-blue-400" },
+    { icon: Lock, bg: "bg-emerald-500/10", color: "text-emerald-400" },
+    { icon: FlaskConical, bg: "bg-sky-500/10", color: "text-sky-400" },
+    { icon: Cookie, bg: "bg-fuchsia-500/10", color: "text-fuchsia-400" },
+    { icon: Link2, bg: "bg-rose-500/10", color: "text-rose-400" },
+];

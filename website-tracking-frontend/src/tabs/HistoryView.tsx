@@ -1,5 +1,6 @@
 "use client";
 
+import { historyIcons } from "@/app/assets/assets";
 import { useBackendContext } from "@/app/context/useBackendContext";
 import { useColorContext } from "@/app/context/useColorContext";
 import { calculateScore } from "@/lib/CalculateScore";
@@ -40,7 +41,7 @@ const HistoryView = ({
     const { historyTests } = useBackendContext();
     const { c } = useColorContext();
 
-    
+
     const filteredHistory = useMemo(() => {
         if (!Array.isArray(historyTests)) {
             return [];
@@ -59,8 +60,8 @@ const HistoryView = ({
         );
     }, [historyTests, historyQuery]);
 
-    const headers = ["Target","Tests Executed","Score","Issues","Status","Date","Action"]
-            
+    const headers = ["Target", "Tests Executed", "Score", "Issues", "Status", "Date", "Action"]
+
     return (
         <div className="px-8 pb-16">
             {/* Header */}
@@ -189,12 +190,14 @@ const HistoryView = ({
 
                         <tbody>
                             {filteredHistory.map(
-                                (row: HistoryTest) => {
+                                (row: HistoryTest, index) => {
                                     const score =
                                         calculateScore(
                                             row.passedCount,
                                             row.testResultsCount
                                         );
+                                    const historyIcon = historyIcons[index % historyIcons.length];
+                                    const Icon = historyIcon.icon;
 
                                     const scoreColor =
                                         score >= 75
@@ -220,7 +223,7 @@ const HistoryView = ({
                                             <td className="px-5 py-4">
                                                 <div className="flex items-center gap-3">
                                                     <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-500/10">
-                                                        <ShieldCheck className="h-4 w-4 text-purple-400" />
+                                                        <Icon className={`h-4 w-4 text-purple-400 ${historyIcon.color}`} />
                                                     </span>
 
                                                     <div className="max-w-[280px]">
@@ -251,7 +254,7 @@ const HistoryView = ({
                                                     row.testResultsCount
                                                 }{" "}
                                                 {row.testResultsCount ===
-                                                1
+                                                    1
                                                     ? "Test"
                                                     : "Tests"}
                                             </td>
@@ -283,17 +286,17 @@ const HistoryView = ({
                                                     style={
                                                         isCompleted
                                                             ? {
-                                                                  backgroundColor:
-                                                                      "rgba(52,211,153,0.1)",
-                                                                  color:
-                                                                      "#34d399",
-                                                              }
+                                                                backgroundColor:
+                                                                    "rgba(52,211,153,0.1)",
+                                                                color:
+                                                                    "#34d399",
+                                                            }
                                                             : {
-                                                                  backgroundColor:
-                                                                      "rgba(248,113,113,0.1)",
-                                                                  color:
-                                                                      "#f87171",
-                                                              }
+                                                                backgroundColor:
+                                                                    "rgba(248,113,113,0.1)",
+                                                                color:
+                                                                    "#f87171",
+                                                            }
                                                     }
                                                 >
                                                     {row.status}
@@ -383,15 +386,15 @@ const HistoryView = ({
                             style={
                                 page === 1
                                     ? {
-                                          borderColor:
-                                              c.accent,
-                                          color: c.accent,
-                                      }
+                                        borderColor:
+                                            c.accent,
+                                        color: c.accent,
+                                    }
                                     : {
-                                          borderColor:
-                                              c.cardBorder,
-                                          color: c.textMuted,
-                                      }
+                                        borderColor:
+                                            c.cardBorder,
+                                        color: c.textMuted,
+                                    }
                             }
                         >
                             {page}

@@ -4,6 +4,7 @@ import { useColorContext } from "@/app/context/useColorContext";
 import { CardShell } from "@/lib/Reusable-Components/Cardshell";
 import { SectionLabel } from "@/lib/Reusable-Components/SectionLabel";
 import { AlertTriangle, Check, ChevronDown, ClipboardList, Globe, Loader2, Play, Upload } from "lucide-react";
+import { useState } from "react";
 
 interface NewTestViewProps {
     startScan: (e: React.FormEvent) => void
@@ -20,6 +21,15 @@ interface NewTestViewProps {
 
 const NewTestView = ({ startScan, newTestUrl, setNewTestUrl, newTestType, setNewTestType, selectedTestNames, setSelectedTestNames, toggleTestName }: NewTestViewProps) => {
     const { c } = useColorContext()
+    const [showAllTests, setShowAllTests] = useState<boolean>(false)
+    const [endpoints, setEndpoints] = useState({
+        loginEndPoint: "",
+        registerEndPoint: "",
+        uploadEndPoint: "",
+        sampleResourceUrl: "",
+        massAssignEndpoint: "",
+    });
+
     return (
         <div className="px-8 pb-16">
             <h1 className="mb-1 text-xl font-bold">New Test</h1>
@@ -58,18 +68,129 @@ const NewTestView = ({ startScan, newTestUrl, setNewTestUrl, newTestType, setNew
                     </button>
                 </div>
             </div>
+            <CardShell className="mb-4 p-5">
+                <div className="mb-4 flex items-center justify-between">
+                    <div>
+                        <div className="flex items-center gap-2">
+                            <SectionLabel>Endpoint Configuration</SectionLabel>
+
+                            <span
+                                className="rounded px-1.5 py-0.5 text-[10px] font-medium"
+                                style={{
+                                    backgroundColor: c.inputBg,
+                                    color: c.textFaint,
+                                }}
+                            >
+                                Optional
+                            </span>
+                        </div>
+
+                        <p
+                            className="mt-1 text-xs"
+                            style={{ color: c.textFaint }}
+                        >
+                            Provide custom endpoints to improve test accuracy.
+                        </p>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                    {[
+                        {
+                            key: "loginEndPoint",
+                            label: "Login Endpoint",
+                            placeholder: "/api/auth/login",
+                        },
+                        {
+                            key: "registerEndPoint",
+                            label: "Register Endpoint",
+                            placeholder: "/api/auth/register",
+                        },
+                        {
+                            key: "uploadEndPoint",
+                            label: "Upload Endpoint",
+                            placeholder: "/api/upload",
+                        },
+                        {
+                            key: "sampleResourceUrl",
+                            label: "Sample Resource URL",
+                            placeholder: "/api/users/1",
+                        },
+                        {
+                            key: "massAssignEndpoint",
+                            label: "Mass Assignment Endpoint",
+                            placeholder: "/api/users/update",
+                        },
+                    ].map((endpoint) => (
+                        <div key={endpoint.key}>
+                            <label
+                                className="mb-1.5 block text-xs font-medium"
+                                style={{ color: c.textMuted }}
+                            >
+                                {endpoint.label}
+                            </label>
+
+                            <input
+                                value={
+                                    endpoints[
+                                    endpoint.key as keyof typeof endpoints
+                                    ]
+                                }
+                                onChange={(e) =>
+                                    setEndpoints((prev) => ({
+                                        ...prev,
+                                        [endpoint.key]: e.target.value,
+                                    }))
+                                }
+                                placeholder={endpoint.placeholder}
+                                className="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none"
+                                style={{
+                                    borderColor: c.cardBorder,
+                                    backgroundColor: c.inputBg,
+                                    color: c.textPrimary,
+                                }}
+                            />
+                        </div>
+                    ))}
+                </div>
+
+                <div
+                    className="mt-3 rounded-lg px-3 py-2 text-xs"
+                    style={{
+                        backgroundColor: c.inputBg,
+                        color: c.textFaint,
+                    }}
+                >
+                    💡 Leave fields empty if you want the scanner to discover
+                    endpoints automatically.
+                </div>
+            </CardShell>
 
             <CardShell className="mb-4 p-5">
                 <div className="mb-3 flex items-center justify-between">
                     <span className="flex items-center gap-2 text-sm font-semibold">
-                        2. Select Tests
-                        <span className="rounded px-1.5 py-0.5 text-xs" style={{ backgroundColor: c.activeNavBg, color: c.accent }}>
-                            {selectedTestNames.size} Selected
-                        </span>
-                    </span>
-                    <button className="text-xs font-medium" style={{ color: c.textMuted }} onClick={() => setSelectedTestNames(new Set())}>
-                        Deselect All
-                    </button>
+                        2. Select Tests</span>
+                        <div>
+    {selectedTestNames.size === individualTestOptions.length ? (
+        <button
+            className="text-xs font-medium"
+            style={{ color: c.textMuted }}
+            onClick={() => setSelectedTestNames(new Set())}
+        >
+            Deselect All
+        </button>
+    ) : (
+        <button
+            className="text-xs font-medium"
+            style={{ color: c.accent }}
+            onClick={() =>
+                setSelectedTestNames(new Set(individualTestOptions))
+            }
+        >
+            Select All
+        </button>
+    )}
+</div>
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-[220px_1fr]">
@@ -95,28 +216,75 @@ const NewTestView = ({ startScan, newTestUrl, setNewTestUrl, newTestType, setNew
                     <div>
                         <p className="mb-2 text-xs font-medium" style={{ color: c.textMuted }}>Select Individual Tests</p>
                         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                            {individualTestOptions.slice(0, 7).map((name) => {
+                            {(showAllTests
+                                ? individualTestOptions
+                                : individualTestOptions.slice(0, 7)
+                            ).map((name) => {
                                 const checked = selectedTestNames.has(name);
+
                                 return (
                                     <button
                                         key={name}
+                                        type="button"
                                         onClick={() => toggleTestName(name)}
                                         className="flex items-center gap-2 rounded-lg border px-3 py-2 text-left text-xs"
-                                        style={{ borderColor: checked ? c.accent : c.cardBorder, backgroundColor: checked ? c.activeNavBg : "transparent" }}
+                                        style={{
+                                            borderColor: checked
+                                                ? c.accent
+                                                : c.cardBorder,
+                                            backgroundColor: checked
+                                                ? c.activeNavBg
+                                                : "transparent",
+                                        }}
                                     >
                                         <span
                                             className="flex h-4 w-4 shrink-0 items-center justify-center rounded"
-                                            style={{ backgroundColor: checked ? c.accent : c.inputBg, border: checked ? "none" : `1px solid ${c.cardBorder}` }}
+                                            style={{
+                                                backgroundColor: checked
+                                                    ? c.accent
+                                                    : c.inputBg,
+                                                border: checked
+                                                    ? "none"
+                                                    : `1px solid ${c.cardBorder}`,
+                                            }}
                                         >
-                                            {checked && <Check className="h-3 w-3 text-white" />}
+                                            {checked && (
+                                                <Check className="h-3 w-3 text-white" />
+                                            )}
                                         </span>
+
                                         {name}
                                     </button>
                                 );
                             })}
-                            <span className="flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-medium" style={{ borderColor: c.cardBorder, color: c.textFaint }}>
-                                + {individualTestOptions.length - 7} more
-                            </span>
+
+                            {!showAllTests && (
+                                <button
+                                    type="button"
+                                    onClick={() => setShowAllTests(true)}
+                                    className="flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-medium transition-colors"
+                                    style={{
+                                        borderColor: c.cardBorder,
+                                        color: c.textFaint,
+                                    }}
+                                >
+                                    + {individualTestOptions.length - 7} more
+                                </button>
+                            )}
+
+                            {showAllTests && (
+                                <button
+                                    type="button"
+                                    onClick={() => setShowAllTests(false)}
+                                    className="flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-medium"
+                                    style={{
+                                        borderColor: c.cardBorder,
+                                        color: c.textFaint,
+                                    }}
+                                >
+                                    Show Less
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
