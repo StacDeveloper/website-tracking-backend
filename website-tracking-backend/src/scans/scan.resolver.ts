@@ -41,5 +41,10 @@ export class ScanResolver {
     async getAlluserTests(@CurrentUser() user: any) {
         return this.scansService.getMyTests(user.id)
     }
+    @UseGuards(AuthGuard)
+    @Query(()=>[ScanType])
+    async getHistoryofUser(@CurrentUser() user:any){
+        return this.scansService.getHistoryofUser(user.id)
+    }
 
 }

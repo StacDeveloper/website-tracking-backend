@@ -246,3 +246,84 @@ export const individualTestOptions = [
     "JWT Security",
     "Dependency CVE",
 ];
+
+export const categoryMeta: Record<
+    string,
+    {
+        name: string;
+        icon: LucideIcon;
+        bg: string;
+    }
+> = {
+    SECURITY_HEADERS: {
+        name: "Security Headers",
+        icon: ShieldCheck,
+        bg: "bg-purple-500/10",
+    },
+
+    TLS_SSL: {
+        name: "TLS / SSL",
+        icon: Lock,
+        bg: "bg-emerald-500/10",
+    },
+
+    CORS: {
+        name: "CORS",
+        icon: Globe,
+        bg: "bg-purple-500/10",
+    },
+
+    CLICKJACKING: {
+        name: "Clickjacking",
+        icon: Ban,
+        bg: "bg-pink-500/10",
+    },
+
+    INFO_DISCLOSURE: {
+        name: "Information Disclosure",
+        icon: FlaskConical,
+        bg: "bg-sky-500/10",
+    },
+
+    SESSION_COOKIE: {
+        name: "Session Cookie",
+        icon: Cookie,
+        bg: "bg-fuchsia-500/10",
+    },
+
+    OPEN_REDIRECT: {
+        name: "Open Redirect",
+        icon: Link2,
+        bg: "bg-rose-500/10",
+    },
+
+    PATH_TRAVERSAL: {
+        name: "Path Traversal",
+        icon: FolderTree,
+        bg: "bg-emerald-500/10",
+    },
+
+    JWT: {
+        name: "JWT",
+        icon: KeyRound,
+        bg: "bg-yellow-500/10",
+    },
+
+    CSRF: {
+        name: "CSRF",
+        icon: ShieldAlert,
+        bg: "bg-orange-500/10",
+    },
+
+    SSRF: {
+        name: "SSRF",
+        icon: Server,
+        bg: "bg-blue-500/10",
+    },
+
+    DEPENDENCY_CVE: {
+        name: "Dependency CVE",
+        icon: Bug,
+        bg: "bg-red-500/10",
+    },
+};

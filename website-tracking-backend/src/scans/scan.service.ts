@@ -85,13 +85,26 @@ export class ScanService {
     async getMyTests(userId: string) {
         const tests = await this.prisma.scan.findMany({
             where: { website: { ownerId: userId } },
-            include: { testResults: true },
+            include: { testResults: true, website: true },
             orderBy: { createdAt: "desc" }
         })
         if (!tests || tests.length === 0) {
             return { success: false, message: !tests ? "Tests not found would you like to create your 1st web test" : "No test has been made for user" }
         }
         return tests
+    }
+    async getHistoryofUser(userId: string) {
+        const scan = await this.prisma.scan.findMany({
+            where: { website: { ownerId: userId } },
+            include: { website: true, testResults: true },
+            orderBy: { createdAt: "desc" }
+        })
+        return scan.map((s) => ({
+            ...s,
+            testResultsCount: s.testResults.length,
+            passedCount: s.testResults.filter((test) => test.status === "PASSED").length,
+            issueCount: s.testResults.filter((test) => test.status === "FAILED").length
+        }))
     }
 
 }

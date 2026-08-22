@@ -4,23 +4,8 @@ import { severityMeta, Test } from "@/app/assets/assets";
 import { useBackendContext } from "@/app/context/useBackendContext";
 import { useColorContext } from "@/app/context/useColorContext";
 import { CardShell } from "@/lib/Reusable-Components/Cardshell";
-import {
-    Ban,
-    Cookie,
-    FlaskConical,
-    FolderTree,
-    Globe,
-    Link2,
-    Search,
-    ShieldCheck,
-    X,
-    Lock,
-    LucideIcon,
-    ShieldAlert,
-    Bug,
-    KeyRound,
-    Server,
-} from "lucide-react";
+import { categoryMeta } from "@/app/assets/assets";
+import { Search, ShieldCheck, X } from "lucide-react";
 import { useMemo } from "react";
 
 interface ResultViewProps {
@@ -45,86 +30,7 @@ interface ResultRow {
     rawResult?: unknown;
 }
 
-const categoryMeta: Record<
-    string,
-    {
-        name: string;
-        icon: LucideIcon;
-        bg: string;
-    }
-> = {
-    SECURITY_HEADERS: {
-        name: "Security Headers",
-        icon: ShieldCheck,
-        bg: "bg-purple-500/10",
-    },
 
-    TLS_SSL: {
-        name: "TLS / SSL",
-        icon: Lock,
-        bg: "bg-emerald-500/10",
-    },
-
-    CORS: {
-        name: "CORS",
-        icon: Globe,
-        bg: "bg-purple-500/10",
-    },
-
-    CLICKJACKING: {
-        name: "Clickjacking",
-        icon: Ban,
-        bg: "bg-pink-500/10",
-    },
-
-    INFO_DISCLOSURE: {
-        name: "Information Disclosure",
-        icon: FlaskConical,
-        bg: "bg-sky-500/10",
-    },
-
-    SESSION_COOKIE: {
-        name: "Session Cookie",
-        icon: Cookie,
-        bg: "bg-fuchsia-500/10",
-    },
-
-    OPEN_REDIRECT: {
-        name: "Open Redirect",
-        icon: Link2,
-        bg: "bg-rose-500/10",
-    },
-
-    PATH_TRAVERSAL: {
-        name: "Path Traversal",
-        icon: FolderTree,
-        bg: "bg-emerald-500/10",
-    },
-
-    JWT: {
-        name: "JWT",
-        icon: KeyRound,
-        bg: "bg-yellow-500/10",
-    },
-
-    CSRF: {
-        name: "CSRF",
-        icon: ShieldAlert,
-        bg: "bg-orange-500/10",
-    },
-
-    SSRF: {
-        name: "SSRF",
-        icon: Server,
-        bg: "bg-blue-500/10",
-    },
-
-    DEPENDENCY_CVE: {
-        name: "Dependency CVE",
-        icon: Bug,
-        bg: "bg-red-500/10",
-    },
-};
 
 const defaultCategory = {
     name: "Security Test",
@@ -143,8 +49,6 @@ const ResultsListView = ({
     const { tests } = useBackendContext();
     const { c } = useColorContext();
 
-   
-    
     const resultsRow = useMemo<ResultRow[]>(() => {
         if (!Array.isArray(tests)) {
             return [];
@@ -158,10 +62,10 @@ const ResultsListView = ({
             return test.testResults.map((result: any, index: number) => {
                 const category = result.category ?? "UNKNOWN";
 
-               
+
                 const severity =
                     result.severity &&
-                    severityMeta[result.severity as keyof typeof severityMeta]
+                        severityMeta[result.severity as keyof typeof severityMeta]
                         ? result.severity
                         : "Info";
 
@@ -183,7 +87,7 @@ const ResultsListView = ({
 
                     issues:
                         result.status === "VULNERABLE" ||
-                        result.status === "FAILED"
+                            result.status === "FAILED"
                             ? 1
                             : 0,
 
@@ -205,7 +109,7 @@ const ResultsListView = ({
         });
     }, [tests]);
 
-  
+
     const resultTabsList = [
         {
             label: "All Tests",
@@ -228,7 +132,7 @@ const ResultsListView = ({
         },
     ];
 
-   
+
     const filteredRows = useMemo(() => {
         let base = resultsRow;
 
@@ -352,11 +256,10 @@ const ResultsListView = ({
                         onChange={(e) =>
                             setQuery(e.target.value)
                         }
-                        placeholder={`Search ${
-                            resultsTab === "all"
+                        placeholder={`Search ${resultsTab === "all"
                                 ? ""
                                 : resultsTab.toLowerCase() + " "
-                        }tests...`}
+                            }tests...`}
                         className="w-40 bg-transparent text-sm focus:outline-none"
                         style={{
                             color: c.textPrimary,
@@ -377,7 +280,7 @@ const ResultsListView = ({
                         const sev =
                             severityMeta[row.severity] ??
                             severityMeta.Info;
-                        
+
                         const category =
                             categoryMeta[row.category] ??
                             defaultCategory;

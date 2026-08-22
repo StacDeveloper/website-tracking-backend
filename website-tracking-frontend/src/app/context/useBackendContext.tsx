@@ -4,14 +4,26 @@ import { createContext, type ReactNode, useContext, useEffect, useState } from "
 import { Test } from "../assets/assets"
 
 
-
+interface HistoryTest {
+    id: string;
+    status: string;
+    completedAt: string;
+    testResultsCount: number;
+    passedCount: number;
+    issueCount: number;
+    website: {
+        url: string;
+    };
+}
 interface BackendContextProps {
-    tests: Test | null,
-    setTests: React.Dispatch<React.SetStateAction<Test | null>>
-    getMyTests: () => void
+    tests: Test[];
+    setTests: React.Dispatch<React.SetStateAction<Test[]>>;
+    historyTests: HistoryTest[];
+    setHistoryTests: React.Dispatch<React.SetStateAction<HistoryTest[]>>;
+    getMyTests: () => Promise<void>;
+    getHistoryOfUser: () => Promise<void>;
 }
 
-const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/graphql`! || "http://localhost:4000/graphql"
 const BackendContext = createContext<BackendContextProps | null>(null)
 
 export const useBackendContext = () => {
@@ -23,14 +35,16 @@ export const useBackendContext = () => {
 export const BackendContextProvider = ({ children }: { children: ReactNode }) => {
 
     const [tests, setTests] = useState<Test[]>([])
+    const [historyTests, sethistoryTests] = useState<HistoryTest[]>([])
 
     useEffect(() => {
-        getMyTests()
+        getHistoryOfUser()
     }, [])
 
+    const url = "http://localhost:4000/graphql"
 
     const getMyTests = async () => {
-        const res = await fetch("http://localhost:4000/graphql", {
+        const res = await fetch(url, {
             method: "POST",
             credentials: "include",
             headers: { "Content-Type": "application/json" },
@@ -57,13 +71,36 @@ export const BackendContextProvider = ({ children }: { children: ReactNode }) =>
 
         const { data, errors } = await res.json()
         console.log(data)
-        setTests(data.getAlluserTests)
+        setTests(data.getAlluserTests ?? [])
         if (errors) throw new Error(errors[0].message)
-
-
-
     }
-    const value: any = { tests, setTests }
+
+    const getHistoryOfUser = async () => {
+        const res = await fetch(url, {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                query: `
+        query {
+  getHistoryofUser {
+    id
+    status
+    completedAt
+    testResultsCount
+    passedCount
+    website { url }
+    issueCount
+  }
+}
+      `,
+            })
+        })
+        const { data, errors } = await res.json()
+        sethistoryTests(data.getHistoryofUser ?? [])
+        console.log(data, errors)
+    }
+    const value: any = { tests, setTests, historyTests, sethistoryTests }
 
     return <BackendContext.Provider value={value}>
         {children}
