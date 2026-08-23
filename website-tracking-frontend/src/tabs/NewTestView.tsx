@@ -17,6 +17,20 @@ interface NewTestViewProps {
     toggleTestName: (name: string) => void
 }
 
+interface WebsiteConfigEndpoint {
+    loginEndPoint?: string,
+    registerEndPoint?: string,
+    uploadEndPoint?: string
+    sampleResourceUrl?: string
+    massAssigEndPoint?: string
+}
+
+
+const PathLinks = [{ key: "loginEndPoint", label: "Login Endpoint", placeholder: "/api/auth/login" },
+{ key: "registerEndPoint", label: "Register Endpoint", placeholder: "/api/auth/register" },
+{ key: "uploadEndPoint", label: "Upload Endpoint", placeholder: "/api/upload" },
+{ key: "sampleResourceUrl", label: "Sample Resource URL", placeholder: "/api/users/1" },
+{ key: "massAssignEndpoint", label: "Mass Assignment Endpoint", placeholder: "/api/users/update" }]
 
 
 const NewTestView = ({ startScan, newTestUrl, setNewTestUrl, newTestType, setNewTestType, selectedTestNames, setSelectedTestNames, toggleTestName }: NewTestViewProps) => {
@@ -29,6 +43,37 @@ const NewTestView = ({ startScan, newTestUrl, setNewTestUrl, newTestType, setNew
         sampleResourceUrl: "",
         massAssignEndpoint: "",
     });
+
+    async function handleStartScan() {
+        const StartScan =  (url: string, categories: string[], config?: WebsiteConfigEndpoint) => {
+            const res = await fetch("http://localhost:4000/graphql", {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    query: `mutation StartScan($url: String!, $categories: [String!]!, $config:WebsiteConfigEndpoint) {
+                startScan(url: $url, categories: $categories) {
+                  message
+                  skippedActiveTest
+                  scan {
+                    id
+                    status
+                  }
+                },
+              }
+                `,
+                    variables: { url, categories, config }
+                }),
+            })
+            const { data, errors } = await res.json()
+            if (errors) {
+                console.error(errors)
+                return null
+            }
+            return data.startScan
+        }
+    }
+
 
     return (
         <div className="px-8 pb-16">
@@ -95,33 +140,7 @@ const NewTestView = ({ startScan, newTestUrl, setNewTestUrl, newTestType, setNew
                 </div>
 
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                    {[
-                        {
-                            key: "loginEndPoint",
-                            label: "Login Endpoint",
-                            placeholder: "/api/auth/login",
-                        },
-                        {
-                            key: "registerEndPoint",
-                            label: "Register Endpoint",
-                            placeholder: "/api/auth/register",
-                        },
-                        {
-                            key: "uploadEndPoint",
-                            label: "Upload Endpoint",
-                            placeholder: "/api/upload",
-                        },
-                        {
-                            key: "sampleResourceUrl",
-                            label: "Sample Resource URL",
-                            placeholder: "/api/users/1",
-                        },
-                        {
-                            key: "massAssignEndpoint",
-                            label: "Mass Assignment Endpoint",
-                            placeholder: "/api/users/update",
-                        },
-                    ].map((endpoint) => (
+                    {PathLinks.map((endpoint) => (
                         <div key={endpoint.key}>
                             <label
                                 className="mb-1.5 block text-xs font-medium"
@@ -169,28 +188,28 @@ const NewTestView = ({ startScan, newTestUrl, setNewTestUrl, newTestType, setNew
             <CardShell className="mb-4 p-5">
                 <div className="mb-3 flex items-center justify-between">
                     <span className="flex items-center gap-2 text-sm font-semibold">
-                        2. Select Tests</span>
-                        <div>
-    {selectedTestNames.size === individualTestOptions.length ? (
-        <button
-            className="text-xs font-medium"
-            style={{ color: c.textMuted }}
-            onClick={() => setSelectedTestNames(new Set())}
-        >
-            Deselect All
-        </button>
-    ) : (
-        <button
-            className="text-xs font-medium"
-            style={{ color: c.accent }}
-            onClick={() =>
-                setSelectedTestNames(new Set(individualTestOptions))
-            }
-        >
-            Select All
-        </button>
-    )}
-</div>
+                        2. Select Tests {<span className="rounded-full bg-purple-500/10 px-2 py-0.5 text-xs font-medium text-purple-400">{String(selectedTestNames.size)} </span>}</span>
+                    <div>
+                        {selectedTestNames.size === individualTestOptions.length ? (
+                            <button
+                                className="text-xs font-medium"
+                                style={{ color: c.textMuted }}
+                                onClick={() => setSelectedTestNames(new Set())}
+                            >
+                                Deselect All
+                            </button>
+                        ) : (
+                            <button
+                                className="text-xs font-medium"
+                                style={{ color: c.accent }}
+                                onClick={() =>
+                                    setSelectedTestNames(new Set(individualTestOptions))
+                                }
+                            >
+                                Select All
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-[220px_1fr]">
@@ -320,7 +339,7 @@ const NewTestView = ({ startScan, newTestUrl, setNewTestUrl, newTestType, setNew
                     <AlertTriangle className="h-4 w-4 shrink-0" />
                     Ensure you have permission to test this target. Unauthorized testing may be illegal.
                 </p>
-                <button onClick={startScan} className="flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white" style={{ backgroundColor: c.accent }}>
+                <button onClick={handleStartScan} className="flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white" style={{ backgroundColor: c.accent }}>
                     <Play className="h-4 w-4" /> Start Scan
                 </button>
             </div>

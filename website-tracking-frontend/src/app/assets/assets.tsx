@@ -227,7 +227,6 @@ export const individualTestOptions = [
     "SQL Injection",
     "XSS (Cross Site Scripting)",
     "Command Injection",
-    "Security Misconfiguration",
     "Sensitive Data Exposure",
     "SSRF",
     "Open Redirect",

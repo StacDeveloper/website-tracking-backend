@@ -1,9 +1,10 @@
 import { InjectQueue } from "@nestjs/bullmq";
 import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
-import { ScanStatus, ScanType } from "@prisma/client";
+import { ScanStatus, ScanType, TestCategory } from "@prisma/client";
 import { Queue } from "bullmq";
 import { PrismaService } from "../prisma/prisma.service";
 import { ACTIVE_TEST, PASSIVE_TEST } from "./scan.test-catogory";
+import { WebsiteConfigInput } from "./scan.graphql";
 
 
 @Injectable()
@@ -13,50 +14,58 @@ export class ScanService {
         @InjectQueue("active-scan") private activeQueue: Queue,
     ) { }
 
-    async startScan(url: string, userId: string) {
+    async startScan(url: string, userId: string, categories: TestCategory[], config?:WebsiteConfigInput) {
 
         const website = await this.prisma.website.upsert({
             where: { url_ownerId: { url, ownerId: userId } },
-            update: {},
+            update: {...config},
             create: {
                 url,
                 ownerId: userId,
-                isVerified: false
+                isVerified: false,
+                ...config
             }
         })
+
+        const requestedPassive = categories.filter((cat) => PASSIVE_TEST.includes(cat))
+        const requestedActive = categories.filter((cat) => ACTIVE_TEST.includes(cat))
+
+        const willRunActive = website.isVerified ? requestedActive : []
+        const skippedActiveTest = website.isVerified ? [] : requestedActive
+
+        const totalExpected = requestedPassive.length + willRunActive.length
 
         const scan = await this.prisma.scan.create({
             data: {
                 websiteId: website.id,
                 scanType: website.isVerified ? ScanType.ACTIVE : ScanType.PASSIVE,
-                status: ScanStatus.PENDING
+                status: ScanStatus.PENDING,
+                expectedCount: totalExpected
             }
         })
 
-        for (const category of PASSIVE_TEST) {
+        for (const category of requestedPassive) {
             await this.passiveQueue.add(
                 "run-test-Passive-Queue",
                 { scanId: scan.id, website, url: website.url, category },
                 { jobId: `${scan.id}-${category}`, attempts: 2 }
             )
-
         }
-        if (website.isVerified) {
-            for (const category of ACTIVE_TEST) {
-                await this.activeQueue.add(
-                    "run-test-Active-Queue",
-                    {
-                        scanId: scan.id, website, url: website.url, category, config: {
-                            loginEndPoint: website.loginEndPoint,
-                            registerEndPoint: website.registerEndPoint,
-                            uploadEndPoint: website.uploadEndPoint,
-                            sampleResourceUrl: website.sampleResourceUrl,
-                            massAssignEndPoint: website.massAssignEndpoint
-                        }
-                    },
-                    { jobId: `${scan.id}-${category}`, attempts: 1 },
-                )
-            }
+        for (const category of willRunActive) {
+            await this.activeQueue.add(
+                "run-test-Active-Queue",
+                {
+                    scanId: scan.id, url: website.url, category,
+                    config: {
+                        loginEndPoint: website.loginEndPoint,
+                        registerEndPoint: website.registerEndPoint,
+                        uploadEndPoint: website.uploadEndPoint,
+                        sampleResourceUrl: website.sampleResourceUrl,
+                        massAssignEndPoint: website.massAssignEndpoint
+                    }
+                },
+                { jobId: `${scan.id}-${category}`, attempts: 1 }
+            )
         }
 
         await this.prisma.scan.update({
@@ -65,8 +74,9 @@ export class ScanService {
         })
         return {
             scan,
-            skippedActiveTest: !website.isVerified,
-            message: !website.isVerified ? "Website not verified — only passive tests will run. Verify ownership to unlock full scan." : "Full scan started."
+            skippedActiveTest: skippedActiveTest.length > 0,
+            skippedActiveCategory: skippedActiveTest,
+            message: skippedActiveTest.length > 0 ? `Website not verified — ${skippedActiveTest.length} active test(s) skipped. Verify ownership to unlock them.` : "Scan started with selected tests"
         }
 
     }

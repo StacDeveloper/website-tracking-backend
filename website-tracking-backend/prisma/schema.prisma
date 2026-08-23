@@ -154,6 +154,7 @@ model Scan {
     websiteId   String
     website     Website      @relation(fields: [websiteId], references: [id])
     scanType    ScanType
+    expectedCount Int @default(0)
     status      ScanStatus   @default(PENDING)
     startedAt   DateTime?
     completedAt DateTime?

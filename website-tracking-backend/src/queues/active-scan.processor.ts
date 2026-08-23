@@ -92,8 +92,7 @@ export class ActiveScanProcessor extends WorkerHost {
         });
         if (!scan) return null;
 
-        const expectedCount = scan.scanType === 'ACTIVE' ? 21 : 12;
-        if (scan.testResults.length >= expectedCount && scan.status !== 'COMPLETED') {
+        if (scan.testResults.length >= scan.expectedCount && scan.status !== 'COMPLETED') {
             return this.prisma.scan.update({
                 where: { id: scanId },
                 data: { status: 'COMPLETED', completedAt: new Date() },

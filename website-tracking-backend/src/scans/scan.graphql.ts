@@ -1,4 +1,4 @@
-import { ObjectType, Field, ID, Int } from "@nestjs/graphql";
+import { ObjectType, Field, ID, Int, InputType } from "@nestjs/graphql";
 import GraphQLJSON from "graphql-type-json";
 
 @ObjectType()
@@ -35,6 +35,15 @@ export class ScanType {
     @Field(() => Int) testResultsCount?: number
     @Field(() => Int) passedCount?: number
     @Field(() => Int) issueCount?: number
+}
+
+@InputType()
+export class WebsiteConfigInput {
+    @Field({ nullable: true }) loginEndPoint?: string
+    @Field({ nullable: true }) registerEndPoint?: string
+    @Field({ nullable: true }) uploadEndPoint?: string
+    @Field({ nullable: true }) sampleResourceUrl?: string
+    @Field({ nullable: true }) massAssignEndPoint?: string
 }
 
 @ObjectType()

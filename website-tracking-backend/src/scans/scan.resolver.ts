@@ -1,10 +1,11 @@
 import { Args, Mutation, Resolver, ID, Query, Subscription } from "@nestjs/graphql";
 import { ScanService } from "./scan.service";
-import { ScanType, StartScanResponse } from "./scan.graphql";
+import { ScanType, StartScanResponse, WebsiteConfigInput } from "./scan.graphql";
 import { pubsub } from "../queues/pubsub.provider";
 import { UseGuards } from "@nestjs/common";
 import { AuthGuard } from "../auth/auth.guard";
-import { CurrentUser } from "../auth/currrent-user.decorator"; 
+import { CurrentUser } from "../auth/currrent-user.decorator";
+import { TestCategory } from "@prisma/client";
 
 
 
@@ -16,9 +17,12 @@ export class ScanResolver {
     @Mutation(() => StartScanResponse)
     async startScan(
         @Args("url", { type: () => ID }) url: string,
-        @CurrentUser() user: any
+        @CurrentUser() user: any,
+        @Args("categories", { type: () => [String] }) categories: TestCategory[],
+        @Args("config", { type: () => WebsiteConfigInput, nullable: true }) config?: WebsiteConfigInput,
+
     ) {
-        return this.scansService.startScan(url, user.id)
+        return this.scansService.startScan(url, user.id, categories, config)
     }
 
     @UseGuards(AuthGuard)
@@ -42,8 +46,8 @@ export class ScanResolver {
         return this.scansService.getMyTests(user.id)
     }
     @UseGuards(AuthGuard)
-    @Query(()=>[ScanType])
-    async getHistoryofUser(@CurrentUser() user:any){
+    @Query(() => [ScanType])
+    async getHistoryofUser(@CurrentUser() user: any) {
         return this.scansService.getHistoryofUser(user.id)
     }
 

@@ -96,8 +96,7 @@ export class PassiveScanProcessor extends WorkerHost {
         })
         if (!scan) return
 
-        const expectedCound = scan.scanType === "ACTIVE" ? 21 : 12
-        if (scan.testResults.length >= expectedCound) {
+        if (scan.testResults.length >= scan.expectedCount && scan.status !== "COMPLETED") {
             return await this.prisma.scan.update({
                 where: { id: scanId },
                 data: { status: "COMPLETED", completedAt: new Date() }
