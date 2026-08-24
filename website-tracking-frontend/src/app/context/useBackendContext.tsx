@@ -22,6 +22,8 @@ interface BackendContextProps {
     setHistoryTests: React.Dispatch<React.SetStateAction<HistoryTest[]>>;
     getMyTests: () => Promise<void>;
     getHistoryOfUser: () => Promise<void>;
+    scanStatus:
+    setScanStatus:
 }
 
 const BackendContext = createContext<BackendContextProps | null>(null)
@@ -36,10 +38,12 @@ export const BackendContextProvider = ({ children }: { children: ReactNode }) =>
 
     const [tests, setTests] = useState<Test[]>([])
     const [historyTests, sethistoryTests] = useState<HistoryTest[]>([])
+    const [scanStatus, setScanStatus] = useState()
 
     useEffect(() => {
         getHistoryOfUser()
         getMyTests()
+        getScanStatus("9a991164-75ae-48a2-b4e8-2ab750ffabeb")
     }, [])
 
     const url = "http://localhost:4000/graphql"
@@ -101,6 +105,50 @@ export const BackendContextProvider = ({ children }: { children: ReactNode }) =>
         sethistoryTests(data.getHistoryofUser ?? [])
         console.log(data, errors)
     }
+
+    const getScanStatus = async (scanId: string) => {
+        if (!scanId) {
+            return console.error("scanId not provided")
+        }
+        const res = await fetch(url, {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                query: `
+                query ScanStatus($scanId:ID!){
+                scanStatus(scanId:$scanId){
+                id
+                  status
+                  scanType
+                  aiSummary
+                  completedAt
+                  website {
+                    url
+                  }
+                  testResults {
+                    category
+                    status
+                    severity
+                    rawResult
+                    aiSuggestion 
+                    }
+                }
+                }`, variables: { scanId }
+            })
+
+        })
+        const { data, errors } = await res.json()
+        if (errors) {
+            console.error(errors);
+            return null;
+        }
+        console.log(data.scanStatus)
+        setScanStatus(data.scanStatus)
+        return data.scanStatus
+    }
+
+
     const value: any = { tests, setTests, historyTests, sethistoryTests }
 
     return <BackendContext.Provider value={value}>

@@ -7,7 +7,7 @@ import { AlertTriangle, Check, ChevronDown, ClipboardList, Globe, Loader2, Play,
 import { useState } from "react";
 
 interface NewTestViewProps {
-    startScan: (e: React.FormEvent) => void
+    setScanning: React.Dispatch<React.SetStateAction<boolean>>
     newTestUrl: string
     setNewTestUrl: React.Dispatch<React.SetStateAction<string>>
     newTestType: "Active" | "Passive"
@@ -17,7 +17,7 @@ interface NewTestViewProps {
     toggleTestName: (name: string) => void
 }
 
-interface WebsiteConfigEndpoint {
+interface WebsiteConfigInput {
     loginEndPoint?: string,
     registerEndPoint?: string,
     uploadEndPoint?: string
@@ -33,25 +33,30 @@ const PathLinks = [{ key: "loginEndPoint", label: "Login Endpoint", placeholder:
 { key: "massAssignEndpoint", label: "Mass Assignment Endpoint", placeholder: "/api/users/update" }]
 
 
-const NewTestView = ({ startScan, newTestUrl, setNewTestUrl, newTestType, setNewTestType, selectedTestNames, setSelectedTestNames, toggleTestName }: NewTestViewProps) => {
+const NewTestView = ({ setScanning, newTestUrl, setNewTestUrl, newTestType, setNewTestType, selectedTestNames, setSelectedTestNames, toggleTestName }: NewTestViewProps) => {
     const { c } = useColorContext()
     const [showAllTests, setShowAllTests] = useState<boolean>(false)
-    const [endpoints, setEndpoints] = useState({
+    const [config, setConfig] = useState({
         loginEndPoint: "",
         registerEndPoint: "",
         uploadEndPoint: "",
         sampleResourceUrl: "",
         massAssignEndpoint: "",
     });
+    const [urlError, setUrlError] = useState<string>("");
 
-    async function handleStartScan() {
-        const StartScan =  (url: string, categories: string[], config?: WebsiteConfigEndpoint) => {
+    const handleStartScan = () => {
+        if (!newTestUrl.trim() || selectedTestNames.size === 0 || newTestUrl.length === 0 || !newTestUrl.includes("https://")) {
+            setUrlError(!newTestUrl.trim() ? "Please enter valid url" : !newTestUrl.includes("https://") ? "Please enter verified url" : "Please select ateleast 1 test")  
+            return;
+        }
+        const StartScan = async (url: string, categories: string[], config?: WebsiteConfigInput) => {
             const res = await fetch("http://localhost:4000/graphql", {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    query: `mutation StartScan($url: String!, $categories: [String!]!, $config:WebsiteConfigEndpoint) {
+                    query: `mutation StartScan($url: String!, $categories: [String!]!, $config:WebsiteConfigInput) {
                 startScan(url: $url, categories: $categories) {
                   message
                   skippedActiveTest
@@ -70,8 +75,10 @@ const NewTestView = ({ startScan, newTestUrl, setNewTestUrl, newTestType, setNew
                 console.error(errors)
                 return null
             }
-            return data.startScan
+            return data.StartScan
         }
+        StartScan(newTestUrl, selectedTestNames, config)
+        setScanning(true)
     }
 
 
@@ -98,6 +105,9 @@ const NewTestView = ({ startScan, newTestUrl, setNewTestUrl, newTestType, setNew
                         className="mt-2 w-full rounded-lg border px-4 py-2.5 text-sm focus:outline-none"
                         style={{ borderColor: c.cardBorder, backgroundColor: c.inputBg, color: c.textPrimary }}
                     />
+                    {urlError && (
+                        <p className="mt-2 text-xs text-red-400">{urlError}</p>
+                    )}
                     <p className="mt-2 text-xs" style={{ color: c.textFaint }}>Enter the full URL including https://</p>
                 </CardShell>
 
@@ -151,12 +161,12 @@ const NewTestView = ({ startScan, newTestUrl, setNewTestUrl, newTestType, setNew
 
                             <input
                                 value={
-                                    endpoints[
-                                    endpoint.key as keyof typeof endpoints
+                                    config[
+                                    endpoint.key as keyof typeof config
                                     ]
                                 }
                                 onChange={(e) =>
-                                    setEndpoints((prev) => ({
+                                    setConfig((prev) => ({
                                         ...prev,
                                         [endpoint.key]: e.target.value,
                                     }))

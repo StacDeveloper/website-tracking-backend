@@ -62,9 +62,9 @@ export default function WebTestApp() {
     setDetailTab("Overview");
   };
 
-  const startScan = () => {
-    setScanning(true);
-  };
+  function startScan(){
+    setScanning(true)
+  }
 
 
 
@@ -85,7 +85,7 @@ export default function WebTestApp() {
   } else if (activeNav === "Overview") {
     mainContent = <OverviewView setActiveNav={setActiveNav} />;
   } else if (activeNav === "New Test") {
-    mainContent = <NewTestView newTestType={newTestType} newTestUrl={newTestUrl} selectedTestNames={selectedTestNames} setNewTestType={setNewTestType} setNewTestUrl={setNewTestUrl} setSelectedTestNames={setSelectedTestNames} startScan={startScan} toggleTestName={toggleTestName} />;
+    mainContent = <NewTestView newTestType={newTestType} newTestUrl={newTestUrl} selectedTestNames={selectedTestNames} setNewTestType={setNewTestType} setNewTestUrl={setNewTestUrl} setSelectedTestNames={setSelectedTestNames} setScanning={setScanning} toggleTestName={toggleTestName} />;
   } else if (activeNav === "Results") {
     mainContent = selectedTest ? <TestDetailView test={selectedTest} codeLang={codeLang} detailTab={detailTab} setCodeLang={setCodeLang} setDetailTab={setDetailTab} setSelectedTest={setSelectedTest} /> : <ResultsListView openTest={openTest} query={query} resultsTab={resultsTab} setQuery={setQuery} setResultsTab={setResultsTab} />;
   } else if (activeNav === "History") {

@@ -1,4 +1,5 @@
 import { liveOutputLines, runningTests } from "@/app/assets/assets";
+import { useBackendContext } from "@/app/context/useBackendContext";
 import { useColorContext } from "@/app/context/useColorContext";
 import { CardShell } from "@/lib/Reusable-Components/Cardshell";
 import { SectionLabel } from "@/lib/Reusable-Components/SectionLabel";
@@ -13,6 +14,8 @@ interface ScanningViewProps {
 
 const ScanningView = ({ setScanning, newTestUrl }: ScanningViewProps) => {
     const { c } = useColorContext()
+    const {} = useBackendContext()
+
     const completed = runningTests.filter((t) => t.status === "Completed").length;
     const inProgress = runningTests.filter((t) => t.status === "In Progress").length;
     const pending = runningTests.filter((t) => t.status === "Pending").length;
@@ -25,7 +28,7 @@ const ScanningView = ({ setScanning, newTestUrl }: ScanningViewProps) => {
                         <Loader2 className="h-5 w-5 animate-spin text-indigo-400" />
                     </span>
                     <div>
-                        <p className="text-lg font-semibold">Scanning {newTestUrl || "https://example.com"}</p>
+                        <p className="text-lg font-semibold">Scanning {newTestUrl}</p>
                         <p className="text-sm" style={{ color: c.textMuted }}>Test ID: WT-1746272523</p>
                     </div>
                 </div>
