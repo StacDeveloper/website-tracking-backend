@@ -22,7 +22,7 @@ interface WebsiteConfigInput {
     registerEndPoint?: string,
     uploadEndPoint?: string
     sampleResourceUrl?: string
-    massAssigEndPoint?: string
+    massAssignEndPoint?: string
 }
 
 
@@ -30,7 +30,7 @@ const PathLinks = [{ key: "loginEndPoint", label: "Login Endpoint", placeholder:
 { key: "registerEndPoint", label: "Register Endpoint", placeholder: "/api/auth/register" },
 { key: "uploadEndPoint", label: "Upload Endpoint", placeholder: "/api/upload" },
 { key: "sampleResourceUrl", label: "Sample Resource URL", placeholder: "/api/users/1" },
-{ key: "massAssignEndpoint", label: "Mass Assignment Endpoint", placeholder: "/api/users/update" }]
+{ key: "massAssignEndPoint", label: "Mass Assignment Endpoint", placeholder: "/api/users/update" }]
 
 
 const NewTestView = ({ setScanning, newTestUrl, setNewTestUrl, newTestType, setNewTestType, selectedTestNames, setSelectedTestNames, toggleTestName }: NewTestViewProps) => {
@@ -41,13 +41,13 @@ const NewTestView = ({ setScanning, newTestUrl, setNewTestUrl, newTestType, setN
         registerEndPoint: "",
         uploadEndPoint: "",
         sampleResourceUrl: "",
-        massAssignEndpoint: "",
+        massAssignEndPoint: "",
     });
     const [urlError, setUrlError] = useState<string>("");
 
     const handleStartScan = () => {
         if (!newTestUrl.trim() || selectedTestNames.size === 0 || newTestUrl.length === 0 || !newTestUrl.includes("https://")) {
-            setUrlError(!newTestUrl.trim() ? "Please enter valid url" : !newTestUrl.includes("https://") ? "Please enter verified url" : "Please select ateleast 1 test")  
+            setUrlError(!newTestUrl.trim() ? "Please enter valid url" : !newTestUrl.includes("https://") ? "Please enter verified url" : "Please select ateleast 1 test")
             return;
         }
         const StartScan = async (url: string, categories: string[], config?: WebsiteConfigInput) => {
@@ -57,7 +57,7 @@ const NewTestView = ({ setScanning, newTestUrl, setNewTestUrl, newTestType, setN
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     query: `mutation StartScan($url: String!, $categories: [String!]!, $config:WebsiteConfigInput) {
-                startScan(url: $url, categories: $categories) {
+                startScan(url: $url, categories: $categories, config:$config) {
                   message
                   skippedActiveTest
                   scan {
@@ -77,7 +77,7 @@ const NewTestView = ({ setScanning, newTestUrl, setNewTestUrl, newTestType, setN
             }
             return data.StartScan
         }
-        StartScan(newTestUrl, selectedTestNames, config)
+        StartScan(newTestUrl, Array.from(selectedTestNames), config)
         setScanning(true)
     }
 

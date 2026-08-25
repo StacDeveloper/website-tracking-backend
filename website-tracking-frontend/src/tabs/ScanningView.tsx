@@ -1,20 +1,30 @@
 import { liveOutputLines, runningTests } from "@/app/assets/assets";
-import { useBackendContext } from "@/app/context/useBackendContext";
 import { useColorContext } from "@/app/context/useColorContext";
 import { CardShell } from "@/lib/Reusable-Components/Cardshell";
+import ProgressBar from "@/lib/Reusable-Components/ProgressBar";
 import { SectionLabel } from "@/lib/Reusable-Components/SectionLabel";
 import { StatusPill } from "@/lib/Reusable-Components/StatusPill";
 import { Loader2, XCircle } from "lucide-react";
 
 
+
+
 interface ScanningViewProps {
     setScanning: React.Dispatch<React.SetStateAction<boolean>>
     newTestUrl: string
+    selectedTestNames: Set<string>
 }
 
-const ScanningView = ({ setScanning, newTestUrl }: ScanningViewProps) => {
+
+
+
+
+const ScanningView = ({ setScanning, newTestUrl, selectedTestNames }: ScanningViewProps) => {
     const { c } = useColorContext()
-    const {} = useBackendContext()
+    const { isDone, progress, scan } = ProgressBar(scanId)
+
+
+
 
     const completed = runningTests.filter((t) => t.status === "Completed").length;
     const inProgress = runningTests.filter((t) => t.status === "In Progress").length;
@@ -55,13 +65,12 @@ const ScanningView = ({ setScanning, newTestUrl }: ScanningViewProps) => {
                 <CardShell className="p-5">
                     <SectionLabel>Running Tests</SectionLabel>
                     <div className="flex flex-col divide-y" style={{ borderColor: c.cardBorder }}>
-                        {runningTests.map((t) => (
-                            <div key={t.name} className="flex items-center justify-between py-2.5">
+                        {Array.from(selectedTestNames).map((name) => (
+                            <div key={name} className="flex items-center justify-between py-2.5">
                                 <span className="flex items-center gap-2.5 text-sm" style={{ color: c.textSecondary }}>
-                                    <t.icon className="h-4 w-4" style={{ color: c.textFaint }} />
-                                    {t.name}
+                                    {name}
                                 </span>
-                                <StatusPill status={t.status} />
+                                <StatusPill status={isDone ? "Completed" : "Pending"} />
                             </div>
                         ))}
                     </div>

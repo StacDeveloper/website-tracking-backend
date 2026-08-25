@@ -144,7 +144,7 @@ model Website {
     registerEndPoint   String?
     uploadEndPoint     String?
     sampleResourceUrl  String?
-    massAssignEndpoint String?
+    massAssignEndPoint String?
 
     @@unique([url, ownerId])
 }

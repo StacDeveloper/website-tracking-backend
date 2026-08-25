@@ -16,7 +16,7 @@ export class ScanResolver {
     @UseGuards(AuthGuard)
     @Mutation(() => StartScanResponse)
     async startScan(
-        @Args("url", { type: () => ID }) url: string,
+        @Args("url", { type: () => String }) url: string,
         @CurrentUser() user: any,
         @Args("categories", { type: () => [String] }) categories: TestCategory[],
         @Args("config", { type: () => WebsiteConfigInput, nullable: true }) config?: WebsiteConfigInput,

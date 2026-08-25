@@ -22,8 +22,7 @@ interface BackendContextProps {
     setHistoryTests: React.Dispatch<React.SetStateAction<HistoryTest[]>>;
     getMyTests: () => Promise<void>;
     getHistoryOfUser: () => Promise<void>;
-    scanStatus:
-    setScanStatus:
+    
 }
 
 const BackendContext = createContext<BackendContextProps | null>(null)
@@ -121,7 +120,6 @@ export const BackendContextProvider = ({ children }: { children: ReactNode }) =>
                 id
                   status
                   scanType
-                  aiSummary
                   completedAt
                   website {
                     url
@@ -143,9 +141,9 @@ export const BackendContextProvider = ({ children }: { children: ReactNode }) =>
             console.error(errors);
             return null;
         }
-        console.log(data.scanStatus)
-        setScanStatus(data.scanStatus)
-        return data.scanStatus
+        console.log(data.startScan)
+        setScanStatus(data.startScan)
+        return data.startScan
     }
 
 

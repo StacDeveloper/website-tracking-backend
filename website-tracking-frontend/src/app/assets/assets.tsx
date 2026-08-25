@@ -1,4 +1,4 @@
-import { BarChart3, Bug, Clock, Gauge, LucideIcon, Search, ShieldCheck, Zap, Lock, LayoutGrid, Plus, History, ClipboardList, Bookmark, Share2, Settings, ShieldAlert, Info, Globe, Ban, FlaskConical, Cookie, FolderTree, Link2, Database, FileCode2, Upload, Terminal, KeyRound, UserCog, RefreshCw, Server, ExternalLink, KeySquare, PackageSearch, Bot, UserX, ShoppingCart, FileText, Layers, Smartphone, User, Palette, Bell, Users, CreditCard, AlertOctagon } from "lucide-react";
+import { BarChart3, Bug, Clock, Gauge, LucideIcon, Search, ShieldCheck, Zap, Lock, LayoutGrid, Plus, History, ClipboardList, Bookmark, Share2, Settings, ShieldAlert, Info, Globe, Ban, FlaskConical, Cookie, FolderTree, Link2, Database, FileCode2, Upload, Terminal, KeyRound, UserCog, RefreshCw, Server, ExternalLink, KeySquare, PackageSearch, Bot, UserX, ShoppingCart, FileText, Layers, Smartphone, User, Palette, Bell, Users, CreditCard, AlertOctagon, Timer, EyeOff, ArrowRightLeft, Radar, Fingerprint } from "lucide-react";
 
 export const features: {
     icon: LucideIcon,
@@ -331,3 +331,30 @@ export const historyIcons = [
     { icon: Cookie, bg: "bg-fuchsia-500/10", color: "text-fuchsia-400" },
     { icon: Link2, bg: "bg-rose-500/10", color: "text-rose-400" },
 ];
+
+
+
+export const testIconMap: Record<string, LucideIcon> = {
+    SQL_INJECTION: Database,
+    XSS: FileCode2,
+    RATE_LIMIT: Timer,
+    BOT: Bot,
+    FAKE_USER: UserX,
+    FILE_UPLOAD: Upload,
+    COMMAND_INJECTION_XXE: Terminal,
+    BROKEN_ACCESS_CONTROL: Ban,
+    API_MASS_ASSIGNMENT: Layers,
+
+    SECURITY_HEADERS: ShieldCheck,
+    TLS_SSL: Lock,
+    CORS: Globe,
+    CLICKJACKING: ShieldAlert,
+    INFO_DISCLOSURE: EyeOff,
+    SESSION_COOKIE: KeySquare,
+    OPEN_REDIRECT: ArrowRightLeft,
+    PATH_TRAVERSAL: FolderTree,
+    SSRF: Radar,
+    CSRF: Fingerprint,
+    JWT: KeySquare,
+    DEPENDENCY_CVE: PackageSearch,
+};

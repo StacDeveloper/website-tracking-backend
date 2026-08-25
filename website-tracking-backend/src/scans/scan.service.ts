@@ -61,7 +61,7 @@ export class ScanService {
                         registerEndPoint: website.registerEndPoint,
                         uploadEndPoint: website.uploadEndPoint,
                         sampleResourceUrl: website.sampleResourceUrl,
-                        massAssignEndPoint: website.massAssignEndpoint
+                        massAssignEndPoint: website.massAssignEndPoint
                     }
                 },
                 { jobId: `${scan.id}-${category}`, attempts: 1 }
