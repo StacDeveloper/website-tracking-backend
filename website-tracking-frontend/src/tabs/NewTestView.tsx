@@ -4,10 +4,10 @@ import { useColorContext } from "@/app/context/useColorContext";
 import { CardShell } from "@/lib/Reusable-Components/Cardshell";
 import { SectionLabel } from "@/lib/Reusable-Components/SectionLabel";
 import { AlertTriangle, Check, ChevronDown, ClipboardList, Globe, Loader2, Play, Upload } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 interface NewTestViewProps {
-    setScanning: React.Dispatch<React.SetStateAction<boolean>>
     newTestUrl: string
     setNewTestUrl: React.Dispatch<React.SetStateAction<string>>
     newTestType: "Active" | "Passive"
@@ -33,7 +33,8 @@ const PathLinks = [{ key: "loginEndPoint", label: "Login Endpoint", placeholder:
 { key: "massAssignEndPoint", label: "Mass Assignment Endpoint", placeholder: "/api/users/update" }]
 
 
-const NewTestView = ({ setScanning, newTestUrl, setNewTestUrl, newTestType, setNewTestType, selectedTestNames, setSelectedTestNames, toggleTestName }: NewTestViewProps) => {
+const NewTestView = ({ newTestUrl, setNewTestUrl, newTestType, setNewTestType, selectedTestNames, setSelectedTestNames, toggleTestName }: NewTestViewProps) => {
+    const router = useRouter()
     const { c } = useColorContext()
     const [showAllTests, setShowAllTests] = useState<boolean>(false)
     const [config, setConfig] = useState({
@@ -45,7 +46,7 @@ const NewTestView = ({ setScanning, newTestUrl, setNewTestUrl, newTestType, setN
     });
     const [urlError, setUrlError] = useState<string>("");
 
-    const handleStartScan = () => {
+    const handleStartScan = async () => {
         if (!newTestUrl.trim() || selectedTestNames.size === 0 || newTestUrl.length === 0 || !newTestUrl.includes("https://")) {
             setUrlError(!newTestUrl.trim() ? "Please enter valid url" : !newTestUrl.includes("https://") ? "Please enter verified url" : "Please select ateleast 1 test")
             return;
@@ -77,8 +78,11 @@ const NewTestView = ({ setScanning, newTestUrl, setNewTestUrl, newTestType, setN
             }
             return data.StartScan
         }
-        StartScan(newTestUrl, Array.from(selectedTestNames), config)
-        setScanning(true)
+        const result = await StartScan(newTestUrl, Array.from(selectedTestNames), config)
+        if (!result?.scan?.id) {
+            return console.error("Scan Failed to start")
+        }
+        router.push(`tests/${result.scan.id}`)
     }
 
 

@@ -1,10 +1,13 @@
-import { liveOutputLines, runningTests } from "@/app/assets/assets";
+"use client"
+import { liveOutputLines, runningTests, testIconMap } from "@/app/assets/assets";
 import { useColorContext } from "@/app/context/useColorContext";
 import { CardShell } from "@/lib/Reusable-Components/Cardshell";
 import ProgressBar from "@/lib/Reusable-Components/ProgressBar";
 import { SectionLabel } from "@/lib/Reusable-Components/SectionLabel";
 import { StatusPill } from "@/lib/Reusable-Components/StatusPill";
-import { Loader2, XCircle } from "lucide-react";
+import { Loader2, ShieldAlert, ShieldCheck, XCircle } from "lucide-react";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 
 
@@ -12,23 +15,94 @@ import { Loader2, XCircle } from "lucide-react";
 interface ScanningViewProps {
     setScanning: React.Dispatch<React.SetStateAction<boolean>>
     newTestUrl: string
-    selectedTestNames: Set<string>
+   
 }
 
 
 
 
 
-const ScanningView = ({ setScanning, newTestUrl, selectedTestNames }: ScanningViewProps) => {
+const ScanningView = ({ setScanning, newTestUrl }: ScanningViewProps) => {
+    const { id:scanId } = useParams()
     const { c } = useColorContext()
-    const { isDone, progress, scan } = ProgressBar(scanId)
+    const { isDone, progress, scan } = ProgressBar(scanId as string)
+    const [error, setError] = useState("")
+    const [selectedTestNames, setSelectedTestNames] = useState([])
 
+    useEffect(() => {
+
+        const isValidUuid = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+
+        if (!scanId || !isValidUuid(scanId as string || "78aad6fd-c336-4b58-8478-0e28a89b25dd")) {
+            console.error("Invalid Scan Id")
+            return;
+        }
+
+        const getScanData = async () => {
+            try {
+                const response = await fetch("http://localhost:4000/graphql", {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        query: `query ScanStatus($scanId:ID!){
+                scanStatus(scanId:$scanId){
+                id
+                  status
+                  scanType
+                  completedAt
+                  website {
+                    url
+                  }
+                  testResults {
+                    category
+                    status
+                    severity
+                    }
+                    }
+                }`, variables: { scanId }
+                    })
+                })
+                const { data, errors } = await response.json()
+
+                if (errors || !data?.scanStatus) {
+                    setError("We couldn't find this test. It may have been removed or the link is incorrect.");
+                    return;
+                }
+                setSelectedTestNames(data.scanStatus)
+
+            } catch (error) {
+                console.error(error)
+                setError("Something went wrong loading this test. Please try again.")
+            }
+
+        }
+        getScanData()
+
+    }, [scanId])
 
 
 
     const completed = runningTests.filter((t) => t.status === "Completed").length;
     const inProgress = runningTests.filter((t) => t.status === "In Progress").length;
     const pending = runningTests.filter((t) => t.status === "Pending").length;
+
+    if (error) {
+    return (
+        <div className="flex flex-col items-center justify-center px-8 py-24 text-center">
+            <ShieldAlert className="mb-4 h-10 w-10" style={{ color: c.textFaint }} />
+            <p className="mb-1 text-lg font-semibold">Test Not Found</p>
+            <p className="mb-6 text-sm" style={{ color: c.textMuted }}>{error}</p>
+            <button
+                onClick={() => setScanning(false)}
+                className="rounded-lg px-5 py-2.5 text-sm font-semibold text-white"
+                style={{ backgroundColor: c.accent }}
+            >
+                Back to New Test
+            </button>
+        </div>
+    );
+}
 
     return (
         <div className="px-8 pb-16">
@@ -65,14 +139,18 @@ const ScanningView = ({ setScanning, newTestUrl, selectedTestNames }: ScanningVi
                 <CardShell className="p-5">
                     <SectionLabel>Running Tests</SectionLabel>
                     <div className="flex flex-col divide-y" style={{ borderColor: c.cardBorder }}>
-                        {Array.from(selectedTestNames).map((name) => (
-                            <div key={name} className="flex items-center justify-between py-2.5">
-                                <span className="flex items-center gap-2.5 text-sm" style={{ color: c.textSecondary }}>
-                                    {name}
-                                </span>
-                                <StatusPill status={isDone ? "Completed" : "Pending"} />
-                            </div>
-                        ))}
+                        {Array.from(selectedTestNames).map((name) => {
+                            const Icon = testIconMap[name] ?? ShieldCheck;
+                            return (
+                                <div key={name} className="flex items-center justify-between py-2.5">
+                                    <span className="flex items-center gap-2.5 text-sm" style={{ color: c.textSecondary }}>
+                                        <Icon className="h-4 w-4" style={{ color: c.textFaint }} />
+                                        {name}
+                                    </span>
+                                    <StatusPill status={isDone ? "Completed" : "Pending"} />
+                                </div>
+                            );
+                        })}
                     </div>
                 </CardShell>
 

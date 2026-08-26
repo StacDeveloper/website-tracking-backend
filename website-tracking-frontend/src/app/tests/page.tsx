@@ -8,7 +8,7 @@ import {
   Crown,
   Headphones,
 } from "lucide-react";
-import ScanningView from "@/tabs/ScanningView";
+
 import OverviewView from "@/tabs/Overview";
 import NewTestView from "@/tabs/NewTestView";
 import TestDetailView from "@/tabs/TestDetailView";
@@ -81,11 +81,10 @@ export default function WebTestApp() {
 
   let mainContent;
   if (scanning) {
-    mainContent = <ScanningView newTestUrl={newTestUrl} setScanning={setScanning} selectedTestNames={selectedTestNames} />;
   } else if (activeNav === "Overview") {
     mainContent = <OverviewView setActiveNav={setActiveNav} />;
   } else if (activeNav === "New Test") {
-    mainContent = <NewTestView newTestType={newTestType} newTestUrl={newTestUrl} selectedTestNames={selectedTestNames} setNewTestType={setNewTestType} setNewTestUrl={setNewTestUrl} setSelectedTestNames={setSelectedTestNames} setScanning={setScanning} toggleTestName={toggleTestName} />;
+    mainContent = <NewTestView newTestType={newTestType} newTestUrl={newTestUrl} selectedTestNames={selectedTestNames} setNewTestType={setNewTestType} setNewTestUrl={setNewTestUrl} setSelectedTestNames={setSelectedTestNames}  toggleTestName={toggleTestName} />;
   } else if (activeNav === "Results") {
     mainContent = selectedTest ? <TestDetailView test={selectedTest} codeLang={codeLang} detailTab={detailTab} setCodeLang={setCodeLang} setDetailTab={setDetailTab} setSelectedTest={setSelectedTest} /> : <ResultsListView openTest={openTest} query={query} resultsTab={resultsTab} setQuery={setQuery} setResultsTab={setResultsTab} />;
   } else if (activeNav === "History") {
