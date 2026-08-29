@@ -80,6 +80,7 @@ const NewTestView = ({ newTestUrl, setNewTestUrl, newTestType, setNewTestType, s
         }
         const result = await StartScan(newTestUrl, Array.from(selectedTestNames), config)
         if (!result?.scan?.id) {
+            console.log(result)
             return console.error("Scan Failed to start")
         }
         router.push(`tests/${result.scan.id}`)

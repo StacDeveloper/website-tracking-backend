@@ -13,7 +13,6 @@ import { useEffect, useState } from "react";
 
 
 interface ScanningViewProps {
-    setScanning: React.Dispatch<React.SetStateAction<boolean>>
     newTestUrl: string
    
 }
@@ -22,7 +21,7 @@ interface ScanningViewProps {
 
 
 
-const ScanningView = ({ setScanning, newTestUrl }: ScanningViewProps) => {
+const ScanningView = ({  newTestUrl }: ScanningViewProps) => {
     const { id:scanId } = useParams()
     const { c } = useColorContext()
     const { isDone, progress, scan } = ProgressBar(scanId as string)
@@ -94,7 +93,6 @@ const ScanningView = ({ setScanning, newTestUrl }: ScanningViewProps) => {
             <p className="mb-1 text-lg font-semibold">Test Not Found</p>
             <p className="mb-6 text-sm" style={{ color: c.textMuted }}>{error}</p>
             <button
-                onClick={() => setScanning(false)}
                 className="rounded-lg px-5 py-2.5 text-sm font-semibold text-white"
                 style={{ backgroundColor: c.accent }}
             >
@@ -117,7 +115,6 @@ const ScanningView = ({ setScanning, newTestUrl }: ScanningViewProps) => {
                     </div>
                 </div>
                 <button
-                    onClick={() => setScanning(false)}
                     className="flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium text-red-400"
                     style={{ borderColor: "rgba(248,113,113,0.3)" }}
                 >
