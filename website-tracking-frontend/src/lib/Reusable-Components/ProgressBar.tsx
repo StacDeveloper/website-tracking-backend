@@ -30,7 +30,7 @@ export default function ProgressBar(scanId: string) {
                         id,
                         status
                         testResultsCount
-                          expectedTestCount
+                          expectedCount
                         }
                     }`, variables: { scanId }
                 })
@@ -49,12 +49,13 @@ export default function ProgressBar(scanId: string) {
                 if (pollRef.current) clearInterval(pollRef.current)
                 if (progressRef.current) clearInterval(progressRef.current)
             }
-            poll()
         }
+        poll()
         pollRef.current = setInterval(poll, 4000)
         return () => {
             if (pollRef.current) clearInterval(pollRef.current)
         }
+
 
     }, [scanId])
 

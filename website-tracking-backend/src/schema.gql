@@ -26,6 +26,7 @@ type ScanType {
   aiSummary: String
   completedAt: DateTime
   createdAt: DateTime!
+  expectedCount: Int
   id: ID!
   issueCount: Int!
   passedCount: Int!
@@ -33,7 +34,7 @@ type ScanType {
   startedAt: DateTime
   status: String!
   testResults: [TestResultType!]
-  testResultsCount: Int!
+  testResultsCount: Int
   website: WebsiteType
 }
 

@@ -32,8 +32,9 @@ export class ScanType {
     @Field({ nullable: true }) startedAt?: Date;
     @Field() createdAt: Date;
     @Field(() => WebsiteType, { nullable: true }) website?: WebsiteType;
-    @Field(() => Int) testResultsCount?: number
+    @Field(() => Int, { nullable: true }) testResultsCount?: number
     @Field(() => Int) passedCount?: number
+    @Field(() => Int, { nullable: true }) expectedCount?: number
     @Field(() => Int) issueCount?: number
 }
 

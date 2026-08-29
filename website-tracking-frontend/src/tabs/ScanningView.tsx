@@ -5,22 +5,18 @@ import { CardShell } from "@/lib/Reusable-Components/Cardshell";
 import ProgressBar from "@/lib/Reusable-Components/ProgressBar";
 import { SectionLabel } from "@/lib/Reusable-Components/SectionLabel";
 import { StatusPill } from "@/lib/Reusable-Components/StatusPill";
-import { Loader2, ShieldAlert, ShieldCheck, XCircle } from "lucide-react";
-import { useParams } from "next/navigation";
+import { ArrowLeft, Loader2, ShieldAlert, ShieldCheck, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 
 
 
 
 interface ScanningViewProps {
-    newTestUrl?: string
-    setScanning?: React.Dispatch<React.SetStateAction<boolean>>
+    newTestUrl: string
+    setScanning: React.Dispatch<React.SetStateAction<boolean>>
     scanId: string
     setScanId: React.Dispatch<React.SetStateAction<string>>
 }
-
-
-
 
 
 const ScanningView = ({ setScanning, newTestUrl, scanId, setScanId }: ScanningViewProps) => {
@@ -34,7 +30,7 @@ const ScanningView = ({ setScanning, newTestUrl, scanId, setScanId }: ScanningVi
 
         const isValidUuid = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
-        if (!scanId || !isValidUuid(scanId as string || "78aad6fd-c336-4b58-8478-0e28a89b25dd")) {
+        if (!scanId || !isValidUuid(scanId as string)) {
             console.error("Invalid Scan Id")
             return;
         }
@@ -47,21 +43,21 @@ const ScanningView = ({ setScanning, newTestUrl, scanId, setScanId }: ScanningVi
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         query: `query ScanStatus($scanId:ID!){
-                scanStatus(scanId:$scanId){
-                id
-                  status
-                  scanType
-                  completedAt
-                  website {
-                    url
-                  }
-                  testResults {
-                    category
-                    status
-                    severity
-                    }
-                    }
-                }`, variables: { scanId }
+                            scanStatus(scanId:$scanId){
+                                id
+                                status
+                                scanType
+                                completedAt
+                                website {
+                                    url
+                                    }
+                                    testResults {
+                                        category
+                                        status
+                                        severity
+                                        }
+                                        }
+                                        }`, variables: { scanId }
                     })
                 })
                 const { data, errors } = await response.json()
@@ -70,7 +66,7 @@ const ScanningView = ({ setScanning, newTestUrl, scanId, setScanId }: ScanningVi
                     setError("We couldn't find this test. It may have been removed or the link is incorrect.");
                     return;
                 }
-                setSelectedTestNames(data.scanStatus)
+                setSelectedTestNames(data.scanStatus.testResults.map((test: any) => test.category))
 
             } catch (error) {
                 console.error(error)
@@ -83,14 +79,10 @@ const ScanningView = ({ setScanning, newTestUrl, scanId, setScanId }: ScanningVi
     }, [scanId])
 
 
-
-    const completed = runningTests.filter((t) => t.status === "Completed").length;
-    const inProgress = runningTests.filter((t) => t.status === "In Progress").length;
-    const pending = runningTests.filter((t) => t.status === "Pending").length;
-
-    if (!scanId) {
-
-    }
+    const completedCount = scan?.testResultsCount ?? 0;
+    const totalCount = selectedTestNames.length;
+    const pendingCount = totalCount - completedCount;
+    const inProgressCount = 0;
 
     if (error) {
         return (
@@ -101,6 +93,7 @@ const ScanningView = ({ setScanning, newTestUrl, scanId, setScanId }: ScanningVi
                 <button
                     className="rounded-lg px-5 py-2.5 text-sm font-semibold text-white"
                     style={{ backgroundColor: c.accent }}
+                    onClick={() => setScanning(false)}
                 >
                     Back to New Test
                 </button>
@@ -112,12 +105,19 @@ const ScanningView = ({ setScanning, newTestUrl, scanId, setScanId }: ScanningVi
         <div className="px-8 pb-16">
             <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-4">
+                    <button
+                        onClick={() => setScanning(false)}
+                        className="mr-2 flex h-9 w-9 items-center justify-center rounded-lg border"
+                        style={{ borderColor: c.cardBorder }}
+                    >
+                        <ArrowLeft className="h-4 w-4" style={{ color: c.textMuted }} />
+                    </button>
                     <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-indigo-500/10">
                         <Loader2 className="h-5 w-5 animate-spin text-indigo-400" />
                     </span>
                     <div>
                         <p className="text-lg font-semibold">Scanning {newTestUrl}</p>
-                        <p className="text-sm" style={{ color: c.textMuted }}>Test ID: WT-1746272523</p>
+                        <p className="text-sm" style={{ color: c.textMuted, width: `${progress}` }}>{progress}</p>
                     </div>
                 </div>
                 <button
@@ -131,10 +131,10 @@ const ScanningView = ({ setScanning, newTestUrl, scanId, setScanId }: ScanningVi
             <CardShell className="mb-6 p-5">
                 <div className="mb-2 flex items-center justify-between text-sm">
                     <span className="font-medium">Overall Progress</span>
-                    <span style={{ color: c.textFaint }}>68%</span>
+                    <span style={{ color: c.textFaint }}>{progress}%</span>
                 </div>
                 <div className="h-2 w-full overflow-hidden rounded-full" style={{ backgroundColor: c.inputBg }}>
-                    <div className="h-full rounded-full bg-gradient-to-r from-indigo-400 to-indigo-600" style={{ width: "68%" }} />
+                    <div className="h-full rounded-full bg-gradient-to-r from-indigo-400 to-indigo-600" style={{ width: `${progress}` }} />
                 </div>
             </CardShell>
 
@@ -173,15 +173,15 @@ const ScanningView = ({ setScanning, newTestUrl, scanId, setScanId }: ScanningVi
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
                 <CardShell className="p-5">
                     <p className="text-sm" style={{ color: c.textMuted }}>Completed</p>
-                    <p className="mt-1 text-2xl font-bold">{completed}</p>
+                    <p className="mt-1 text-2xl font-bold">{completedCount}</p>
                 </CardShell>
                 <CardShell className="p-5">
                     <p className="text-sm" style={{ color: c.textMuted }}>In Progress</p>
-                    <p className="mt-1 text-2xl font-bold">{inProgress}</p>
+                    <p className="mt-1 text-2xl font-bold">{inProgressCount}</p>
                 </CardShell>
                 <CardShell className="p-5">
                     <p className="text-sm" style={{ color: c.textMuted }}>Pending</p>
-                    <p className="mt-1 text-2xl font-bold">{pending}</p>
+                    <p className="mt-1 text-2xl font-bold">{pendingCount}</p>
                 </CardShell>
                 <CardShell className="p-5">
                     <p className="text-sm" style={{ color: c.textMuted }}>Issues Found</p>

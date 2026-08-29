@@ -79,7 +79,7 @@ const NewTestView = ({ newTestUrl, setNewTestUrl, newTestType, setNewTestType, s
                 console.error(errors)
                 return null
             }
-            return data.StartScan
+            return data.startScan
         }
         const result = await StartScan(newTestUrl, Array.from(selectedTestNames), config)
         if (!result?.scan?.id) {

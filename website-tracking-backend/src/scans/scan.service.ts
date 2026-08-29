@@ -14,11 +14,11 @@ export class ScanService {
         @InjectQueue("active-scan") private activeQueue: Queue,
     ) { }
 
-    async startScan(url: string, userId: string, categories: TestCategory[], config?:WebsiteConfigInput) {
+    async startScan(url: string, userId: string, categories: TestCategory[], config?: WebsiteConfigInput) {
 
         const website = await this.prisma.website.upsert({
             where: { url_ownerId: { url, ownerId: userId } },
-            update: {...config},
+            update: { ...config },
             create: {
                 url,
                 ownerId: userId,
@@ -87,7 +87,11 @@ export class ScanService {
         })
         if (!status) throw new NotFoundException("Scan not found")
         if (status.website.ownerId !== userId) throw new ForbiddenException("You dont have access to this scan")
-        return status
+        return {
+            ...status,
+            testResultsCount: status.testResults.length,
+            passedCount: status.testResults.filter((test) => test.status === "PASSED").length
+        }
     }
 
 
