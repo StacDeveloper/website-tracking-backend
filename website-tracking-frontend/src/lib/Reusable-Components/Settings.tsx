@@ -1,4 +1,3 @@
-"use client"
 import { useColorContext } from "@/app/context/useColorContext";
 import { ChevronDown } from "lucide-react";
 import { ReactNode } from "react";
@@ -8,9 +7,7 @@ import { ReactNode } from "react";
 
 
 export const Toggle = ({ checked, onChange }: { checked: boolean; onChange: () => void }) => {
-
     const { c } = useColorContext()
-
     return (
         <button
             onClick={onChange}

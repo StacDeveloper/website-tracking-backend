@@ -7,6 +7,7 @@ import { AlertTriangle, Check, ChevronDown, ClipboardList, Globe, Loader2, Play,
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+
 interface NewTestViewProps {
     newTestUrl: string
     setNewTestUrl: React.Dispatch<React.SetStateAction<string>>
@@ -15,6 +16,8 @@ interface NewTestViewProps {
     selectedTestNames: any
     setSelectedTestNames: any
     toggleTestName: (name: string) => void
+    setScanning:React.Dispatch<React.SetStateAction<boolean>>
+    setCurrentId:React.Dispatch<React.SetStateAction<string>>
 }
 
 interface WebsiteConfigInput {
@@ -33,7 +36,7 @@ const PathLinks = [{ key: "loginEndPoint", label: "Login Endpoint", placeholder:
 { key: "massAssignEndPoint", label: "Mass Assignment Endpoint", placeholder: "/api/users/update" }]
 
 
-const NewTestView = ({ newTestUrl, setNewTestUrl, newTestType, setNewTestType, selectedTestNames, setSelectedTestNames, toggleTestName }: NewTestViewProps) => {
+const NewTestView = ({ newTestUrl, setNewTestUrl, newTestType, setNewTestType, selectedTestNames, setSelectedTestNames, toggleTestName, setScanning, setCurrentId }: NewTestViewProps) => {
     const router = useRouter()
     const { c } = useColorContext()
     const [showAllTests, setShowAllTests] = useState<boolean>(false)
@@ -83,7 +86,9 @@ const NewTestView = ({ newTestUrl, setNewTestUrl, newTestType, setNewTestType, s
             console.log(result)
             return console.error("Scan Failed to start")
         }
-        router.push(`tests/${result.scan.id}`)
+        setScanning(true)
+        setCurrentId(result.scan.id)
+
     }
 
 

@@ -13,16 +13,18 @@ import { useEffect, useState } from "react";
 
 
 interface ScanningViewProps {
-    newTestUrl: string
-   
+    newTestUrl?: string
+    setScanning?: React.Dispatch<React.SetStateAction<boolean>>
+    scanId: string
+    setScanId: React.Dispatch<React.SetStateAction<string>>
 }
 
 
 
 
 
-const ScanningView = ({  newTestUrl }: ScanningViewProps) => {
-    const { id:scanId } = useParams()
+const ScanningView = ({ setScanning, newTestUrl, scanId, setScanId }: ScanningViewProps) => {
+
     const { c } = useColorContext()
     const { isDone, progress, scan } = ProgressBar(scanId as string)
     const [error, setError] = useState("")
@@ -86,21 +88,25 @@ const ScanningView = ({  newTestUrl }: ScanningViewProps) => {
     const inProgress = runningTests.filter((t) => t.status === "In Progress").length;
     const pending = runningTests.filter((t) => t.status === "Pending").length;
 
+    if (!scanId) {
+
+    }
+
     if (error) {
-    return (
-        <div className="flex flex-col items-center justify-center px-8 py-24 text-center">
-            <ShieldAlert className="mb-4 h-10 w-10" style={{ color: c.textFaint }} />
-            <p className="mb-1 text-lg font-semibold">Test Not Found</p>
-            <p className="mb-6 text-sm" style={{ color: c.textMuted }}>{error}</p>
-            <button
-                className="rounded-lg px-5 py-2.5 text-sm font-semibold text-white"
-                style={{ backgroundColor: c.accent }}
-            >
-                Back to New Test
-            </button>
-        </div>
-    );
-}
+        return (
+            <div className="flex flex-col items-center justify-center px-8 py-24 text-center">
+                <ShieldAlert className="mb-4 h-10 w-10" style={{ color: c.textFaint }} />
+                <p className="mb-1 text-lg font-semibold">Test Not Found</p>
+                <p className="mb-6 text-sm" style={{ color: c.textMuted }}>{error}</p>
+                <button
+                    className="rounded-lg px-5 py-2.5 text-sm font-semibold text-white"
+                    style={{ backgroundColor: c.accent }}
+                >
+                    Back to New Test
+                </button>
+            </div>
+        );
+    }
 
     return (
         <div className="px-8 pb-16">
