@@ -16,69 +16,19 @@ interface ScanningViewProps {
     setScanning: React.Dispatch<React.SetStateAction<boolean>>
     scanId: string
     setScanId: React.Dispatch<React.SetStateAction<string>>
+    selectedTestNames: string[];
 }
 
 
-const ScanningView = ({ setScanning, newTestUrl, scanId, setScanId }: ScanningViewProps) => {
+const ScanningView = ({ setScanning, newTestUrl, scanId, selectedTestNames, setScanId }: ScanningViewProps) => {
 
     const { c } = useColorContext()
     const { isDone, progress, scan } = ProgressBar(scanId as string)
     const [error, setError] = useState("")
-    const [selectedTestNames, setSelectedTestNames] = useState([])
-
-    useEffect(() => {
-
-        const isValidUuid = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
-
-        if (!scanId || !isValidUuid(scanId as string)) {
-            console.error("Invalid Scan Id")
-            return;
-        }
-
-        const getScanData = async () => {
-            try {
-                const response = await fetch("http://localhost:4000/graphql", {
-                    method: "POST",
-                    credentials: "include",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        query: `query ScanStatus($scanId:ID!){
-                            scanStatus(scanId:$scanId){
-                                id
-                                status
-                                scanType
-                                completedAt
-                                website {
-                                    url
-                                    }
-                                    testResults {
-                                        category
-                                        status
-                                        severity
-                                        }
-                                        }
-                                        }`, variables: { scanId }
-                    })
-                })
-                const { data, errors } = await response.json()
-
-                if (errors || !data?.scanStatus) {
-                    setError("We couldn't find this test. It may have been removed or the link is incorrect.");
-                    return;
-                }
-                setSelectedTestNames(data.scanStatus.testResults.map((test: any) => test.category))
-
-            } catch (error) {
-                console.error(error)
-                setError("Something went wrong loading this test. Please try again.")
-            }
-
-        }
-        getScanData()
-
-    }, [scanId])
+    
 
 
+  
     const completedCount = scan?.testResultsCount ?? 0;
     const totalCount = selectedTestNames.length;
     const pendingCount = totalCount - completedCount;
@@ -117,7 +67,7 @@ const ScanningView = ({ setScanning, newTestUrl, scanId, setScanId }: ScanningVi
                     </span>
                     <div>
                         <p className="text-lg font-semibold">Scanning {newTestUrl}</p>
-                        <p className="text-sm" style={{ color: c.textMuted, width: `${progress}` }}>{progress}</p>
+                        <p className="text-sm" style={{ color: c.textMuted, width: `${progress}` }}></p>
                     </div>
                 </div>
                 <button
@@ -134,7 +84,7 @@ const ScanningView = ({ setScanning, newTestUrl, scanId, setScanId }: ScanningVi
                     <span style={{ color: c.textFaint }}>{progress}%</span>
                 </div>
                 <div className="h-2 w-full overflow-hidden rounded-full" style={{ backgroundColor: c.inputBg }}>
-                    <div className="h-full rounded-full bg-gradient-to-r from-indigo-400 to-indigo-600" style={{ width: `${progress}` }} />
+                    <div className="h-full rounded-full bg-gradient-to-r from-indigo-400 to-indigo-600" style={{ width: `${progress}%` }} />
                 </div>
             </CardShell>
 

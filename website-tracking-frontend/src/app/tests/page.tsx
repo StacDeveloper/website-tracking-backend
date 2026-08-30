@@ -82,7 +82,7 @@ export default function WebTestApp() {
 
   let mainContent;
   if (scanning) {
-    mainContent = <ScanningView scanId={currentId} setScanId={setCurrentId} newTestUrl={newTestUrl} setScanning={setScanning} />;
+    mainContent = <ScanningView scanId={currentId} setScanId={setCurrentId} newTestUrl={newTestUrl} setScanning={setScanning} selectedTestNames={Array.from(selectedTestNames)} />;
   } else if (activeNav === "Overview") {
     mainContent = <OverviewView setActiveNav={setActiveNav} />;
   } else if (activeNav === "New Test") {
