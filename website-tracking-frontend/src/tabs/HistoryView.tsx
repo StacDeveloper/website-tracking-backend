@@ -13,13 +13,15 @@ import {
     Filter,
     MoreVertical,
     Search,
-    ShieldCheck,
 } from "lucide-react";
 import { useMemo } from "react";
+import LinkResult from "./LinkResult";
 
 interface HistoryViewProps {
     historyQuery: string;
     setHistoryQuery: React.Dispatch<React.SetStateAction<string>>;
+    viewingId: string | null
+    setViewingId: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 interface HistoryTest {
@@ -37,6 +39,8 @@ interface HistoryTest {
 const HistoryView = ({
     historyQuery,
     setHistoryQuery,
+    viewingId,
+    setViewingId
 }: HistoryViewProps) => {
     const { historyTests } = useBackendContext();
     const { c } = useColorContext();
@@ -61,6 +65,10 @@ const HistoryView = ({
     }, [historyTests, historyQuery]);
 
     const headers = ["Target", "Tests Executed", "Score", "Issues", "Status", "Date", "Action"]
+
+    if (viewingId) {
+        return <LinkResult scanId={viewingId} onBack={() => setViewingId(null)} />
+    }
 
     return (
         <div className="px-8 pb-16">
@@ -326,6 +334,7 @@ const HistoryView = ({
                                                             color:
                                                                 c.accent,
                                                         }}
+                                                        onClick={() => setViewingId(row.id)}
                                                     >
                                                         View Report
                                                     </button>

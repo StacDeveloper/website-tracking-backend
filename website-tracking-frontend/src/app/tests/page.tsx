@@ -54,6 +54,7 @@ export default function WebTestApp() {
   const [notifyCritical, setNotifyCritical] = useState(true);
   const [notifyWeekly, setNotifyWeekly] = useState(true);
   const [currentId, setCurrentId] = useState<string>("")
+  const [viewingId, setViewingId] = useState<string | null>("")
   const { c, isDark, theme, setTheme } = useColorContext()
 
 
@@ -90,7 +91,7 @@ export default function WebTestApp() {
   } else if (activeNav === "Results") {
     mainContent = selectedTest ? <TestDetailView test={selectedTest} codeLang={codeLang} detailTab={detailTab} setCodeLang={setCodeLang} setDetailTab={setDetailTab} setSelectedTest={setSelectedTest} /> : <ResultsListView openTest={openTest} query={query} resultsTab={resultsTab} setQuery={setQuery} setResultsTab={setResultsTab} />;
   } else if (activeNav === "History") {
-    mainContent = <HistoryView historyQuery={historyQuery} setHistoryQuery={setHistoryQuery} />;
+    mainContent = <HistoryView historyQuery={historyQuery} setHistoryQuery={setHistoryQuery} viewingId={viewingId} setViewingId={setViewingId} />;
   } else if (activeNav === "Saved Targets") {
     mainContent = <SavedTargetsView savedQuery={savedQuery} setNewTestUrl={setNewTestUrl} setSavedQuery={setSavedQuery} startScan={startScan} />;
   } else if (activeNav === "Settings") {
