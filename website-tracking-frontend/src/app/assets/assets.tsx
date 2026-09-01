@@ -128,7 +128,30 @@ export const topIssues = [
     { name: "SQL Injection", count: 2 },
     { name: "XSS Detected", count: 1 },
 ]
-
+export const testNameToEnum: Record<string, string> = {
+    "SQL Injection": "SQL_INJECTION",
+    "XSS (Cross Site Scripting)": "XSS",
+    "Command Injection": "COMMAND_INJECTION_XXE",
+    "Sensitive Data Exposure": "INFO_DISCLOSURE",
+    "SSRF": "SSRF",
+    "Open Redirect": "OPEN_REDIRECT",
+    "Path Traversal": "PATH_TRAVERSAL",
+    "Rate Limit": "RATE_LIMIT",
+    "API Mass Assignment": "API_MASS_ASSIGNMENT",
+    "File Upload": "FILE_UPLOAD",
+    "Security Headers": "SECURITY_HEADERS",
+    "TLS/SSL": "TLS_SSL",
+    "CORS": "CORS",
+    "Clickjacking": "CLICKJACKING",
+    "Information Disclosure": "INFO_DISCLOSURE",
+    "Session Cookie": "SESSION_COOKIE",
+    "CSRF": "CSRF",
+    "JWT": "JWT",
+    "Bot Detection": "BOT",
+    "Fake User": "FAKE_USER",
+    "Broken Access Control": "BROKEN_ACCESS_CONTROL",
+    "Dependency Vulnerabilities": "DEPENDENCY_CVE",
+};
 export const runningTests = [
     { name: "Security Headers", icon: ShieldCheck, status: "Completed" },
     { name: "TLS/SSL", icon: Lock, status: "Completed" },

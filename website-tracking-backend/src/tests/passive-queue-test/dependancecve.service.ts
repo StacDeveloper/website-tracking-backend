@@ -35,7 +35,7 @@ export class DependancyCVEService {
 
     private async checkOsv(name: string, version: string) {
         try {
-            const res = await axios.post("/https://api.osv.dev/v1/query", { version, package: { name } })
+            const res = await axios.post("/https://api.osv.dev/v1/query", { version, package: { name } },{timeout:5000})
             return (res.data.vulns || []).map(v => v.id)
         } catch (error) {
             return []

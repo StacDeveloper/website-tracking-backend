@@ -4,7 +4,7 @@ import { FormatCategoryMeta } from "@/lib/FormatCategory";
 import { CardShell } from "@/lib/Reusable-Components/Cardshell";
 import { SectionLabel } from "@/lib/Reusable-Components/SectionLabel";
 import { StatusPill } from "@/lib/Reusable-Components/StatusPill";
-import { ArrowLeft, Download, ExternalLink, Share2, ShieldAlert, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowLeft, Download, ExternalLink, RefreshCw, Share2, ShieldAlert, ShieldCheck, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 
 
@@ -65,6 +65,7 @@ const LinkResult = ({ scanId, onBack }: LinkResultsProps) => {
     const [activeTab, setActiveTab] = useState<"overview" | "results" | "ai">("overview")
 
     const fetchScan = async () => {
+        console.log("fetchscan triggered")
         try {
             const res = await fetch("http://localhost:4000/graphql", {
                 method: "POST",
@@ -107,7 +108,12 @@ const LinkResult = ({ scanId, onBack }: LinkResultsProps) => {
     useEffect(() => {
         if (!scanId) return;
         fetchScan();
-    }, [scanId]);
+        const interval = setInterval(() => {
+            if (scan?.status !== "COMPLETED") fetchScan();
+        }, 5000);
+
+        return () => clearInterval(interval);
+    }, [scanId, scan?.status]);
 
     if (loading) {
         return (
@@ -172,6 +178,13 @@ const LinkResult = ({ scanId, onBack }: LinkResultsProps) => {
                     <ArrowLeft className="h-3.5 w-3.5" /> Back to History
                 </button>
                 <div className="flex gap-2">
+                    <button
+                        onClick={fetchScan}
+                        className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium"
+                        style={{ borderColor: c.cardBorder, color: c.textSecondary }}
+                    >
+                        <RefreshCw className="h-3.5 w-3.5" /> Refresh
+                    </button>
                     <button
                         className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium"
                         style={{ borderColor: c.cardBorder, color: c.textSecondary }}

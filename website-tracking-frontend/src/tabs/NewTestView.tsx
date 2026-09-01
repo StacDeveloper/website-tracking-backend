@@ -1,5 +1,5 @@
 "use client"
-import { individualTestOptions } from "@/app/assets/assets";
+import { individualTestOptions, testNameToEnum } from "@/app/assets/assets";
 import { useColorContext } from "@/app/context/useColorContext";
 import { CardShell } from "@/lib/Reusable-Components/Cardshell";
 import { SectionLabel } from "@/lib/Reusable-Components/SectionLabel";
@@ -16,8 +16,8 @@ interface NewTestViewProps {
     selectedTestNames: any
     setSelectedTestNames: any
     toggleTestName: (name: string) => void
-    setScanning:React.Dispatch<React.SetStateAction<boolean>>
-    setCurrentId:React.Dispatch<React.SetStateAction<string>>
+    setScanning: React.Dispatch<React.SetStateAction<boolean>>
+    setCurrentId: React.Dispatch<React.SetStateAction<string>>
 }
 
 interface WebsiteConfigInput {
@@ -81,7 +81,8 @@ const NewTestView = ({ newTestUrl, setNewTestUrl, newTestType, setNewTestType, s
             }
             return data.startScan
         }
-        const result = await StartScan(newTestUrl, Array.from(selectedTestNames), config)
+        const enumCategories = Array.from(selectedTestNames).map((test: any) => testNameToEnum[test]).filter(Boolean)
+        const result = await StartScan(newTestUrl, enumCategories, config)
         if (!result?.scan?.id) {
             console.log(result)
             return console.error("Scan Failed to start")

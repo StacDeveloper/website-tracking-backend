@@ -34,6 +34,7 @@ export class ActiveScanProcessor extends WorkerHost {
         const { scanId, url, category, config } = job.data
 
         try {
+
             const result = await this.runTest(category, url, config)
             await this.prisma.testResult.create({
                 data: {
