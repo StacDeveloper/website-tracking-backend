@@ -263,6 +263,12 @@ export const individualTestOptions = [
     "Clickjacking",
     "Information Disclosure",
     "Session Cookie",
+    "CSRF",
+    "JWT",
+    "Bot Detection",
+    "Fake User",
+    "Broken Access Control",
+    "Dependency Vulnerabilities",
 ];
 
 export const categoryMeta: Record<

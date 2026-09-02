@@ -1,5 +1,5 @@
 import { Processor, WorkerHost } from "@nestjs/bullmq";
-import { TestCategory, TestStatus } from "@prisma/client";
+import { Severity, TestCategory, TestStatus } from "@prisma/client";
 import { Job } from "bullmq";
 import { PrismaService } from "../prisma/prisma.service";
 import { SecurityHeadersService } from '../tests/passive-queue-test/securityheaders.service';
@@ -16,6 +16,7 @@ import { JwtSerice } from '../tests/passive-queue-test/jwt.service';
 import { DependancyCVEService } from "../tests/passive-queue-test/dependancecve.service";
 import { pubsub } from "./pubsub.provider";
 import { AiSuggestionService } from "../ai-report/aisuggession.service";
+import { withTimeout } from "../lib/withtimeout";
 
 
 
@@ -42,7 +43,7 @@ export class PassiveScanProcessor extends WorkerHost {
     async process(job: Job) {
         const { scanId, url, category } = job.data
         try {
-            const result = await this.runTest(category, url)
+            const result = await withTimeout(this.runTest(category, url), 10000, { status: TestStatus.ERROR, severity: null, data: { error: "Test timed out" } } as any) as { status: TestStatus, severity: Severity | null, data: any }
             await this.prisma.testResult.create({
                 data: {
                     scanId,

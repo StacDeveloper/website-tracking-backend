@@ -21,7 +21,7 @@ export class JwtSerice {
         if (decoded?.header?.alg === "none") {
             findings.push({ issue: "Token uses alg:none — no signature verification" })
         }
-        const commonSecrets = ["secret', '123456', 'password', 'changeme', 'jwtsecret"]
+        const commonSecrets = ["secret", "123456", "password", "changeme", "jwtsecret"];
         for (const secret of commonSecrets) {
             try {
                 jwt.verify(token, secret)

@@ -1,5 +1,5 @@
 import { Processor, WorkerHost } from "@nestjs/bullmq";
-import { TestCategory, TestStatus } from "@prisma/client";
+import { Severity, TestCategory, TestStatus } from "@prisma/client";
 import { Job } from "bullmq";
 import { PrismaService } from "../prisma/prisma.service";
 import { SqlInjectionService } from '../tests/active-queue-test/sqlinjection.service';
@@ -13,6 +13,7 @@ import { BrokenAccessService } from "../tests/active-queue-test/broken.service";
 import { ApiMassManagementService } from "../tests/active-queue-test/apimanagement.service";
 import { pubsub } from "./pubsub.provider";
 import { AiSuggestionService } from "../ai-report/aisuggession.service";
+import { withTimeout } from "../lib/withtimeout";
 
 @Processor("active-scan", { concurrency: 2 })
 export class ActiveScanProcessor extends WorkerHost {
@@ -35,7 +36,8 @@ export class ActiveScanProcessor extends WorkerHost {
 
         try {
 
-            const result = await this.runTest(category, url, config)
+            const result = await withTimeout(this.runTest(category, url, config), 10000, { status: TestStatus.ERROR, severity: null, data: { error: "Test timed out" } } as any) as { status: TestStatus, severity: Severity | null, data: any }
+
             await this.prisma.testResult.create({
                 data: {
                     scanId,

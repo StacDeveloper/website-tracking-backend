@@ -25,10 +25,7 @@ const ScanningView = ({ setScanning, newTestUrl, scanId, selectedTestNames, setS
     const { c } = useColorContext()
     const { isDone, progress, scan } = ProgressBar(scanId as string)
     const [error, setError] = useState("")
-    
 
-
-  
     const completedCount = scan?.testResultsCount ?? 0;
     const totalCount = selectedTestNames.length;
     const pendingCount = totalCount - completedCount;
