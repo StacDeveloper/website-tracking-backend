@@ -1,5 +1,5 @@
 "use client"
-import { liveOutputLines, runningTests, testIconMap } from "@/app/assets/assets";
+import { liveOutputLines, testIconMap } from "@/app/assets/assets";
 import { useColorContext } from "@/app/context/useColorContext";
 import { CardShell } from "@/lib/Reusable-Components/Cardshell";
 import ProgressBar from "@/lib/Reusable-Components/ProgressBar";
@@ -21,7 +21,7 @@ interface ScanningViewProps {
 
 
 const ScanningView = ({ setScanning, newTestUrl, scanId, selectedTestNames, setScanId }: ScanningViewProps) => {
-
+    console.log(scanId)
     const { c } = useColorContext()
     const { isDone, progress, scan } = ProgressBar(scanId as string)
     const [error, setError] = useState("")
@@ -31,6 +31,7 @@ const ScanningView = ({ setScanning, newTestUrl, scanId, selectedTestNames, setS
     const pendingCount = totalCount - completedCount;
     const inProgressCount = 0;
 
+  
     if (error) {
         return (
             <div className="flex flex-col items-center justify-center px-8 py-24 text-center">

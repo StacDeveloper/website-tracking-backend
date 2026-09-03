@@ -27,13 +27,17 @@ export class ScanService {
             }
         })
 
-        const requestedPassive = categories.filter((cat) => PASSIVE_TEST.includes(cat))
-        const requestedActive = categories.filter((cat) => ACTIVE_TEST.includes(cat))
+        const uniqueCategory = [...new Set(categories)]
+        const requestedPassive = uniqueCategory.filter((cat) => PASSIVE_TEST.includes(cat))
+        const requestedActive = uniqueCategory.filter((cat) => ACTIVE_TEST.includes(cat))
 
         const willRunActive = website.isVerified ? requestedActive : []
         const skippedActiveTest = website.isVerified ? [] : requestedActive
 
         const totalExpected = requestedPassive.length + willRunActive.length
+
+
+
 
         const scan = await this.prisma.scan.create({
             data: {

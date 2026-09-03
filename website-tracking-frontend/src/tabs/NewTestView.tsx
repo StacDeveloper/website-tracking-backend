@@ -4,7 +4,7 @@ import { useColorContext } from "@/app/context/useColorContext";
 import { CardShell } from "@/lib/Reusable-Components/Cardshell";
 import { SectionLabel } from "@/lib/Reusable-Components/SectionLabel";
 import { AlertTriangle, Check, ChevronDown, ClipboardList, Globe, Loader2, Play, Upload } from "lucide-react";
-import { useRouter } from "next/navigation";
+
 import { useState } from "react";
 
 
@@ -37,7 +37,6 @@ const PathLinks = [{ key: "loginEndPoint", label: "Login Endpoint", placeholder:
 
 
 const NewTestView = ({ newTestUrl, setNewTestUrl, newTestType, setNewTestType, selectedTestNames, setSelectedTestNames, toggleTestName, setScanning, setCurrentId }: NewTestViewProps) => {
-    const router = useRouter()
     const { c } = useColorContext()
     const [showAllTests, setShowAllTests] = useState<boolean>(false)
     const [config, setConfig] = useState({

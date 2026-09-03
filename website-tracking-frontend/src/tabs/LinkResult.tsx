@@ -108,11 +108,6 @@ const LinkResult = ({ scanId, onBack }: LinkResultsProps) => {
     useEffect(() => {
         if (!scanId) return;
         fetchScan();
-        const interval = setInterval(() => {
-            if (scan?.status !== "COMPLETED") fetchScan();
-        }, 5000);
-
-        return () => clearInterval(interval);
     }, [scanId, scan?.status]);
 
     if (loading) {
