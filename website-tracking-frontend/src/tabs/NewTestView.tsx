@@ -48,6 +48,8 @@ const NewTestView = ({ newTestUrl, setNewTestUrl, newTestType, setNewTestType, s
     });
     const [urlError, setUrlError] = useState<string>("");
 
+
+
     const handleStartScan = async () => {
         if (!newTestUrl.trim() || selectedTestNames.size === 0 || newTestUrl.length === 0 || !newTestUrl.includes("https://")) {
             setUrlError(!newTestUrl.trim() ? "Please enter valid url" : !newTestUrl.includes("https://") ? "Please enter verified url" : "Please select ateleast 1 test")

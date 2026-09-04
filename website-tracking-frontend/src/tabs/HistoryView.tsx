@@ -1,4 +1,3 @@
-"use client";
 
 import { historyIcons } from "@/app/assets/assets";
 import { useBackendContext } from "@/app/context/useBackendContext";

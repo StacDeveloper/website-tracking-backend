@@ -2,7 +2,7 @@
 import { liveOutputLines, testIconMap } from "@/app/assets/assets";
 import { useColorContext } from "@/app/context/useColorContext";
 import { CardShell } from "@/lib/Reusable-Components/Cardshell";
-import ProgressBar from "@/lib/Reusable-Components/ProgressBar";
+import useProgressBar from "@/lib/Reusable-Components/ProgressBar";
 import { SectionLabel } from "@/lib/Reusable-Components/SectionLabel";
 import { StatusPill } from "@/lib/Reusable-Components/StatusPill";
 import { ArrowLeft, Loader2, ShieldAlert, ShieldCheck, XCircle } from "lucide-react";
@@ -17,13 +17,13 @@ interface ScanningViewProps {
     scanId: string
     setScanId: React.Dispatch<React.SetStateAction<string>>
     selectedTestNames: string[];
+    setActiveNav: React.Dispatch<React.SetStateAction<string>>
 }
 
 
-const ScanningView = ({ setScanning, newTestUrl, scanId, selectedTestNames, setScanId }: ScanningViewProps) => {
-    console.log(scanId)
+const ScanningView = ({ setScanning, newTestUrl, scanId, selectedTestNames, setScanId, setActiveNav }: ScanningViewProps) => {
     const { c } = useColorContext()
-    const { isDone, progress, scan } = ProgressBar(scanId as string)
+    const { isDone, progress, scan } = useProgressBar({ scanId })
     const [error, setError] = useState("")
 
     const completedCount = scan?.testResultsCount ?? 0;
@@ -31,7 +31,17 @@ const ScanningView = ({ setScanning, newTestUrl, scanId, selectedTestNames, setS
     const pendingCount = totalCount - completedCount;
     const inProgressCount = 0;
 
-  
+
+    useEffect(() => {
+        if (isDone) {
+            const timeOut = setTimeout(() => {
+                setScanning(false)
+                setActiveNav("History")
+            }, 4000)
+            return () => clearTimeout(timeOut)
+        }
+    }, [isDone])
+
     if (error) {
         return (
             <div className="flex flex-col items-center justify-center px-8 py-24 text-center">

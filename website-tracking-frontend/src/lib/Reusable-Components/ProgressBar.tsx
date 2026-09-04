@@ -7,9 +7,8 @@ interface ScanStatusData {
     expectedCount: number
 }
 
-export default function ProgressBar(scanId: string) {
-    console.log("Progress Bar Called")
-    console.log(scanId)
+export default function useProgressBar({ scanId }: { scanId: string }) {
+
     const [progress, setProgress] = useState(0)
     const [scan, setScan] = useState<ScanStatusData | null>(null)
     const [isDone, setIsDone] = useState(false)
@@ -19,7 +18,7 @@ export default function ProgressBar(scanId: string) {
 
     useEffect(() => {
         if (!scanId) return;
-        console.log("Progress Bar triggered")
+
         progressRef.current = setInterval(() => {
             setProgress((prev) => (prev >= 90 ? prev : Math.min(prev + (Math.random() * 8 + 4), 90)))
         }, 4000)
@@ -28,14 +27,10 @@ export default function ProgressBar(scanId: string) {
         }
     }, [scanId])
 
-     useEffect(() => {
-        console.log("BARE MINIMUM EFFECT FIRED");
-    }, [scanId]);
 
     useEffect(() => {
         if (!scanId) return
-        console.log(scanId)
-        console.log("Scan started for" + scanId)
+
         const poll = async () => {
             const res = await fetch("http://localhost:4000/graphql", {
                 method: "POST",

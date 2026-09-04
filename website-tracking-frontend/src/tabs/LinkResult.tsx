@@ -65,7 +65,6 @@ const LinkResult = ({ scanId, onBack }: LinkResultsProps) => {
     const [activeTab, setActiveTab] = useState<"overview" | "results" | "ai">("overview")
 
     const fetchScan = async () => {
-        console.log("fetchscan triggered")
         try {
             const res = await fetch("http://localhost:4000/graphql", {
                 method: "POST",
