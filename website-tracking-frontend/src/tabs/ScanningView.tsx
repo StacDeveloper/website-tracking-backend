@@ -25,12 +25,12 @@ const ScanningView = ({ setScanning, newTestUrl, scanId, selectedTestNames, setS
     const { c } = useColorContext()
     const { isDone, progress, scan } = useProgressBar({ scanId })
     const [error, setError] = useState("")
+    console.log(scan)
 
     const completedCount = scan?.testResultsCount ?? 0;
     const totalCount = selectedTestNames.length;
-    const pendingCount = totalCount - completedCount;
-    const inProgressCount = 0;
-
+    const skippedTests = totalCount - completedCount;
+    const issuesFound = scan?.issuesFound
 
     useEffect(() => {
         if (isDone) {
@@ -131,19 +131,19 @@ const ScanningView = ({ setScanning, newTestUrl, scanId, selectedTestNames, setS
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
                 <CardShell className="p-5">
                     <p className="text-sm" style={{ color: c.textMuted }}>Completed</p>
-                    <p className="mt-1 text-2xl font-bold">{completedCount}</p>
+                    <p className="mt-1 text-2xl font-bold">{completedCount || 0}</p>
                 </CardShell>
                 <CardShell className="p-5">
                     <p className="text-sm" style={{ color: c.textMuted }}>In Progress</p>
-                    <p className="mt-1 text-2xl font-bold">{inProgressCount}</p>
+                    <p className="mt-1 text-2xl font-bold">{selectedTestNames.length || 0}</p>
                 </CardShell>
                 <CardShell className="p-5">
-                    <p className="text-sm" style={{ color: c.textMuted }}>Pending</p>
-                    <p className="mt-1 text-2xl font-bold">{pendingCount}</p>
+                    <p className="text-sm" style={{ color: c.textMuted }}>Skipped</p>
+                    <p className="mt-1 text-2xl font-bold">{skippedTests || 0}</p>
                 </CardShell>
                 <CardShell className="p-5">
                     <p className="text-sm" style={{ color: c.textMuted }}>Issues Found</p>
-                    <p className="mt-1 text-2xl font-bold text-red-400">12</p>
+                    <p className="mt-1 text-2xl font-bold text-red-400">{issuesFound || 0}</p>
                 </CardShell>
             </div>
         </div>

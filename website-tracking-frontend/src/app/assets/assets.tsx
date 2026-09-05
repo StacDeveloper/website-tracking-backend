@@ -385,3 +385,277 @@ export const testIconMap: Record<string, LucideIcon> = {
     JWT: KeySquare,
     DEPENDENCY_CVE: PackageSearch,
 };
+
+interface TestKnowLedge {
+    name: string
+    description: string
+    riskDescription: string
+    impact: string[]
+    reproduce: (rawResult: any, url: string) => string[]
+    codeSamples: Record<string, string>
+    references?: string[]
+}
+export const testknowledgebase: Record<string, TestKnowLedge> = {
+    SQL_INJECTION: {
+        name: "SQL Injection",
+        description: "The application does not properly sanitize user input before using it in SQL queries, allowing attackers to alter query logic.",
+        riskDescription: "An attacker can manipulate input parameters to modify SQL queries, potentially accessing unauthorized data, bypassing authentication, or corrupting the database.",
+        impact: ["Unauthorized data access", "Authentication bypass", "Data manipulation or deletion", "Full database compromise"],
+        reproduce: (raw) => {
+            const findings = raw?.findings ?? [];
+            if (!findings.length) return ["No specific payload recorded for this finding."];
+            return findings.slice(0, 3).map((f: any) =>
+                f.type === "LOGIN_BYPASS"
+                    ? `Login bypass: submitting email "${f.payload?.email}" returned a successful (${f.status}) response without valid credentials.`
+                    : `Payload "${f.payload}" triggered a database error or timing anomaly (${f.errorMatch ? "error signature matched" : "time-based delay detected"}).`
+            );
+        },
+        codeSamples: {
+            "Node.js": `// Vulnerable\ndb.query(\`SELECT * FROM users WHERE email = '\${email}'\`);\n\n// Fixed — parameterized query\ndb.query('SELECT * FROM users WHERE email = ?', [email]);`,
+            "Python": `# Vulnerable\ncursor.execute(f"SELECT * FROM users WHERE email = '{email}'")\n\n# Fixed — parameterized query\ncursor.execute("SELECT * FROM users WHERE email = %s", (email,))`,
+        },
+    },
+
+    XSS: {
+        name: "Cross-Site Scripting (XSS)",
+        description: "User-supplied input is reflected in the page or API response without proper encoding, allowing script injection.",
+        riskDescription: "An attacker can inject malicious scripts that execute in other users' browsers, potentially stealing session cookies or performing actions on their behalf.",
+        impact: ["Session hijacking", "Credential theft", "Defacement", "Malware distribution"],
+        reproduce: (raw) => {
+            const findings = raw?.findings ?? [];
+            if (!findings.length) return ["No reflected payload recorded for this finding."];
+            return findings.slice(0, 3).map((f: any) => `Payload "${f.payload}" was reflected unescaped in the response at ${f.url}.`);
+        },
+        codeSamples: {
+            "Node.js": `// Vulnerable\nres.send(\`<div>\${userInput}</div>\`);\n\n// Fixed — escape output\nimport { escape } from 'html-escaper';\nres.send(\`<div>\${escape(userInput)}</div>\`);`,
+            "React": `// Vulnerable\n<div dangerouslySetInnerHTML={{ __html: userInput }} />\n\n// Fixed — React escapes by default\n<div>{userInput}</div>`,
+        },
+    },
+
+    RATE_LIMIT: {
+        name: "Missing Rate Limiting",
+        description: "The endpoint accepts a high volume of requests in a short period without throttling.",
+        riskDescription: "Without rate limiting, attackers can brute-force credentials, scrape data at scale, or overwhelm the server with requests.",
+        impact: ["Brute-force attacks", "Credential stuffing", "Resource exhaustion / denial of service", "Data scraping"],
+        reproduce: (raw) => [
+            `Sent ${raw?.totalRequest ?? 30} rapid requests to the target; ${raw?.got429 ? "some were throttled." : "none received a 429 (Too Many Requests) response."}`,
+        ],
+        codeSamples: {
+            "Node.js / Express": `import rateLimit from 'express-rate-limit';\n\nconst limiter = rateLimit({ windowMs: 60_000, max: 20 });\napp.use('/api/', limiter);`,
+        },
+    },
+
+    BOT: {
+        name: "Missing Bot Protection",
+        description: "The application does not distinguish between real browser traffic and automated bot requests.",
+        riskDescription: "Without bot detection, automated scripts can scrape content, abuse forms, or perform credential stuffing at scale.",
+        impact: ["Content scraping", "Automated abuse", "Fake account creation", "Inventory/price scraping"],
+        reproduce: (raw) => [
+            `Requests sent with a non-browser User-Agent (curl) returned status codes: ${(raw?.statusCodes ?? []).join(", ")} — ${raw?.blocked ? "some were blocked." : "none were blocked."}`,
+        ],
+        codeSamples: {
+            "General": `// Add bot-detection middleware or a challenge service (e.g. Cloudflare Turnstile, hCaptcha)\n// on sensitive endpoints: login, signup, checkout, search.`,
+        },
+    },
+
+    FAKE_USER: {
+        name: "Missing Signup Protection",
+        description: "The registration endpoint accepts new accounts without verification, CAPTCHA, or throttling.",
+        riskDescription: "Attackers can script mass account creation for spam, fraud, or to bypass per-account limits.",
+        impact: ["Spam account creation", "Fraud", "Resource abuse", "Fake reviews/engagement"],
+        reproduce: () => ["Multiple signup attempts with disposable emails all succeeded without CAPTCHA or email verification."],
+        codeSamples: {
+            "General": `// Add email verification before activating accounts, and a CAPTCHA\n// (e.g. hCaptcha, reCAPTCHA) on the signup form.`,
+        },
+    },
+
+    FILE_UPLOAD: {
+        name: "Unrestricted File Upload",
+        description: "The upload endpoint accepts files without validating their type or extension.",
+        riskDescription: "An attacker can upload executable scripts (e.g. .php) disguised as regular files, potentially achieving remote code execution if the file is later served or executed.",
+        impact: ["Remote code execution", "Server compromise", "Malware hosting", "Defacement"],
+        reproduce: (raw) => (raw?.findings ?? []).map((f: any) => f.issue) ?? ["A .php file was accepted without extension filtering."],
+        codeSamples: {
+            "Node.js": `// Vulnerable — accepts any extension\n\n// Fixed — allowlist extensions and validate MIME type\nconst allowed = ['.png', '.jpg', '.pdf'];\nif (!allowed.includes(path.extname(file.originalname))) {\n  throw new Error('File type not allowed');\n}`,
+        },
+    },
+
+    COMMAND_INJECTION_XXE: {
+        name: "Command Injection / XXE",
+        description: "User input is passed to a system shell command or XML parser without sanitization.",
+        riskDescription: "An attacker can execute arbitrary system commands or read local files via crafted XML entities, potentially compromising the entire server.",
+        impact: ["Remote code execution", "File system access", "Full server compromise"],
+        reproduce: (raw) => (raw?.findings ?? []).map((f: any) => f.type === "xxe" ? `XXE payload leaked local file contents (${f.evidence}).` : `Command injection payload "${f.payload}" executed successfully.`),
+        codeSamples: {
+            "Node.js": `// Vulnerable\nexec(\`ping \${userInput}\`);\n\n// Fixed — use safe APIs, never shell out with raw input\nexecFile('ping', [userInput]);`,
+            "XML (any language)": `<!-- Fixed — disable external entity resolution in your XML parser -->\n<!-- e.g. libxmljs: noent: false, in Java: disable DOCTYPE_DECL -->`,
+        },
+    },
+
+    BROKEN_ACCESS_CONTROL: {
+        name: "Broken Access Control",
+        description: "Resources are accessible by manipulating an identifier (e.g. user ID) without verifying the requester's authorization.",
+        riskDescription: "An attacker can access or modify other users' data simply by changing an ID in the request, without needing valid credentials for that account.",
+        impact: ["Unauthorized data access", "Privacy violation", "Account takeover", "Data tampering"],
+        reproduce: (raw) => (raw?.findings ?? []).map((f: any) => `Resource with ID "${f.id}" was accessible without proper authorization.`),
+        codeSamples: {
+            "General": `// Always verify the authenticated user owns or has permission\n// for the requested resource before returning it — never trust\n// a client-supplied ID alone.\nif (resource.ownerId !== req.user.id) throw new ForbiddenException();`,
+        },
+    },
+
+    API_MASS_ASSIGNMENT: {
+        name: "API Mass Assignment",
+        description: "The API accepts and applies fields from the request body that should not be user-controllable (e.g. role, isAdmin).",
+        riskDescription: "An attacker can escalate privileges by including protected fields in an otherwise normal request, such as setting their own account to admin.",
+        impact: ["Privilege escalation", "Account takeover", "Data integrity violation"],
+        reproduce: (raw) => [`Submitting a request with an added "isAdmin"/"role" field ${raw?.accepted ? "was accepted by the server." : "was rejected."}`],
+        codeSamples: {
+            "General": `// Vulnerable — spreads entire request body into the update\nawait db.user.update({ where: { id }, data: req.body });\n\n// Fixed — allowlist updatable fields explicitly\nconst { name, bio } = req.body;\nawait db.user.update({ where: { id }, data: { name, bio } });`,
+        },
+    },
+
+    SECURITY_HEADERS: {
+        name: "Missing Security Headers",
+        description: "The server response is missing one or more recommended security headers.",
+        riskDescription: "Missing headers like CSP or HSTS reduce the browser's built-in protections against common attacks like XSS and man-in-the-middle downgrade attacks.",
+        impact: ["Increased XSS risk", "Clickjacking exposure", "Protocol downgrade attacks"],
+        reproduce: (raw) => [`Missing headers: ${(raw?.missing ?? []).join(", ") || "see evidence"}.`],
+        codeSamples: {
+            "Node.js / Express": `import helmet from 'helmet';\napp.use(helmet()); // sets CSP, HSTS, X-Frame-Options, etc. by default`,
+        },
+    },
+
+    TLS_SSL: {
+        name: "Weak TLS/SSL Configuration",
+        description: "The server's TLS configuration uses an outdated protocol version or an expired certificate.",
+        riskDescription: "Weak TLS settings can allow attackers to intercept or downgrade encrypted connections between users and the server.",
+        impact: ["Man-in-the-middle attacks", "Data interception", "Browser security warnings"],
+        reproduce: (raw) => [
+            raw?.expired ? `Certificate expired on ${raw?.validTo}.` : `Server negotiated protocol ${raw?.protocol}, which is considered outdated.`,
+        ],
+        codeSamples: {
+            "General": `// Renew the TLS certificate and disable TLSv1/TLSv1.1\n// at the load balancer or reverse proxy (e.g. Nginx: ssl_protocols TLSv1.2 TLSv1.3;)`,
+        },
+    },
+
+    CORS: {
+        name: "CORS Misconfiguration",
+        description: "The server reflects any origin or uses a wildcard in the Access-Control-Allow-Origin header.",
+        riskDescription: "A permissive CORS policy allows any website to make authenticated cross-origin requests to your API on behalf of a logged-in user.",
+        impact: ["Cross-origin data theft", "CSRF-like attacks on APIs", "Session abuse"],
+        reproduce: (raw) => [`Server responded with Access-Control-Allow-Origin: ${raw?.allowedOrigin ?? "*"} for an arbitrary origin.`],
+        codeSamples: {
+            "Node.js / Express": `// Vulnerable\napp.use(cors({ origin: '*' }));\n\n// Fixed — allowlist known origins\napp.use(cors({ origin: ['https://yourapp.com'], credentials: true }));`,
+        },
+    },
+
+    CLICKJACKING: {
+        name: "Clickjacking",
+        description: "The page can be embedded in an iframe on another site, since X-Frame-Options or CSP frame-ancestors is missing.",
+        riskDescription: "An attacker can overlay your page in an invisible iframe to trick users into clicking buttons they didn't intend to (e.g. transferring funds, changing settings).",
+        impact: ["UI redress attacks", "Unauthorized actions on behalf of the user"],
+        reproduce: () => ["The page loaded successfully inside a test iframe with no X-Frame-Options or frame-ancestors restriction."],
+        codeSamples: {
+            "Node.js / Express": `app.use((req, res, next) => {\n  res.setHeader('X-Frame-Options', 'SAMEORIGIN');\n  next();\n});`,
+        },
+    },
+
+    INFO_DISCLOSURE: {
+        name: "Sensitive Information Disclosure",
+        description: "Sensitive files or paths (e.g. .env, .git) are publicly accessible.",
+        riskDescription: "Exposed configuration files can leak database credentials, API keys, and source code, giving attackers a direct path to full compromise.",
+        impact: ["Credential leakage", "Source code exposure", "Full application compromise"],
+        reproduce: (raw) => [`Publicly accessible paths found: ${(raw?.exposedPaths ?? []).join(", ")}.`],
+        codeSamples: {
+            "General": `// Ensure your web server / deployment config blocks access to\n// dotfiles and config files, e.g. in Nginx:\nlocation ~ /\\. { deny all; }`,
+        },
+    },
+
+    SESSION_COOKIE: {
+        name: "Insecure Session Cookies",
+        description: "Session cookies are missing the Secure, HttpOnly, or SameSite attributes.",
+        riskDescription: "Without these flags, cookies can be stolen via XSS (missing HttpOnly), sent over unencrypted connections (missing Secure), or used in cross-site request forgery (missing SameSite).",
+        impact: ["Session hijacking", "Cookie theft via XSS", "CSRF"],
+        reproduce: (raw) => [`Insecure cookies found: ${(raw?.insureCookies ?? raw?.insecureCookies ?? []).join(", ") || "see evidence"}.`],
+        codeSamples: {
+            "Node.js / Express": `res.cookie('session', token, {\n  httpOnly: true,\n  secure: true,\n  sameSite: 'strict',\n});`,
+        },
+    },
+
+    OPEN_REDIRECT: {
+        name: "Open Redirect",
+        description: "A redirect parameter accepts arbitrary external URLs without validation.",
+        riskDescription: "Attackers can craft links that appear to originate from your trusted domain but redirect victims to a phishing site.",
+        impact: ["Phishing", "Brand impersonation", "Credential theft via fake login pages"],
+        reproduce: (raw) => [`A redirect parameter pointing to an external domain resulted in a redirect to: ${raw?.location ?? "an external site"}.`],
+        codeSamples: {
+            "General": `// Fixed — only allow relative paths or an allowlist of domains\nconst allowed = ['/dashboard', '/settings'];\nif (!allowed.includes(redirectTo)) redirectTo = '/';`,
+        },
+    },
+
+    PATH_TRAVERSAL: {
+        name: "Path Traversal",
+        description: "A file path parameter allows navigating outside the intended directory using sequences like ../.",
+        riskDescription: "An attacker can read arbitrary files on the server, including configuration files or system files like /etc/passwd.",
+        impact: ["Arbitrary file read", "Source code / config disclosure", "Credential leakage"],
+        reproduce: (raw) => (raw?.findings ?? []).map((f: string) => `Payload "${f}" successfully accessed a file outside the intended directory.`),
+        codeSamples: {
+            "Node.js": `// Fixed — resolve and verify the path stays within the allowed base directory\nconst safePath = path.resolve(baseDir, userInput);\nif (!safePath.startsWith(baseDir)) throw new Error('Invalid path');`,
+        },
+    },
+
+    SSRF: {
+        name: "Server-Side Request Forgery (SSRF)",
+        description: "The server fetches a user-supplied URL without restricting which hosts can be targeted.",
+        riskDescription: "An attacker can make the server send requests to internal-only services (like cloud metadata endpoints), potentially leaking credentials or accessing internal infrastructure.",
+        impact: ["Internal network access", "Cloud credential theft", "Internal service exploitation"],
+        reproduce: (raw) => (raw?.findings ?? []).map((f: any) => `Parameter "${f.param}" fetched an internal target (${f.target}), exposing: ${f.evidence}.`),
+        codeSamples: {
+            "General": `// Fixed — allowlist permitted domains for server-side fetches,\n// and block requests to private IP ranges (10.x, 192.168.x, 169.254.x).`,
+        },
+    },
+
+    CSRF: {
+        name: "Cross-Site Request Forgery (CSRF)",
+        description: "State-changing requests do not include or verify a CSRF token.",
+        riskDescription: "An attacker can trick a logged-in user's browser into submitting unwanted requests (e.g. changing their password) without their knowledge.",
+        impact: ["Unauthorized actions on behalf of the user", "Account settings tampering"],
+        reproduce: () => ["No CSRF token was found in the form or request, meaning cross-site requests would be accepted."],
+        codeSamples: {
+            "Node.js / Express": `import csurf from 'csurf';\napp.use(csurf());\n// include the token in your forms and verify it server-side`,
+        },
+    },
+
+    JWT: {
+        name: "JWT Vulnerabilities",
+        description: "The JWT implementation has a weak signing secret, missing expiry, or accepts an unsigned (alg:none) token.",
+        riskDescription: "A weak or missing JWT verification allows attackers to forge valid-looking tokens and impersonate any user.",
+        impact: ["Account takeover", "Privilege escalation", "Full authentication bypass"],
+        reproduce: (raw) => (raw?.findings ?? []).map((f: any) => f.issue),
+        codeSamples: {
+            "Node.js": `// Fixed — use a strong random secret, set expiry, and reject alg:none\njwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h', algorithm: 'HS256' });`,
+        },
+    },
+
+    DEPENDENCY_CVE: {
+        name: "Vulnerable Dependency",
+        description: "The server is running a version of a library or framework with a known public vulnerability (CVE).",
+        riskDescription: "Known vulnerabilities in outdated dependencies are actively exploited since attackers can look up public exploit code for a specific version.",
+        impact: ["Depends on the specific CVE — ranges from information disclosure to remote code execution"],
+        reproduce: (raw) => (raw?.findings ?? []).map((f: any) => `${f.name} ${f.version} has known vulnerabilities: ${(f.vulnerabilities ?? []).join(", ")}.`),
+        codeSamples: {
+            "General": `// Update the affected package to the latest patched version,\n// and set up automated dependency scanning (e.g. Dependabot, Snyk).`,
+        },
+    },
+}
+
+export function getTestKnowledge(category: string): TestKnowLedge {
+    return testknowledgebase[category] ?? {
+        name: category,
+        description: "No detailed information available for this test category yet.",
+        riskDescription: "",
+        impact: [],
+        reproduce: () => [],
+        codeSamples: {},
+    }
+}

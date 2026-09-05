@@ -94,7 +94,8 @@ export class ScanService {
         return {
             ...status,
             testResultsCount: status.testResults.length,
-            passedCount: status.testResults.filter((test) => test.status === "PASSED").length
+            passedCount: status.testResults.filter((test) => test.status === "PASSED").length,
+            issuesFound: status.testResults.filter((test) => test.status === "FAILED").length
         }
     }
 

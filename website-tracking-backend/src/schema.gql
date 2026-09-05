@@ -29,6 +29,7 @@ type ScanType {
   expectedCount: Int
   id: ID!
   issueCount: Int!
+  issuesFound: Int!
   passedCount: Int!
   scanType: String!
   startedAt: DateTime

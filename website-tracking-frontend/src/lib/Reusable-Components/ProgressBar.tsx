@@ -5,6 +5,7 @@ interface ScanStatusData {
     status: string
     testResultsCount: number
     expectedCount: number
+    issuesFound: number
 }
 
 export default function useProgressBar({ scanId }: { scanId: string }) {
@@ -43,6 +44,7 @@ export default function useProgressBar({ scanId }: { scanId: string }) {
                         status
                         testResultsCount
                         expectedCount
+                        issuesFound
                         }
                     }`, variables: { scanId }
                 })

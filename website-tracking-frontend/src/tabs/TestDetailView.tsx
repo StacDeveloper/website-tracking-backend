@@ -4,7 +4,7 @@ import { useColorContext } from "@/app/context/useColorContext";
 import { CardShell } from "@/lib/Reusable-Components/Cardshell";
 import { SectionLabel } from "@/lib/Reusable-Components/SectionLabel";
 import { AlertTriangle, ArrowRight, ChevronRight, Copy, ExternalLink, Sparkles } from "lucide-react";
-
+import { getTestKnowledge } from "@/app/assets/assets";
 
 interface TestDetailViewProps {
     test: Test
@@ -18,6 +18,8 @@ interface TestDetailViewProps {
 const TestDetailView = ({ test, setSelectedTest, setDetailTab, detailTab, codeLang, setCodeLang }: TestDetailViewProps) => {
     const { c } = useColorContext()
     const sev = severityMeta[test.severity];
+    const knowledge = getTestKnowledge(test.name)
+    const getInfo = knowledge.reproduce(test.rawResult, test.url)
     return (
         <div className="px-8 pb-16">
             <div className="mb-4 flex items-center gap-1.5 text-sm" style={{ color: c.textMuted }}>

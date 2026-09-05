@@ -36,6 +36,7 @@ export class ScanType {
     @Field(() => Int) passedCount?: number
     @Field(() => Int, { nullable: true }) expectedCount?: number
     @Field(() => Int) issueCount?: number
+    @Field(() => Int) issuesFound?: number
 }
 
 @InputType()
