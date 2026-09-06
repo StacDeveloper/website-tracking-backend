@@ -1,6 +1,6 @@
 import { Args, Mutation, Resolver, ID, Query, Subscription } from "@nestjs/graphql";
 import { ScanService } from "./scan.service";
-import { ScanType, StartScanResponse, WebsiteConfigInput } from "./scan.graphql";
+import { SavedWebsiteList, ScanType, StartScanResponse, WebsiteConfigInput } from "./scan.graphql";
 import { pubsub } from "../queues/pubsub.provider";
 import { UseGuards } from "@nestjs/common";
 import { AuthGuard } from "../auth/auth.guard";
@@ -50,5 +50,19 @@ export class ScanResolver {
     async getHistoryofUser(@CurrentUser() user: any) {
         return this.scansService.getHistoryofUser(user.id)
     }
+
+    @UseGuards(AuthGuard)
+    @Mutation(() => Boolean)
+
+    async saveWebsite(@Args("websiteId", { type: () => ID }) websiteId: string, @CurrentUser() user: any) {
+        return this.scansService.saveWebsiteOfUser(websiteId, user.id)
+    }
+    @UseGuards(AuthGuard)
+    @Query(() => [SavedWebsiteList])
+    async getSavedWebsitesOfUser(@CurrentUser() user: any) {
+        return this.scansService.getSavedWebsiteOfUser(user.id)
+    }
+
+
 
 }

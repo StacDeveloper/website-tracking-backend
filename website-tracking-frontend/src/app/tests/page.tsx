@@ -30,7 +30,7 @@ export default function WebTestApp() {
   const [scanning, setScanning] = useState(false);
   const [newTestUrl, setNewTestUrl] = useState("");
   const [codeLang, setCodeLang] = useState("Node.js (mysql2)");
-
+  const [testId, setTestId] = useState<string>("")
   // New Test form state
   const [newTestType, setNewTestType] = useState<"Active" | "Passive">("Active");
   const [selectedTestNames, setSelectedTestNames] = useState<Set<string>>(new Set(individualTestOptions));
@@ -89,7 +89,7 @@ export default function WebTestApp() {
   } else if (activeNav === "New Test") {
     mainContent = <NewTestView newTestType={newTestType} newTestUrl={newTestUrl} selectedTestNames={selectedTestNames} setNewTestType={setNewTestType} setNewTestUrl={setNewTestUrl} setSelectedTestNames={setSelectedTestNames} toggleTestName={toggleTestName} setScanning={setScanning} setCurrentId={setCurrentId} />;
   } else if (activeNav === "Results") {
-    mainContent = selectedTest ? <TestDetailView test={selectedTest} codeLang={codeLang} detailTab={detailTab} setCodeLang={setCodeLang} setDetailTab={setDetailTab} setSelectedTest={setSelectedTest} /> : <ResultsListView openTest={openTest} query={query} resultsTab={resultsTab} setQuery={setQuery} setResultsTab={setResultsTab} />;
+    mainContent = selectedTest ? <TestDetailView testId={testId} test={selectedTest} codeLang={codeLang} detailTab={detailTab} setCodeLang={setCodeLang} setDetailTab={setDetailTab} setSelectedTest={setSelectedTest} /> : <ResultsListView setTestId={setTestId} openTest={openTest} query={query} resultsTab={resultsTab} setQuery={setQuery} setResultsTab={setResultsTab} />;
   } else if (activeNav === "History") {
     mainContent = <HistoryView historyQuery={historyQuery} setHistoryQuery={setHistoryQuery} viewingId={viewingId} setViewingId={setViewingId} />;
   } else if (activeNav === "Saved Targets") {

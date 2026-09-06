@@ -1,25 +1,43 @@
-"use client"
-import { codeSamples, detailTabs, severityMeta, Test } from "@/app/assets/assets";
+import { detailTabs, severityMeta } from "@/app/assets/assets";
 import { useColorContext } from "@/app/context/useColorContext";
 import { CardShell } from "@/lib/Reusable-Components/Cardshell";
 import { SectionLabel } from "@/lib/Reusable-Components/SectionLabel";
 import { AlertTriangle, ArrowRight, ChevronRight, Copy, ExternalLink, Sparkles } from "lucide-react";
-import { getTestKnowledge } from "@/app/assets/assets";
+import { getTestKnowledge } from "@/app/assets/assets"; 
 
-interface TestDetailViewProps {
-    test: Test
-    setSelectedTest: React.Dispatch<React.SetStateAction<Test | null>>
-    setDetailTab: React.Dispatch<React.SetStateAction<string>>
-    detailTab: string
-    setCodeLang: React.Dispatch<React.SetStateAction<string>>
-    codeLang: string
+interface ResultRow {
+    id: string;
+    name: string;
+    category: string;
+    severity: keyof typeof severityMeta;
+    issues: number;
+    desc: string;
+    scanType: string;
+    status: string;
+    aiSummary?: string;
+    aiSuggestion?: string | null;
+    rawResult?: any;
 }
 
-const TestDetailView = ({ test, setSelectedTest, setDetailTab, detailTab, codeLang, setCodeLang }: TestDetailViewProps) => {
-    const { c } = useColorContext()
+interface TestDetailViewProps {
+    test: ResultRow;
+    url: string;
+    setSelectedTest: React.Dispatch<React.SetStateAction<ResultRow | null>>;
+    setDetailTab: React.Dispatch<React.SetStateAction<string>>;
+    detailTab: string;
+    setCodeLang: React.Dispatch<React.SetStateAction<string>>;
+    codeLang: string;
+}
+
+const TestDetailView = ({ test, url, setSelectedTest, setDetailTab, detailTab, codeLang, setCodeLang }: TestDetailViewProps) => {
+    const { c } = useColorContext();
     const sev = severityMeta[test.severity];
-    const knowledge = getTestKnowledge(test.name)
-    const getInfo = knowledge.reproduce(test.rawResult, test.url)
+    const knowledge = getTestKnowledge(test.category);
+    const reproSteps = knowledge.reproduce(test.rawResult, url);
+
+    const codeLangKeys = Object.keys(knowledge.codeSamples);
+    const activeCodeLang = codeLangKeys.includes(codeLang) ? codeLang : codeLangKeys[0];
+
     return (
         <div className="px-8 pb-16">
             <div className="mb-4 flex items-center gap-1.5 text-sm" style={{ color: c.textMuted }}>
@@ -30,7 +48,7 @@ const TestDetailView = ({ test, setSelectedTest, setDetailTab, detailTab, codeLa
 
             <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                    <h1 className="text-xl font-bold">{test.name}</h1>
+                    <h1 className="text-xl font-bold">{knowledge.name}</h1>
                     <span className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ${sev.bg} ${sev.text}`}>
                         <span className={`h-1.5 w-1.5 rounded-full ${sev.dot}`} />
                         {test.severity}
@@ -63,22 +81,26 @@ const TestDetailView = ({ test, setSelectedTest, setDetailTab, detailTab, codeLa
                         <CardShell className="p-5">
                             <SectionLabel>Finding Summary</SectionLabel>
                             <p className="text-sm" style={{ color: c.textSecondary }}>
-                                The application is vulnerable to SQL injection. User input is not properly sanitized before being used in SQL queries.
+                                {knowledge.description}
                             </p>
                         </CardShell>
                         <CardShell className="p-5">
                             <SectionLabel>Risk Description</SectionLabel>
                             <p className="text-sm" style={{ color: c.textSecondary }}>
-                                An attacker can manipulate the &quot;id&quot; parameter to modify the SQL query and access unauthorized data, bypass authentication, or perform other malicious actions on the database.
+                                {knowledge.riskDescription}
                             </p>
                         </CardShell>
                         <CardShell className="p-5">
                             <SectionLabel>How to Reproduce</SectionLabel>
-                            <ol className="flex list-decimal flex-col gap-2 pl-4 text-sm" style={{ color: c.textSecondary }}>
-                                <li>Go to: <span style={{ color: c.accent }}>https://example.com/product?id=1</span></li>
-                                <li>Modify the parameter to <code>id=1&apos; OR &apos;1&apos;=1</code></li>
-                                <li>Observe the response contains unexpected data.</li>
-                            </ol>
+                            {reproSteps.length === 0 ? (
+                                <p className="text-sm" style={{ color: c.textFaint }}>No reproduction evidence recorded for this finding.</p>
+                            ) : (
+                                <ol className="flex list-decimal flex-col gap-2 pl-4 text-sm" style={{ color: c.textSecondary }}>
+                                    {reproSteps.map((step, i) => (
+                                        <li key={i}>{step}</li>
+                                    ))}
+                                </ol>
+                            )}
                         </CardShell>
                     </div>
 
@@ -87,49 +109,31 @@ const TestDetailView = ({ test, setSelectedTest, setDetailTab, detailTab, codeLa
                             <div className="flex flex-col gap-3 text-sm">
                                 {[
                                     ["Severity", test.severity],
-                                    ["CVSS Score", "9.8 (AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H)"],
-                                    ["Status", "Confirmed"],
-                                    ["Location", "GET /product?id=1"],
-                                    ["Parameter", "id"],
-                                    ["Discovered", "3 May 2025, 12:45 PM"],
+                                    ["Status", test.status],
+                                    ["Category", knowledge.name],
+                                    ["Target", url],
                                 ].map(([label, val]) => (
-                                    <div key={label} className="flex items-center justify-between">
+                                    <div key={label} className="flex items-center justify-between gap-4">
                                         <span style={{ color: c.textFaint }}>{label}</span>
-                                        <span className="text-right font-medium">{val}</span>
+                                        <span className="truncate text-right font-medium" title={String(val)}>{val}</span>
                                     </div>
                                 ))}
                             </div>
                         </CardShell>
                         <CardShell className="p-5">
                             <SectionLabel>Impact</SectionLabel>
-                            <ul className="flex flex-col gap-1.5 text-sm" style={{ color: c.textSecondary }}>
-                                {["Unauthorized data access", "Data manipulation", "Authentication bypass", "Database deletion"].map((item) => (
-                                    <li key={item} className="flex items-center gap-2">
-                                        <span className="h-1 w-1 rounded-full" style={{ backgroundColor: c.textFaint }} />
-                                        {item}
-                                    </li>
-                                ))}
-                            </ul>
-                        </CardShell>
-                        <CardShell className="p-5">
-                            <SectionLabel>Severity Breakdown</SectionLabel>
-                            <div className="flex flex-col gap-2 text-sm">
-                                {[
-                                    ["Attack Vector", "Network"],
-                                    ["Attack Complexity", "Low"],
-                                    ["Privileges Required", "None"],
-                                    ["User Interaction", "None"],
-                                    ["Scope", "Unchanged"],
-                                    ["Confidentiality", "High"],
-                                    ["Integrity", "High"],
-                                    ["Availability", "High"],
-                                ].map(([label, val]) => (
-                                    <div key={label} className="flex items-center justify-between">
-                                        <span style={{ color: c.textFaint }}>{label}</span>
-                                        <span className="font-medium">{val}</span>
-                                    </div>
-                                ))}
-                            </div>
+                            {knowledge.impact.length === 0 ? (
+                                <p className="text-sm" style={{ color: c.textFaint }}>No impact information available.</p>
+                            ) : (
+                                <ul className="flex flex-col gap-1.5 text-sm" style={{ color: c.textSecondary }}>
+                                    {knowledge.impact.map((item) => (
+                                        <li key={item} className="flex items-center gap-2">
+                                            <span className="h-1 w-1 rounded-full" style={{ backgroundColor: c.textFaint }} />
+                                            {item}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
                         </CardShell>
                     </div>
                 </div>
@@ -143,42 +147,41 @@ const TestDetailView = ({ test, setSelectedTest, setDetailTab, detailTab, codeLa
                             <span className="text-sm font-semibold">AI Generated Suggestion</span>
                         </div>
                         <p className="text-sm" style={{ color: c.textSecondary }}>
-                            Use parameterized queries or prepared statements to prevent SQL injection. Never concatenate user input directly into SQL queries.
+                            {test.aiSuggestion ?? knowledge.riskDescription}
                         </p>
-                        <button className="mt-3 rounded-lg px-3 py-1.5 text-xs font-semibold text-white" style={{ backgroundColor: c.accent }}>
-                            Regenerate Suggestion
-                        </button>
                     </div>
 
-                    <CardShell className="p-5">
-                        <SectionLabel>Recommended Fix</SectionLabel>
-                        <div className="mb-3 flex flex-wrap gap-2">
-                            {Object.keys(codeSamples).map((lang) => (
+                    {codeLangKeys.length > 0 && (
+                        <CardShell className="p-5">
+                            <SectionLabel>Recommended Fix</SectionLabel>
+                            <div className="mb-3 flex flex-wrap gap-2">
+                                {codeLangKeys.map((lang) => (
+                                    <button
+                                        key={lang}
+                                        onClick={() => setCodeLang(lang)}
+                                        className="rounded-md px-3 py-1.5 text-xs font-medium"
+                                        style={{
+                                            backgroundColor: lang === activeCodeLang ? c.accent : c.inputBg,
+                                            color: lang === activeCodeLang ? "#ffffff" : c.textSecondary,
+                                        }}
+                                    >
+                                        {lang}
+                                    </button>
+                                ))}
+                            </div>
+                            <div className="relative rounded-lg" style={{ backgroundColor: c.codeBg }}>
                                 <button
-                                    key={lang}
-                                    onClick={() => setCodeLang(lang)}
-                                    className="rounded-md px-3 py-1.5 text-xs font-medium"
-                                    style={{
-                                        backgroundColor: codeLang === lang ? c.accent : c.inputBg,
-                                        color: codeLang === lang ? "#ffffff" : c.textSecondary,
-                                    }}
+                                    className="absolute right-3 top-3 flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs"
+                                    style={{ borderColor: c.cardBorder, color: c.textMuted }}
                                 >
-                                    {lang}
+                                    <Copy className="h-3 w-3" /> Copy Code
                                 </button>
-                            ))}
-                        </div>
-                        <div className="relative rounded-lg" style={{ backgroundColor: c.codeBg }}>
-                            <button
-                                className="absolute right-3 top-3 flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs"
-                                style={{ borderColor: c.cardBorder, color: c.textMuted }}
-                            >
-                                <Copy className="h-3 w-3" /> Copy Code
-                            </button>
-                            <pre className="overflow-x-auto p-4 text-xs leading-relaxed" style={{ color: "#a5b4fc" }}>
-                                <code>{codeSamples[codeLang]}</code>
-                            </pre>
-                        </div>
-                    </CardShell>
+                                <pre className="overflow-x-auto p-4 text-xs leading-relaxed" style={{ color: "#a5b4fc" }}>
+                                    <code>{knowledge.codeSamples[activeCodeLang]}</code>
+                                </pre>
+                            </div>
+                        </CardShell>
+                    )}
 
                     <CardShell className="p-5">
                         <div className="mb-2 flex items-center gap-2">
@@ -186,11 +189,8 @@ const TestDetailView = ({ test, setSelectedTest, setDetailTab, detailTab, codeLa
                             <span className="text-sm font-semibold">Why is this vulnerable?</span>
                         </div>
                         <p className="text-sm" style={{ color: c.textSecondary }}>
-                            Directly concatenating user input into SQL queries allows attackers to modify the query structure and execute arbitrary SQL commands.
+                            {knowledge.riskDescription}
                         </p>
-                        <button className="mt-3 flex items-center gap-1 text-xs font-semibold" style={{ color: c.accent }}>
-                            Learn More <ArrowRight className="h-3 w-3" />
-                        </button>
                     </CardShell>
                 </div>
             )}

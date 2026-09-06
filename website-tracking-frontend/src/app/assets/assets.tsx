@@ -410,10 +410,46 @@ export const testknowledgebase: Record<string, TestKnowLedge> = {
                     : `Payload "${f.payload}" triggered a database error or timing anomaly (${f.errorMatch ? "error signature matched" : "time-based delay detected"}).`
             );
         },
-        codeSamples: {
-            "Node.js": `// Vulnerable\ndb.query(\`SELECT * FROM users WHERE email = '\${email}'\`);\n\n// Fixed — parameterized query\ndb.query('SELECT * FROM users WHERE email = ?', [email]);`,
-            "Python": `# Vulnerable\ncursor.execute(f"SELECT * FROM users WHERE email = '{email}'")\n\n# Fixed — parameterized query\ncursor.execute("SELECT * FROM users WHERE email = %s", (email,))`,
-        },
+       codeSamples: {
+    "Node.js": `// Vulnerable
+db.query(\`SELECT * FROM users WHERE email = '\${email}'\`);
+
+// Fixed — parameterized query
+db.query(
+  'SELECT * FROM users WHERE email = ?',
+  [email]
+);`,
+
+    "Java": `// Fixed — use PreparedStatement
+String sql = "SELECT * FROM users WHERE email = ?";
+
+PreparedStatement stmt = connection.prepareStatement(sql);
+stmt.setString(1, email);
+
+ResultSet result = stmt.executeQuery();`,
+
+    "Python": `# Fixed — parameterized query
+cursor.execute(
+    "SELECT * FROM users WHERE email = %s",
+    (email,)
+)`,
+
+    "Go": `// Fixed — use parameterized queries
+row := db.QueryRow(
+    "SELECT * FROM users WHERE email = ?",
+    email,
+)`,
+
+    "C#": `// Fixed — use parameterized queries
+using var command = new SqlCommand(
+    "SELECT * FROM Users WHERE Email = @email",
+    connection
+);
+
+command.Parameters.AddWithValue("@email", email);
+
+using var reader = command.ExecuteReader();`,
+},
     },
 
     XSS: {
@@ -426,10 +462,35 @@ export const testknowledgebase: Record<string, TestKnowLedge> = {
             if (!findings.length) return ["No reflected payload recorded for this finding."];
             return findings.slice(0, 3).map((f: any) => `Payload "${f.payload}" was reflected unescaped in the response at ${f.url}.`);
         },
-        codeSamples: {
-            "Node.js": `// Vulnerable\nres.send(\`<div>\${userInput}</div>\`);\n\n// Fixed — escape output\nimport { escape } from 'html-escaper';\nres.send(\`<div>\${escape(userInput)}</div>\`);`,
-            "React": `// Vulnerable\n<div dangerouslySetInnerHTML={{ __html: userInput }} />\n\n// Fixed — React escapes by default\n<div>{userInput}</div>`,
-        },
+       codeSamples: {
+    "Node.js": `// Fixed — escape untrusted output
+import { escape } from "html-escaper";
+
+res.send(\`<div>\${escape(userInput)}</div>\`);`,
+
+    "Java": `// Fixed — escape untrusted HTML
+import org.apache.commons.text.StringEscapeUtils;
+
+String safe = StringEscapeUtils.escapeHtml4(userInput);
+response.getWriter().write("<div>" + safe + "</div>");`,
+
+    "Python": `# Fixed — escape untrusted output
+import html
+
+safe = html.escape(user_input)
+return f"<div>{safe}</div>"`,
+
+    "Go": `// Go templates escape HTML by default
+tmpl, _ := template.ParseFiles("page.html")
+tmpl.Execute(w, map[string]string{
+    "Input": userInput,
+})`,
+
+    "C#": `// Razor automatically HTML-encodes output
+<div>@Model.UserInput</div>
+
+// Avoid Html.Raw() with untrusted input`,
+},
     },
 
     RATE_LIMIT: {
@@ -440,9 +501,70 @@ export const testknowledgebase: Record<string, TestKnowLedge> = {
         reproduce: (raw) => [
             `Sent ${raw?.totalRequest ?? 30} rapid requests to the target; ${raw?.got429 ? "some were throttled." : "none received a 429 (Too Many Requests) response."}`,
         ],
-        codeSamples: {
-            "Node.js / Express": `import rateLimit from 'express-rate-limit';\n\nconst limiter = rateLimit({ windowMs: 60_000, max: 20 });\napp.use('/api/', limiter);`,
-        },
+       codeSamples: {
+    "Node.js": `import rateLimit from "express-rate-limit";
+
+const limiter = rateLimit({
+  windowMs: 60_000,
+  max: 20,
+});
+
+app.use("/api/", limiter);`,
+
+    "Java": `// Spring Boot — use a rate limiting filter/library
+// Example with Bucket4j
+Bucket bucket = Bucket.builder()
+    .addLimit(Bandwidth.simple(20, Duration.ofMinutes(1)))
+    .build();
+
+if (!bucket.tryConsume(1)) {
+    throw new ResponseStatusException(
+        HttpStatus.TOO_MANY_REQUESTS
+    );
+}`,
+
+    "Python": `# Flask-Limiter
+from flask_limiter import Limiter
+
+limiter = Limiter(
+    key_func=get_remote_address,
+    app=app
+)
+
+@app.route("/api/login")
+@limiter.limit("20 per minute")
+def login():
+    return "OK"`,
+
+    "Go": `// golang.org/x/time/rate
+limiter := rate.NewLimiter(
+    rate.Every(time.Minute/20),
+    20,
+)
+
+if !limiter.Allow() {
+    http.Error(
+        w,
+        "Too many requests",
+        http.StatusTooManyRequests,
+    )
+    return
+}`,
+
+    "C#": `// ASP.NET Core
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter(
+        "api",
+        options =>
+        {
+            options.PermitLimit = 20;
+            options.Window = TimeSpan.FromMinutes(1);
+        });
+});
+
+app.UseRateLimiter();`,
+},
     },
 
     BOT: {
@@ -454,8 +576,75 @@ export const testknowledgebase: Record<string, TestKnowLedge> = {
             `Requests sent with a non-browser User-Agent (curl) returned status codes: ${(raw?.statusCodes ?? []).join(", ")} — ${raw?.blocked ? "some were blocked." : "none were blocked."}`,
         ],
         codeSamples: {
-            "General": `// Add bot-detection middleware or a challenge service (e.g. Cloudflare Turnstile, hCaptcha)\n// on sensitive endpoints: login, signup, checkout, search.`,
-        },
+    "Node.js": `// Fixed — add bot protection to sensitive endpoints
+import rateLimit from "express-rate-limit";
+
+const loginLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+});
+
+app.post(
+  "/login",
+  loginLimiter,
+  verifyCaptcha,
+  login
+);`,
+
+    "Java": `// Spring Security / application layer
+// Add CAPTCHA verification and rate limiting
+// before processing sensitive operations.
+
+@PostMapping("/login")
+public ResponseEntity<?> login(
+    @RequestBody LoginRequest request
+) {
+    verifyCaptcha(request.getCaptcha());
+
+    // Authenticate user...
+}`,
+
+    "Python": `# Flask example
+@app.route("/login", methods=["POST"])
+@limiter.limit("10 per minute")
+def login():
+
+    verify_captcha(
+        request.form.get("captcha")
+    )
+
+    # Authenticate user...
+    return authenticate_user()`,
+
+    "Go": `// Add rate limiting and CAPTCHA verification
+func login(w http.ResponseWriter, r *http.Request) {
+
+    if !captchaValid(r) {
+        http.Error(
+            w,
+            "Captcha required",
+            http.StatusForbidden,
+        )
+        return
+    }
+
+    // Authenticate user...
+}`,
+
+    "C#": `// ASP.NET Core
+[HttpPost("login")]
+[EnableRateLimiting("login")]
+public IActionResult Login(LoginRequest request)
+{
+    if (!VerifyCaptcha(request.Captcha))
+    {
+        return Forbid();
+    }
+
+    // Authenticate user...
+    return Ok();
+}`,
+},
     },
 
     FAKE_USER: {
@@ -476,8 +665,75 @@ export const testknowledgebase: Record<string, TestKnowLedge> = {
         impact: ["Remote code execution", "Server compromise", "Malware hosting", "Defacement"],
         reproduce: (raw) => (raw?.findings ?? []).map((f: any) => f.issue) ?? ["A .php file was accepted without extension filtering."],
         codeSamples: {
-            "Node.js": `// Vulnerable — accepts any extension\n\n// Fixed — allowlist extensions and validate MIME type\nconst allowed = ['.png', '.jpg', '.pdf'];\nif (!allowed.includes(path.extname(file.originalname))) {\n  throw new Error('File type not allowed');\n}`,
-        },
+    "Node.js": `const allowed = [".png", ".jpg", ".pdf"];
+
+if (!allowed.includes(
+    path.extname(file.originalname).toLowerCase()
+)) {
+    throw new Error("File type not allowed");
+}`,
+
+    "Java": `String filename =
+    StringUtils.cleanPath(file.getOriginalFilename());
+
+Set<String> allowed =
+    Set.of("png", "jpg", "pdf");
+
+String extension =
+    FilenameUtils.getExtension(filename).toLowerCase();
+
+if (!allowed.contains(extension)) {
+    throw new IllegalArgumentException(
+        "File type not allowed"
+    );
+}`,
+
+    "Python": `from pathlib import Path
+
+allowed = {".png", ".jpg", ".pdf"}
+
+extension = Path(file.filename).suffix.lower()
+
+if extension not in allowed:
+    raise ValueError("File type not allowed")`,
+
+    "Go": `allowed := map[string]bool{
+    ".png": true,
+    ".jpg": true,
+    ".pdf": true,
+}
+
+ext := strings.ToLower(
+    filepath.Ext(fileHeader.Filename),
+)
+
+if !allowed[ext] {
+    http.Error(
+        w,
+        "File type not allowed",
+        http.StatusBadRequest,
+    )
+    return
+}`,
+
+    "C#": `var allowed = new[]
+{
+    ".png",
+    ".jpg",
+    ".pdf"
+};
+
+var extension =
+    Path.GetExtension(file.FileName)
+        .ToLowerInvariant();
+
+if (!allowed.Contains(extension))
+{
+    return BadRequest(
+        "File type not allowed"
+    );
+}`,
+},
     },
 
     COMMAND_INJECTION_XXE: {
@@ -487,9 +743,42 @@ export const testknowledgebase: Record<string, TestKnowLedge> = {
         impact: ["Remote code execution", "File system access", "Full server compromise"],
         reproduce: (raw) => (raw?.findings ?? []).map((f: any) => f.type === "xxe" ? `XXE payload leaked local file contents (${f.evidence}).` : `Command injection payload "${f.payload}" executed successfully.`),
         codeSamples: {
-            "Node.js": `// Vulnerable\nexec(\`ping \${userInput}\`);\n\n// Fixed — use safe APIs, never shell out with raw input\nexecFile('ping', [userInput]);`,
-            "XML (any language)": `<!-- Fixed — disable external entity resolution in your XML parser -->\n<!-- e.g. libxmljs: noent: false, in Java: disable DOCTYPE_DECL -->`,
-        },
+    "Node.js": `// Fixed — avoid shell interpolation
+execFile("ping", [userInput]);`,
+
+    "Java": `// Fixed — pass arguments separately
+ProcessBuilder process =
+    new ProcessBuilder(
+        "ping",
+        userInput
+    );
+
+process.start();`,
+
+    "Python": `# Fixed — never use shell=True
+subprocess.run(
+    ["ping", user_input],
+    shell=False,
+    check=True
+)`,
+
+    "Go": `// Fixed — pass arguments separately
+cmd := exec.Command(
+    "ping",
+    userInput,
+)
+
+err := cmd.Run()`,
+
+    "C#": `// Fixed — avoid shell command strings
+var process = new Process();
+
+process.StartInfo.FileName = "ping";
+process.StartInfo.ArgumentList.Add(userInput);
+process.StartInfo.UseShellExecute = false;
+
+process.Start();`,
+},
     },
 
     BROKEN_ACCESS_CONTROL: {
@@ -498,9 +787,49 @@ export const testknowledgebase: Record<string, TestKnowLedge> = {
         riskDescription: "An attacker can access or modify other users' data simply by changing an ID in the request, without needing valid credentials for that account.",
         impact: ["Unauthorized data access", "Privacy violation", "Account takeover", "Data tampering"],
         reproduce: (raw) => (raw?.findings ?? []).map((f: any) => `Resource with ID "${f.id}" was accessible without proper authorization.`),
-        codeSamples: {
-            "General": `// Always verify the authenticated user owns or has permission\n// for the requested resource before returning it — never trust\n// a client-supplied ID alone.\nif (resource.ownerId !== req.user.id) throw new ForbiddenException();`,
-        },
+       codeSamples: {
+    "Node.js": `const resource = await db.resource.findUnique({
+  where: { id },
+});
+
+if (resource.ownerId !== req.user.id) {
+  throw new ForbiddenError();
+}`,
+
+    "Java": `Resource resource =
+    resourceService.findById(id);
+
+if (!resource.getOwnerId()
+        .equals(authenticatedUser.getId())) {
+    throw new AccessDeniedException(
+        "Forbidden"
+    );
+}`,
+
+    "Python": `resource = get_resource(resource_id)
+
+if resource.owner_id != current_user.id:
+    abort(403)`,
+
+    "Go": `resource := getResource(id)
+
+if resource.OwnerID != currentUser.ID {
+    http.Error(
+        w,
+        "Forbidden",
+        http.StatusForbidden,
+    )
+    return
+}`,
+
+    "C#": `var resource =
+    await db.Resources.FindAsync(id);
+
+if (resource.OwnerId != userId)
+{
+    return Forbid();
+}`,
+},
     },
 
     API_MASS_ASSIGNMENT: {
@@ -510,8 +839,93 @@ export const testknowledgebase: Record<string, TestKnowLedge> = {
         impact: ["Privilege escalation", "Account takeover", "Data integrity violation"],
         reproduce: (raw) => [`Submitting a request with an added "isAdmin"/"role" field ${raw?.accepted ? "was accepted by the server." : "was rejected."}`],
         codeSamples: {
-            "General": `// Vulnerable — spreads entire request body into the update\nawait db.user.update({ where: { id }, data: req.body });\n\n// Fixed — allowlist updatable fields explicitly\nconst { name, bio } = req.body;\nawait db.user.update({ where: { id }, data: { name, bio } });`,
-        },
+    "Node.js": `// Vulnerable
+await db.user.update({
+  where: { id },
+  data: req.body,
+});
+
+// Fixed — explicitly allow fields
+const { name, bio } = req.body;
+
+await db.user.update({
+  where: { id },
+  data: {
+    name,
+    bio,
+  },
+});`,
+
+    "Java": `// Fixed — use a DTO containing only
+// fields the user is allowed to modify.
+
+public class UpdateUserRequest {
+    private String name;
+    private String bio;
+
+    // getters / setters
+}
+
+// Do not bind fields such as:
+// role, isAdmin, permissions, etc.`,
+
+    "Python": `# Fixed — explicitly select fields
+name = request.json.get("name")
+bio = request.json.get("bio")
+
+user.name = name
+user.bio = bio
+
+db.session.commit()
+
+# Do not pass the entire request body
+# directly into the model.`,
+
+    "Go": `// Fixed — use a dedicated request struct
+type UpdateUserRequest struct {
+    Name string \`json:"name"\`
+    Bio  string \`json:"bio"\`
+}
+
+var input UpdateUserRequest
+
+if err := json.NewDecoder(
+    r.Body,
+).Decode(&input); err != nil {
+    http.Error(
+        w,
+        "Invalid request",
+        http.StatusBadRequest,
+    )
+    return
+}
+
+// Update only permitted fields.`,
+
+    "C#": `// Fixed — use a DTO with only
+// user-controllable properties
+public class UpdateUserRequest
+{
+    public string Name { get; set; }
+    public string Bio { get; set; }
+}
+
+[HttpPut("{id}")]
+public async Task<IActionResult> Update(
+    int id,
+    UpdateUserRequest request
+)
+{
+    var user = await db.Users.FindAsync(id);
+
+    user.Name = request.Name;
+    user.Bio = request.Bio;
+
+    await db.SaveChangesAsync();
+
+    return Ok();
+}`,
+},
     },
 
     SECURITY_HEADERS: {
@@ -520,9 +934,72 @@ export const testknowledgebase: Record<string, TestKnowLedge> = {
         riskDescription: "Missing headers like CSP or HSTS reduce the browser's built-in protections against common attacks like XSS and man-in-the-middle downgrade attacks.",
         impact: ["Increased XSS risk", "Clickjacking exposure", "Protocol downgrade attacks"],
         reproduce: (raw) => [`Missing headers: ${(raw?.missing ?? []).join(", ") || "see evidence"}.`],
-        codeSamples: {
-            "Node.js / Express": `import helmet from 'helmet';\napp.use(helmet()); // sets CSP, HSTS, X-Frame-Options, etc. by default`,
+       codeSamples: {
+    "Node.js": `import helmet from "helmet";
+
+app.use(helmet());`,
+
+    "Java": `// Spring Security
+http
+    .headers(headers -> headers
+        .contentSecurityPolicy(
+            csp -> csp.policyDirectives(
+                "default-src 'self'"
+            )
+        )
+        .frameOptions(
+            frame -> frame.sameOrigin()
+        )
+    );`,
+
+    "Python": `# Flask example
+@app.after_request
+def security_headers(response):
+    response.headers[
+        "X-Frame-Options"
+    ] = "SAMEORIGIN"
+
+    response.headers[
+        "Content-Security-Policy"
+    ] = "default-src 'self'"
+
+    return response`,
+
+    "Go": `func securityHeaders(
+    next http.Handler,
+) http.Handler {
+    return http.HandlerFunc(
+        func(w http.ResponseWriter, r *http.Request) {
+            w.Header().Set(
+                "X-Frame-Options",
+                "SAMEORIGIN",
+            )
+
+            w.Header().Set(
+                "Content-Security-Policy",
+                "default-src 'self'",
+            )
+
+            next.ServeHTTP(w, r)
         },
+    )
+}`,
+
+    "C#": `app.Use(async (context, next) =>
+{
+    context.Response.Headers.Append(
+        "X-Frame-Options",
+        "SAMEORIGIN"
+    );
+
+    context.Response.Headers.Append(
+        "Content-Security-Policy",
+        "default-src 'self'"
+    );
+
+    await next();
+});`,
+},
     },
 
     TLS_SSL: {
@@ -533,9 +1010,67 @@ export const testknowledgebase: Record<string, TestKnowLedge> = {
         reproduce: (raw) => [
             raw?.expired ? `Certificate expired on ${raw?.validTo}.` : `Server negotiated protocol ${raw?.protocol}, which is considered outdated.`,
         ],
-        codeSamples: {
-            "General": `// Renew the TLS certificate and disable TLSv1/TLSv1.1\n// at the load balancer or reverse proxy (e.g. Nginx: ssl_protocols TLSv1.2 TLSv1.3;)`,
-        },
+     codeSamples: {
+    "Node.js": `// Fixed — create an HTTPS server with TLS 1.2+
+// and use a valid certificate.
+
+import https from "https";
+import fs from "fs";
+
+const options = {
+  key: fs.readFileSync("server.key"),
+  cert: fs.readFileSync("server.crt"),
+  minVersion: "TLSv1.2",
+};
+
+https.createServer(options, app).listen(443);`,
+
+    "Java": `// Fixed — require TLS 1.2 or newer
+// in your server / connector configuration.
+
+// Example JVM configuration:
+// -Djdk.tls.server.protocols=TLSv1.2,TLSv1.3
+
+// Avoid enabling TLSv1.0 and TLSv1.1.`,
+
+    "Python": `# Fixed — require TLS 1.2+
+import ssl
+
+context = ssl.SSLContext(
+    ssl.PROTOCOL_TLS_SERVER
+)
+
+context.minimum_version = ssl.TLSVersion.TLSv1_2
+
+context.load_cert_chain(
+    "server.crt",
+    "server.key"
+)`,
+
+    "Go": `// Fixed — require TLS 1.2+
+server := &http.Server{
+    Addr: ":443",
+    TLSConfig: &tls.Config{
+        MinVersion: tls.VersionTLS12,
+    },
+}
+
+err := server.ListenAndServeTLS(
+    "server.crt",
+    "server.key",
+)`,
+
+    "C#": `// Fixed — enable TLS 1.2+
+var handler = new HttpClientHandler();
+
+// For modern .NET versions, TLS 1.2+
+// is normally negotiated automatically.
+
+// For explicit configuration:
+handler.SslProtocols =
+    SslProtocols.Tls12 |
+    SslProtocols.Tls13;`,
+},
     },
 
     CORS: {
@@ -545,8 +1080,62 @@ export const testknowledgebase: Record<string, TestKnowLedge> = {
         impact: ["Cross-origin data theft", "CSRF-like attacks on APIs", "Session abuse"],
         reproduce: (raw) => [`Server responded with Access-Control-Allow-Origin: ${raw?.allowedOrigin ?? "*"} for an arbitrary origin.`],
         codeSamples: {
-            "Node.js / Express": `// Vulnerable\napp.use(cors({ origin: '*' }));\n\n// Fixed — allowlist known origins\napp.use(cors({ origin: ['https://yourapp.com'], credentials: true }));`,
-        },
+    "Node.js": `app.use(cors({
+  origin: ["https://yourapp.com"],
+  credentials: true,
+}));`,
+
+    "Java": `@Configuration
+public class CorsConfig
+    implements WebMvcConfigurer {
+
+    @Override
+    public void addCorsMappings(
+        CorsRegistry registry
+    ) {
+        registry.addMapping("/api/**")
+            .allowedOrigins(
+                "https://yourapp.com"
+            )
+            .allowCredentials(true);
+    }
+}`,
+
+    "Python": `from flask_cors import CORS
+
+CORS(
+    app,
+    origins=["https://yourapp.com"],
+    supports_credentials=True
+)`,
+
+    "Go": `// Allow only trusted origins
+w.Header().Set(
+    "Access-Control-Allow-Origin",
+    "https://yourapp.com",
+)
+
+w.Header().Set(
+    "Access-Control-Allow-Credentials",
+    "true",
+)`,
+    
+    "C#": `builder.Services.AddCors(options =>
+{
+    options.AddPolicy(
+        "TrustedOrigins",
+        policy =>
+            policy.WithOrigins(
+                "https://yourapp.com"
+            )
+            .AllowCredentials()
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+    );
+});
+
+app.UseCors("TrustedOrigins");`,
+},
     },
 
     CLICKJACKING: {
@@ -578,8 +1167,59 @@ export const testknowledgebase: Record<string, TestKnowLedge> = {
         impact: ["Session hijacking", "Cookie theft via XSS", "CSRF"],
         reproduce: (raw) => [`Insecure cookies found: ${(raw?.insureCookies ?? raw?.insecureCookies ?? []).join(", ") || "see evidence"}.`],
         codeSamples: {
-            "Node.js / Express": `res.cookie('session', token, {\n  httpOnly: true,\n  secure: true,\n  sameSite: 'strict',\n});`,
-        },
+    "Node.js": `res.cookie("session", token, {
+  httpOnly: true,
+  secure: true,
+  sameSite: "strict",
+});`,
+
+    "Java": `ResponseCookie cookie =
+    ResponseCookie.from(
+        "session",
+        token
+    )
+    .httpOnly(true)
+    .secure(true)
+    .sameSite("Strict")
+    .build();
+
+response.addHeader(
+    HttpHeaders.SET_COOKIE,
+    cookie.toString()
+);`,
+
+    "Python": `response.set_cookie(
+    "session",
+    token,
+    httponly=True,
+    secure=True,
+    samesite="Strict",
+)`,
+
+    "Go": `http.SetCookie(
+    w,
+    &http.Cookie{
+        Name: "session",
+        Value: token,
+        HttpOnly: true,
+        Secure: true,
+        SameSite:
+            http.SameSiteStrictMode,
+    },
+)`,
+
+    "C#": `Response.Cookies.Append(
+    "session",
+    token,
+    new CookieOptions
+    {
+        HttpOnly = true,
+        Secure = true,
+        SameSite =
+            SameSiteMode.Strict,
+    }
+);`,
+},
     },
 
     OPEN_REDIRECT: {
@@ -589,8 +1229,70 @@ export const testknowledgebase: Record<string, TestKnowLedge> = {
         impact: ["Phishing", "Brand impersonation", "Credential theft via fake login pages"],
         reproduce: (raw) => [`A redirect parameter pointing to an external domain resulted in a redirect to: ${raw?.location ?? "an external site"}.`],
         codeSamples: {
-            "General": `// Fixed — only allow relative paths or an allowlist of domains\nconst allowed = ['/dashboard', '/settings'];\nif (!allowed.includes(redirectTo)) redirectTo = '/';`,
-        },
+    "Node.js": `// Fixed — allowlist redirect destinations
+const allowedPaths = new Set([
+  "/dashboard",
+  "/settings",
+]);
+
+if (!allowedPaths.has(redirectTo)) {
+  redirectTo = "/";
+}
+
+res.redirect(redirectTo);`,
+
+    "Java": `// Fixed — allowlist local destinations
+Set<String> allowedPaths = Set.of(
+    "/dashboard",
+    "/settings"
+);
+
+if (!allowedPaths.contains(redirectTo)) {
+    redirectTo = "/";
+}
+
+return "redirect:" + redirectTo;`,
+
+    "Python": `# Fixed — allowlist destinations
+from urllib.parse import urlparse
+
+allowed_paths = {
+    "/dashboard",
+    "/settings",
+}
+
+parsed = urlparse(redirect_to)
+
+if parsed.netloc or parsed.path not in allowed_paths:
+    redirect_to = "/"
+
+return redirect(redirect_to)`,
+
+    "Go": `// Fixed — allowlist redirect paths
+allowed := map[string]bool{
+    "/dashboard": true,
+    "/settings":  true,
+}
+
+if !allowed[redirectTo] {
+    redirectTo = "/"
+}
+
+http.Redirect(
+    w,
+    r,
+    redirectTo,
+    http.StatusFound,
+)`,
+
+    "C#": `// Fixed — only allow local URLs
+if (!Url.IsLocalUrl(returnUrl))
+{
+    returnUrl = "/";
+}
+
+return Redirect(returnUrl);`,
+},
     },
 
     PATH_TRAVERSAL: {
@@ -600,8 +1302,96 @@ export const testknowledgebase: Record<string, TestKnowLedge> = {
         impact: ["Arbitrary file read", "Source code / config disclosure", "Credential leakage"],
         reproduce: (raw) => (raw?.findings ?? []).map((f: string) => `Payload "${f}" successfully accessed a file outside the intended directory.`),
         codeSamples: {
-            "Node.js": `// Fixed — resolve and verify the path stays within the allowed base directory\nconst safePath = path.resolve(baseDir, userInput);\nif (!safePath.startsWith(baseDir)) throw new Error('Invalid path');`,
-        },
+    "Node.js": `// Fixed — resolve and verify the path
+const baseDir = path.resolve("./uploads");
+
+const requestedPath = path.resolve(
+  baseDir,
+  userInput
+);
+
+if (
+  !requestedPath.startsWith(
+    baseDir + path.sep
+  )
+) {
+  throw new Error("Invalid path");
+}
+
+const data = await fs.readFile(requestedPath);`,
+
+    "Java": `// Fixed — normalize and verify path
+Path baseDir =
+    Paths.get("/app/uploads")
+        .toAbsolutePath()
+        .normalize();
+
+Path requested =
+    baseDir
+        .resolve(userInput)
+        .normalize();
+
+if (!requested.startsWith(baseDir)) {
+    throw new SecurityException(
+        "Invalid path"
+    );
+}
+
+byte[] data =
+    Files.readAllBytes(requested);`,
+
+    "Python": `# Fixed — verify resolved path
+from pathlib import Path
+
+base_dir = Path("/app/uploads").resolve()
+requested = (base_dir / user_input).resolve()
+
+if base_dir not in requested.parents:
+    raise ValueError("Invalid path")
+
+data = requested.read_bytes()`,
+
+    "Go": `// Fixed — clean and validate the path
+baseDir, _ := filepath.Abs("./uploads")
+
+requested := filepath.Join(
+    baseDir,
+    userInput,
+)
+
+requested, _ =
+    filepath.Abs(requested)
+
+relative, err :=
+    filepath.Rel(baseDir, requested)
+
+if err != nil ||
+    strings.HasPrefix(relative, "..") {
+    return errors.New("invalid path")
+}`,
+
+    "C#": `// Fixed — resolve and verify path
+var baseDir =
+    Path.GetFullPath("./uploads");
+
+var requested =
+    Path.GetFullPath(
+        Path.Combine(baseDir, userInput)
+    );
+
+if (!requested.StartsWith(
+    baseDir + Path.DirectorySeparatorChar,
+    StringComparison.OrdinalIgnoreCase
+))
+{
+    throw new SecurityException(
+        "Invalid path"
+    );
+}
+
+var data =
+    await File.ReadAllBytesAsync(requested);`,
+},
     },
 
     SSRF: {
@@ -611,8 +1401,92 @@ export const testknowledgebase: Record<string, TestKnowLedge> = {
         impact: ["Internal network access", "Cloud credential theft", "Internal service exploitation"],
         reproduce: (raw) => (raw?.findings ?? []).map((f: any) => `Parameter "${f.param}" fetched an internal target (${f.target}), exposing: ${f.evidence}.`),
         codeSamples: {
-            "General": `// Fixed — allowlist permitted domains for server-side fetches,\n// and block requests to private IP ranges (10.x, 192.168.x, 169.254.x).`,
-        },
+    "Node.js": `// Fixed — allowlist trusted hosts
+const allowedHosts = new Set([
+  "api.example.com",
+  "images.example.com",
+]);
+
+const target = new URL(userInput);
+
+if (!allowedHosts.has(target.hostname)) {
+  throw new Error("Destination not allowed");
+}
+
+const response = await fetch(target);`,
+
+    "Java": `// Fixed — allowlist destinations
+URI target = URI.create(userInput);
+
+Set<String> allowedHosts = Set.of(
+    "api.example.com",
+    "images.example.com"
+);
+
+if (!allowedHosts.contains(target.getHost())) {
+    throw new SecurityException(
+        "Destination not allowed"
+    );
+}
+
+HttpRequest request =
+    HttpRequest.newBuilder(target)
+        .GET()
+        .build();`,
+
+    "Python": `# Fixed — allowlist destinations
+from urllib.parse import urlparse
+
+allowed_hosts = {
+    "api.example.com",
+    "images.example.com",
+}
+
+target = urlparse(user_input)
+
+if target.hostname not in allowed_hosts:
+    raise ValueError("Destination not allowed")
+
+# Perform the request only after validation.`,
+
+    "Go": `// Fixed — allowlist trusted hosts
+allowedHosts := map[string]bool{
+    "api.example.com":    true,
+    "images.example.com": true,
+}
+
+target, err := url.Parse(userInput)
+if err != nil {
+    return err
+}
+
+if !allowedHosts[target.Hostname()] {
+    return errors.New(
+        "destination not allowed",
+    )
+}
+
+resp, err := http.Get(target.String())`,
+
+    "C#": `// Fixed — allowlist trusted hosts
+var allowedHosts = new HashSet<string>
+{
+    "api.example.com",
+    "images.example.com"
+};
+
+var target = new Uri(userInput);
+
+if (!allowedHosts.Contains(target.Host))
+{
+    throw new SecurityException(
+        "Destination not allowed"
+    );
+}
+
+var response =
+    await httpClient.GetAsync(target);`,
+},
     },
 
     CSRF: {
@@ -621,9 +1495,50 @@ export const testknowledgebase: Record<string, TestKnowLedge> = {
         riskDescription: "An attacker can trick a logged-in user's browser into submitting unwanted requests (e.g. changing their password) without their knowledge.",
         impact: ["Unauthorized actions on behalf of the user", "Account settings tampering"],
         reproduce: () => ["No CSRF token was found in the form or request, meaning cross-site requests would be accepted."],
-        codeSamples: {
-            "Node.js / Express": `import csurf from 'csurf';\napp.use(csurf());\n// include the token in your forms and verify it server-side`,
-        },
+       codeSamples: {
+    "Node.js": `// Check dependencies
+npm audit
+
+// Update vulnerable dependencies
+npm audit fix
+
+// Keep dependencies updated
+// and use automated dependency scanning.`,
+
+    "Java": `// Maven — inspect dependencies
+mvn dependency:tree
+
+// Check for known vulnerabilities
+// using OWASP Dependency-Check.
+
+// Example:
+// mvn org.owasp:dependency-check-maven:check`,
+
+    "Python": `# Check installed dependencies
+pip-audit
+
+# Generate dependency information
+pip freeze > requirements.txt
+
+# Keep dependencies pinned and updated.`,
+
+    "Go": `// Check dependencies
+go list -m all
+
+// Scan for known vulnerabilities
+govulncheck ./...
+
+// Keep Go modules updated.`,
+
+    "C#": `// Check vulnerable NuGet packages
+dotnet list package --vulnerable
+
+// Update packages
+dotnet restore
+
+// Keep dependencies patched and
+// use automated vulnerability scanning.`,
+},
     },
 
     JWT: {
@@ -632,9 +1547,84 @@ export const testknowledgebase: Record<string, TestKnowLedge> = {
         riskDescription: "A weak or missing JWT verification allows attackers to forge valid-looking tokens and impersonate any user.",
         impact: ["Account takeover", "Privilege escalation", "Full authentication bypass"],
         reproduce: (raw) => (raw?.findings ?? []).map((f: any) => f.issue),
-        codeSamples: {
-            "Node.js": `// Fixed — use a strong random secret, set expiry, and reject alg:none\njwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h', algorithm: 'HS256' });`,
-        },
+       codeSamples: {
+    "Node.js": `jwt.sign(
+  payload,
+  process.env.JWT_SECRET,
+  {
+    expiresIn: "1h",
+    algorithm: "HS256",
+  }
+);`,
+
+    "Java": `String token = Jwts.builder()
+    .subject(userId)
+    .expiration(
+        Date.from(
+            Instant.now()
+                .plus(1, ChronoUnit.HOURS)
+        )
+    )
+    .signWith(secretKey)
+    .compact();`,
+
+    "Python": `token = jwt.encode(
+    {
+        "sub": user_id,
+        "exp": datetime.utcnow()
+            + timedelta(hours=1),
+    },
+    SECRET_KEY,
+    algorithm="HS256",
+)`,
+
+    "Go": `claims := jwt.MapClaims{
+    "sub": userID,
+    "exp": time.Now()
+        .Add(time.Hour)
+        .Unix(),
+}
+
+token := jwt.NewWithClaims(
+    jwt.SigningMethodHS256,
+    claims,
+)
+
+signed, err :=
+    token.SignedString(secret)`,
+
+    "C#": `var tokenHandler =
+    new JwtSecurityTokenHandler();
+
+var key = Encoding.UTF8.GetBytes(
+    configuration["Jwt:Secret"]
+);
+
+var descriptor =
+    new SecurityTokenDescriptor
+    {
+        Subject = new ClaimsIdentity(
+            new[]
+            {
+                new Claim(
+                    ClaimTypes.NameIdentifier,
+                    userId
+                )
+            }
+        ),
+        Expires =
+            DateTime.UtcNow.AddHours(1),
+
+        SigningCredentials =
+            new SigningCredentials(
+                new SymmetricSecurityKey(key),
+                SecurityAlgorithms.HmacSha256
+            )
+    };
+
+var token =
+    tokenHandler.CreateToken(descriptor);`,
+},
     },
 
     DEPENDENCY_CVE: {
@@ -644,8 +1634,49 @@ export const testknowledgebase: Record<string, TestKnowLedge> = {
         impact: ["Depends on the specific CVE — ranges from information disclosure to remote code execution"],
         reproduce: (raw) => (raw?.findings ?? []).map((f: any) => `${f.name} ${f.version} has known vulnerabilities: ${(f.vulnerabilities ?? []).join(", ")}.`),
         codeSamples: {
-            "General": `// Update the affected package to the latest patched version,\n// and set up automated dependency scanning (e.g. Dependabot, Snyk).`,
-        },
+    "Node.js": `// Check dependencies
+npm audit
+
+// Update vulnerable dependencies
+npm audit fix
+
+// Keep dependencies updated
+// and use automated dependency scanning.`,
+
+    "Java": `// Maven — inspect dependencies
+mvn dependency:tree
+
+// Check for known vulnerabilities
+// using OWASP Dependency-Check.
+
+// Example:
+// mvn org.owasp:dependency-check-maven:check`,
+
+    "Python": `# Check installed dependencies
+pip-audit
+
+# Generate dependency information
+pip freeze > requirements.txt
+
+# Keep dependencies pinned and updated.`,
+
+    "Go": `// Check dependencies
+go list -m all
+
+// Scan for known vulnerabilities
+govulncheck ./...
+
+// Keep Go modules updated.`,
+
+    "C#": `// Check vulnerable NuGet packages
+dotnet list package --vulnerable
+
+// Update packages
+dotnet restore
+
+// Keep dependencies patched and
+// use automated vulnerability scanning.`,
+},
     },
 }
 

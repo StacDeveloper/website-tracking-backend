@@ -14,6 +14,7 @@ interface ResultViewProps {
     query: string;
     setQuery: React.Dispatch<React.SetStateAction<string>>;
     openTest: (test: Test) => void;
+    setTestId: React.Dispatch<React.SetStateAction<string>>;
 }
 
 interface ResultRow {
@@ -45,6 +46,7 @@ const ResultsListView = ({
     query,
     setQuery,
     openTest,
+    setTestId
 }: ResultViewProps) => {
     const { tests } = useBackendContext();
     const { c } = useColorContext();
@@ -257,8 +259,8 @@ const ResultsListView = ({
                             setQuery(e.target.value)
                         }
                         placeholder={`Search ${resultsTab === "all"
-                                ? ""
-                                : resultsTab.toLowerCase() + " "
+                            ? ""
+                            : resultsTab.toLowerCase() + " "
                             }tests...`}
                         className="w-40 bg-transparent text-sm focus:outline-none"
                         style={{
@@ -357,10 +359,10 @@ const ResultsListView = ({
 
                                     {/* View details */}
                                     <button
-                                        onClick={() =>
-                                            openTest(
-                                                row as unknown as Test
-                                            )
+                                        onClick={() => {
+                                            openTest(row as unknown as Test
+                                            ); setTestId(row.id)
+                                        }
                                         }
                                         className="whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-medium"
                                         style={{

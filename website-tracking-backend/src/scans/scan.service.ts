@@ -126,5 +126,46 @@ export class ScanService {
         }))
     }
 
+    async saveWebsiteOfUser(websiteId: string, userId: string) {
+        const website = await this.prisma.website.findUnique({ where: { id: websiteId } })
+        if (!website || website.ownerId !== userId) {
+            throw new ForbiddenException("This is not your website")
+        }
+        const updated = await this.prisma.website.update({
+            where: { id: websiteId },
+            data: { isSaved: !website.isSaved }
+        })
+        return updated.isSaved
+    }
+
+    async getSavedWebsiteOfUser(userId: string) {
+        const websites = await this.prisma.website.findMany({
+            where: { id: userId },
+            include: {
+                scans: {
+                    orderBy: { createdAt: "desc" },
+                    take: 1,
+                    include: { testResults: true }
+                }
+            }
+        })
+        return websites.map((web) => {
+            const latestScan = web.scans[0]
+            const testResults = latestScan?.testResults ?? []
+            const passed = testResults.filter((test) => test.status === "PASSED").length
+            const score = testResults.length ? Math.round((passed / testResults.length) * 100) : null
+
+            return {
+                id: web.id,
+                domain: new URL(web.url).hostname,
+                url: web.url,
+                lastTested: latestScan?.createdAt ?? null,
+                score,
+                tests: testResults.length
+
+            }
+        })
+    }
+
 }
 

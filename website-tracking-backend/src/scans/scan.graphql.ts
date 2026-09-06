@@ -49,6 +49,16 @@ export class WebsiteConfigInput {
 }
 
 @ObjectType()
+export class SavedWebsiteList {
+    @Field({ nullable: true }) id: string
+    @Field({ nullable: true }) domain: string
+    @Field({ nullable: true }) url: string
+    @Field({ nullable: true }) lastTested: Date
+    @Field({ nullable: true }) score: number
+    @Field({ nullable: true }) tests: number
+}
+
+@ObjectType()
 export class StartScanResponse {
     @Field(() => ScanType) scan: ScanType;
     @Field() skippedActiveTest: boolean;

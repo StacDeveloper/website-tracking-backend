@@ -1,10 +1,9 @@
 "use client"
-
 import { savedTargetLists } from "@/app/assets/assets";
 import { useColorContext } from "@/app/context/useColorContext";
 import { CardShell } from "@/lib/Reusable-Components/Cardshell";
 import { MoreVertical, Plus, Search } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 
 interface SavedTargetsViewProps {
@@ -19,6 +18,40 @@ const SavedTargetsView = ({ savedQuery, setSavedQuery, startScan, setNewTestUrl 
     const filteredSaved = useMemo(() => savedTargetLists.filter((t) => t.domain.toLowerCase().includes(savedQuery.toLowerCase())),
         [savedQuery])
 
+    const [showAddTarget, setShowAddTarget] = useState(false);
+    const [targetUrl, setTargetUrl] = useState("");
+    const [targetName, setTargetName] = useState("");
+
+    const getSavedUrl = async () => {
+        const websites = await fetch("http://localhost:4000/graphql", {
+            method: "POST",
+            headers: { "Content-type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+                query: `query getSavedUrl{
+                getSavedWebsitesOfUser{
+                    id
+                    domain
+                    url
+                    lastTested
+                    score
+                    tests
+                }
+                }`})
+        })
+        const { data, errors } = await websites.json()
+        if (errors) {
+            console.error(errors)
+            return []
+        }
+        console.log(data)
+        return data.getSavedWebsitesOfUser
+    }
+
+    useEffect(() => {
+        getSavedUrl()
+    }, [])
+
     const { c } = useColorContext()
 
     return (
@@ -28,8 +61,13 @@ const SavedTargetsView = ({ savedQuery, setSavedQuery, startScan, setNewTestUrl 
                     <h1 className="text-xl font-bold">Saved Targets</h1>
                     <p className="text-sm" style={{ color: c.textMuted }}>Your saved websites and applications for quick testing.</p>
                 </div>
-                <button className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white" style={{ backgroundColor: c.accent }}>
-                    <Plus className="h-4 w-4" /> Add Target
+                <button
+                    onClick={() => setShowAddTarget(true)}
+                    className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white"
+                    style={{ backgroundColor: c.accent }}
+                >
+                    <Plus className="h-4 w-4" />
+                    Add Target
                 </button>
             </div>
 
@@ -101,6 +139,126 @@ const SavedTargetsView = ({ savedQuery, setSavedQuery, startScan, setNewTestUrl 
                     ))}
                 </div>
             </div>
+            {showAddTarget && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center px-4"
+                    style={{ backgroundColor: "rgba(0, 0, 0, 0.65)" }}
+                    onClick={() => setShowAddTarget(false)}
+                >
+                    <div
+                        className="w-full max-w-md rounded-xl border p-6 shadow-2xl"
+                        style={{
+                            backgroundColor: c.cardBg,
+                            borderColor: c.cardBorder,
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Header */}
+                        <div className="mb-6 flex items-start justify-between">
+                            <div>
+                                <h2
+                                    className="text-lg font-bold"
+                                    style={{ color: c.textPrimary }}
+                                >
+                                    Add Target
+                                </h2>
+
+                                <p
+                                    className="mt-1 text-sm"
+                                    style={{ color: c.textMuted }}
+                                >
+                                    Save a website or application for quick testing.
+                                </p>
+                            </div>
+
+                            <button
+                                onClick={() => setShowAddTarget(false)}
+                                className="text-lg"
+                                style={{ color: c.textFaint }}
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                        {/* Target Name */}
+                        <div className="mb-4">
+                            <label
+                                className="mb-2 block text-sm font-medium"
+                                style={{ color: c.textPrimary }}
+                            >
+                                Target Name
+                            </label>
+
+                            <input
+                                type="text"
+                                value={targetName}
+                                onChange={(e) => setTargetName(e.target.value)}
+                                placeholder="e.g. My Local API"
+                                className="w-full rounded-lg border px-3 py-2.5 text-sm outline-none"
+                                style={{
+                                    backgroundColor: c.inputBg,
+                                    borderColor: c.cardBorder,
+                                    color: c.textPrimary,
+                                }}
+                            />
+                        </div>
+
+                        {/* Target URL */}
+                        <div className="mb-6">
+                            <label
+                                className="mb-2 block text-sm font-medium"
+                                style={{ color: c.textPrimary }}
+                            >
+                                Website URL
+                            </label>
+
+                            <input
+                                type="url"
+                                value={targetUrl}
+                                onChange={(e) => setTargetUrl(e.target.value)}
+                                placeholder="http://localhost:3000"
+                                className="w-full rounded-lg border px-3 py-2.5 text-sm outline-none"
+                                style={{
+                                    backgroundColor: c.inputBg,
+                                    borderColor: c.cardBorder,
+                                    color: c.textPrimary,
+                                }}
+                            />
+
+                            <p
+                                className="mt-2 text-xs"
+                                style={{ color: c.textFaint }}
+                            >
+                                Enter the URL of the application you want to save.
+                            </p>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => setShowAddTarget(false)}
+                                className="rounded-lg border px-4 py-2 text-sm font-medium"
+                                style={{
+                                    borderColor: c.cardBorder,
+                                    color: c.textMuted,
+                                }}
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                disabled={!targetUrl.trim()}
+                                className="rounded-lg px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+                                style={{
+                                    backgroundColor: c.accent,
+                                }}
+                            >
+                                Save Target
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

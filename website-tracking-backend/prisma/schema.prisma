@@ -80,49 +80,49 @@ model User {
     accounts Account[]
 }
 
-model Session{
-    id String @id
+model Session {
+    id        String   @id
     expiresAt DateTime
-    token String 
+    token     String
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     ipAddress String?
     userAgent String?
-    userId String
-    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId    String
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@unique([token])
     @@index([userId])
     @@map("session")
 }
 
-model Account{
-    id String @id 
-    accountId String
-    providerId String 
-    userId String 
-    user User @relation(fields: [userId], references: [id])
-    accessToken String?
-    refreshToken String?
-    idToken String?
-    accessTokenExpiresAt DateTime?
+model Account {
+    id                    String    @id
+    accountId             String
+    providerId            String
+    userId                String
+    user                  User      @relation(fields: [userId], references: [id])
+    accessToken           String?
+    refreshToken          String?
+    idToken               String?
+    accessTokenExpiresAt  DateTime?
     refreshTokenExpiresAt DateTime?
-    scope String?
-    password String?
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    scope                 String?
+    password              String?
+    createdAt             DateTime  @default(now())
+    updatedAt             DateTime  @updatedAt
 
-    @@index([userId]) 
+    @@index([userId])
     @@map("account")
 }
 
-model Verification{
-    id String @id
-    identifier String 
-    value String 
-    expiresAt DateTime 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+model Verification {
+    id         String   @id
+    identifier String
+    value      String
+    expiresAt  DateTime
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
 
     @@index([identifier])
     @@map("verification")
@@ -139,7 +139,7 @@ model Website {
     verifiedAt         DateTime?
     scans              Scan[]
     createdAt          DateTime            @default(now())
-
+    isSaved            Boolean             @default(false)
     loginEndPoint      String?
     registerEndPoint   String?
     uploadEndPoint     String?
@@ -150,17 +150,17 @@ model Website {
 }
 
 model Scan {
-    id          String       @id @default(uuid())
-    websiteId   String
-    website     Website      @relation(fields: [websiteId], references: [id])
-    scanType    ScanType
-    expectedCount Int @default(0)
-    status      ScanStatus   @default(PENDING)
-    startedAt   DateTime?
-    completedAt DateTime?
-    aiSummary   String?
-    testResults TestResult[]
-    createdAt   DateTime     @default(now())
+    id            String       @id @default(uuid())
+    websiteId     String
+    website       Website      @relation(fields: [websiteId], references: [id])
+    scanType      ScanType
+    expectedCount Int          @default(0)
+    status        ScanStatus   @default(PENDING)
+    startedAt     DateTime?
+    completedAt   DateTime?
+    aiSummary     String?
+    testResults   TestResult[]
+    createdAt     DateTime     @default(now())
 }
 
 model TestResult {
