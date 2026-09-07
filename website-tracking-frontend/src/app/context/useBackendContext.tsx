@@ -42,7 +42,6 @@ export const BackendContextProvider = ({ children }: { children: ReactNode }) =>
     useEffect(() => {
         getHistoryOfUser()
         getMyTests()
-        getScanStatus("9a991164-75ae-48a2-b4e8-2ab750ffabeb")
     }, [])
 
     const url = "http://localhost:4000/graphql"
@@ -105,46 +104,6 @@ export const BackendContextProvider = ({ children }: { children: ReactNode }) =>
         console.log(data, errors)
     }
 
-    const getScanStatus = async (scanId: string) => {
-        if (!scanId) {
-            return console.error("scanId not provided")
-        }
-        const res = await fetch(url, {
-            method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                query: `
-                query ScanStatus($scanId:ID!){
-                scanStatus(scanId:$scanId){
-                id
-                  status
-                  scanType
-                  completedAt
-                  website {
-                    url
-                  }
-                  testResults {
-                    category
-                    status
-                    severity
-                    rawResult
-                    aiSuggestion 
-                    }
-                }
-                }`, variables: { scanId }
-            })
-
-        })
-        const { data, errors } = await res.json()
-        if (errors) {
-            console.error(errors);
-            return null;
-        }
-        console.log(data.startScan)
-        setScanStatus(data.startScan)
-        return data.startScan
-    }
 
 
     const value: any = { tests, setTests, historyTests, sethistoryTests }

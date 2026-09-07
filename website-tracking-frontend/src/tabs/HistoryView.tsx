@@ -6,6 +6,8 @@ import { calculateScore } from "@/lib/CalculateScore";
 import { formatDate } from "@/lib/FormateDate";
 import { CardShell } from "@/lib/Reusable-Components/Cardshell";
 import {
+    Bookmark,
+    BookmarkCheck,
     Calendar,
     ChevronDown,
     Download,
@@ -13,7 +15,7 @@ import {
     MoreVertical,
     Search,
 } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import LinkResult from "./LinkResult";
 
 interface HistoryViewProps {
@@ -35,6 +37,8 @@ interface HistoryTest {
     };
 }
 
+const headers = ["Target", "Tests Executed", "Score", "Issues", "Status", "Date", "Save", "Action"]
+
 const HistoryView = ({
     historyQuery,
     setHistoryQuery,
@@ -43,7 +47,27 @@ const HistoryView = ({
 }: HistoryViewProps) => {
     const { historyTests } = useBackendContext();
     const { c } = useColorContext();
+    const [savedTests, setSavedTests] = useState<string[]>([]);
 
+    const makeApiCallToSave = async (websiteId: string) => {
+        const response = await fetch("http://localhost:4000/graphql", {
+            method: "POST",
+            headers: { "Content-type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+                query: `mutation postSavedUrl($websiteId:ID!){
+                saveWebsite(websiteId:$websiteId)
+                }`, variables: { websiteId }
+            })
+        })
+        const { data, errors } = await response.json()
+        if (errors) {
+            console.error(errors)
+            return;
+        }
+        console.log(data)
+        return data.saveWebsite
+    }
 
     const filteredHistory = useMemo(() => {
         if (!Array.isArray(historyTests)) {
@@ -63,7 +87,7 @@ const HistoryView = ({
         );
     }, [historyTests, historyQuery]);
 
-    const headers = ["Target", "Tests Executed", "Score", "Issues", "Status", "Date", "Action"]
+
 
     if (viewingId) {
         return <LinkResult scanId={viewingId} onBack={() => setViewingId(null)} />
@@ -320,6 +344,47 @@ const HistoryView = ({
                                                 {formatDate(
                                                     row.completedAt
                                                 )}
+                                            </td>
+                                            {/* Save / Bookmark */}
+                                            <td className="px-5 py-4">
+                                                <button
+                                                    type="button"
+                                                    onClick={async () => {
+                                                        const nowSaved = await makeApiCallToSave(row.id)
+                                                        if (nowSaved === null) return;
+                                                        setSavedTests((prev) => nowSaved ? [...prev, row.id] : prev.filter((p) => row.id !== p))
+                                                    }}
+                                                    title={
+                                                        savedTests.includes(row.id)
+                                                            ? "Remove from saved"
+                                                            : "Save report"
+                                                    }
+                                                    className="group flex h-8 w-8 items-center justify-center rounded-lg border transition-all duration-150"
+                                                    style={{
+                                                        borderColor: savedTests.includes(row.id)
+                                                            ? `${c.accent}55`
+                                                            : c.cardBorder,
+                                                        backgroundColor: savedTests.includes(row.id)
+                                                            ? `${c.accent}12`
+                                                            : "transparent",
+                                                    }}
+                                                >
+                                                    {savedTests.includes(row.id) ? (
+                                                        <BookmarkCheck
+                                                            className="h-4 w-4"
+                                                            style={{
+                                                                color: c.accent,
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <Bookmark
+                                                            className="h-4 w-4 transition-colors"
+                                                            style={{
+                                                                color: c.textFaint,
+                                                            }}
+                                                        />
+                                                    )}
+                                                </button>
                                             </td>
 
                                             {/* Actions */}

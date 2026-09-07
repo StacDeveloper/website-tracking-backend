@@ -62,7 +62,4 @@ export class ScanResolver {
     async getSavedWebsitesOfUser(@CurrentUser() user: any) {
         return this.scansService.getSavedWebsiteOfUser(user.id)
     }
-
-
-
 }
