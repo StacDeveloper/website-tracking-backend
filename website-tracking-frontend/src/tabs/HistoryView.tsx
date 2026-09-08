@@ -5,6 +5,7 @@ import { useColorContext } from "@/app/context/useColorContext";
 import { calculateScore } from "@/lib/CalculateScore";
 import { formatDate } from "@/lib/FormateDate";
 import { CardShell } from "@/lib/Reusable-Components/Cardshell";
+import  {HistoryTest} from "@/app/context/useBackendContext"
 import {
     Bookmark,
     BookmarkCheck,
@@ -25,17 +26,7 @@ interface HistoryViewProps {
     setViewingId: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
-interface HistoryTest {
-    id: string;
-    status: string;
-    completedAt: string;
-    testResultsCount: number;
-    passedCount: number;
-    issueCount: number;
-    website: {
-        url: string;
-    };
-}
+
 
 const headers = ["Target", "Tests Executed", "Score", "Issues", "Status", "Date", "Save", "Action"]
 
@@ -350,7 +341,7 @@ const HistoryView = ({
                                                 <button
                                                     type="button"
                                                     onClick={async () => {
-                                                        const nowSaved = await makeApiCallToSave(row.id)
+                                                        const nowSaved =   await makeApiCallToSave(row.website.id)
                                                         if (nowSaved === null) return;
                                                         setSavedTests((prev) => nowSaved ? [...prev, row.id] : prev.filter((p) => row.id !== p))
                                                     }}

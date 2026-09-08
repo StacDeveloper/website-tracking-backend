@@ -4,7 +4,7 @@ import { createContext, type ReactNode, useContext, useEffect, useState } from "
 import { Test } from "../assets/assets"
 
 
-interface HistoryTest {
+export interface HistoryTest {
     id: string;
     status: string;
     completedAt: string;
@@ -12,6 +12,7 @@ interface HistoryTest {
     passedCount: number;
     issueCount: number;
     website: {
+        id:string
         url: string;
     };
 }
@@ -22,7 +23,7 @@ interface BackendContextProps {
     setHistoryTests: React.Dispatch<React.SetStateAction<HistoryTest[]>>;
     getMyTests: () => Promise<void>;
     getHistoryOfUser: () => Promise<void>;
-    
+
 }
 
 const BackendContext = createContext<BackendContextProps | null>(null)
@@ -37,7 +38,6 @@ export const BackendContextProvider = ({ children }: { children: ReactNode }) =>
 
     const [tests, setTests] = useState<Test[]>([])
     const [historyTests, sethistoryTests] = useState<HistoryTest[]>([])
-    const [scanStatus, setScanStatus] = useState()
 
     useEffect(() => {
         getHistoryOfUser()
@@ -92,7 +92,7 @@ export const BackendContextProvider = ({ children }: { children: ReactNode }) =>
     completedAt
     testResultsCount
     passedCount
-    website { url }
+    website { id,url }
     issueCount
   }
 }
@@ -101,7 +101,8 @@ export const BackendContextProvider = ({ children }: { children: ReactNode }) =>
         })
         const { data, errors } = await res.json()
         sethistoryTests(data.getHistoryofUser ?? [])
-        console.log(data, errors)
+        console.log(data.getHistoryofUser)
+        
     }
 
 

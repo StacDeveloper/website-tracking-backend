@@ -73,7 +73,7 @@ const ResultsListView = ({
 
                 return {
                     id: `${test.id}-${category}-${index}`,
-
+                    websiteId: `${test.id}`,
                     name:
                         categoryMeta[category]?.name ??
                         category

@@ -127,6 +127,9 @@ export class ScanService {
     }
 
     async saveWebsiteOfUser(websiteId: string, userId: string) {
+        if(!websiteId){
+            throw new NotFoundException("Website Id not provided")
+        }
         const website = await this.prisma.website.findUnique({ where: { id: websiteId } })
         if (!website || website.ownerId !== userId) {
             throw new ForbiddenException("This is not your website")
