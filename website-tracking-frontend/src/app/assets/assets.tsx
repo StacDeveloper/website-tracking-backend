@@ -223,12 +223,12 @@ export const historyRows = [
 ]
 
 export const savedTargetLists = [
-    { domain: "example.com", desc: "Production Website", icon: Globe, iconBg: "bg-indigo-500/10", iconColor: "text-indigo-400", lastTested: "3 May 2025", score: 78, tests: 21 },
-    { domain: "api.example.com", desc: "Main API Server", icon: Server, iconBg: "bg-sky-500/10", iconColor: "text-sky-400", lastTested: "1 May 2025", score: 91, tests: 18 },
-    { domain: "shop.example.com", desc: "E-commerce Platform", icon: ShoppingCart, iconBg: "bg-red-500/10", iconColor: "text-red-400", lastTested: "29 Apr 2025", score: 64, tests: 21 },
-    { domain: "blog.example.com", desc: "Company Blog", icon: FileText, iconBg: "bg-emerald-500/10", iconColor: "text-emerald-400", lastTested: "27 Apr 2025", score: 82, tests: 14 },
-    { domain: "staging.example.com", desc: "Staging Environment", icon: Layers, iconBg: "bg-fuchsia-500/10", iconColor: "text-fuchsia-400", lastTested: "25 Apr 2025", score: 48, tests: 19 },
-    { domain: "myapp.example.com", desc: "Web Application", icon: Smartphone, iconBg: "bg-cyan-500/10", iconColor: "text-cyan-400", lastTested: "23 Apr 2025", score: 73, tests: 21 },
+    {  icon: Globe, iconBg: "bg-indigo-500/10", iconColor: "text-indigo-400"},
+    {  icon: Server, iconBg: "bg-sky-500/10", iconColor: "text-sky-400"},
+    {  icon: ShoppingCart, iconBg: "bg-red-500/10", iconColor: "text-red-400" },
+    { icon: FileText, iconBg: "bg-emerald-500/10", iconColor: "text-emerald-400" },
+    { icon: Layers, iconBg: "bg-fuchsia-500/10", iconColor: "text-fuchsia-400" },
+    {  icon: Smartphone, iconBg: "bg-cyan-500/10", iconColor: "text-cyan-400" },
 ]
 
 export const settingsNav = [

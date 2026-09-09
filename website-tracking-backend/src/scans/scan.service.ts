@@ -143,7 +143,7 @@ export class ScanService {
 
     async getSavedWebsiteOfUser(userId: string) {
         const websites = await this.prisma.website.findMany({
-            where: { id: userId },
+            where: { ownerId:userId, isSaved:true },
             include: {
                 scans: {
                     orderBy: { createdAt: "desc" },

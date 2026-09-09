@@ -60,6 +60,7 @@ export class ScanResolver {
     @UseGuards(AuthGuard)
     @Query(() => [SavedWebsiteList])
     async getSavedWebsitesOfUser(@CurrentUser() user: any) {
+        console.log("Fetching saved sites for user:", user.id);
         return this.scansService.getSavedWebsiteOfUser(user.id)
     }
 }

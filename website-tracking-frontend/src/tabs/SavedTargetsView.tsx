@@ -1,6 +1,7 @@
 "use client"
 import { savedTargetLists } from "@/app/assets/assets";
 import { useColorContext } from "@/app/context/useColorContext";
+import { formatDate } from "@/lib/FormateDate";
 import { CardShell } from "@/lib/Reusable-Components/Cardshell";
 import { MoreVertical, Plus, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -13,12 +14,31 @@ interface SavedTargetsViewProps {
     setNewTestUrl: React.Dispatch<React.SetStateAction<string>>
 }
 
+interface SaveWebsite {
+    id: string
+    domain: string
+    url: string
+    lastTested: string
+    score: number
+    tests: number
+}
 
 const SavedTargetsView = ({ savedQuery, setSavedQuery, startScan, setNewTestUrl }: SavedTargetsViewProps) => {
-    const filteredSaved = useMemo(() => savedTargetLists.filter((t) => t.domain.toLowerCase().includes(savedQuery.toLowerCase())),
-        [savedQuery])
 
+    const [savedWebsite, setSavedWebsite] = useState<SaveWebsite[] | []>([])
 
+    const displayWebsite = useMemo(() => {
+        return savedWebsite.map((website, index) => {
+            const style = savedTargetLists[index % savedTargetLists.length]
+            return {
+                ...website,
+                ...style,
+                desc: "Tracked Website"
+            }
+        })
+    }, [savedWebsite])
+    const filteredSaved = useMemo(() => displayWebsite.filter((t) => t.domain.toLowerCase().includes(savedQuery.toLowerCase())),
+        [savedQuery, displayWebsite])
 
     const getSavedUrl = async () => {
         const websites = await fetch("http://localhost:4000/graphql", {
@@ -43,24 +63,13 @@ const SavedTargetsView = ({ savedQuery, setSavedQuery, startScan, setNewTestUrl 
             return []
         }
         console.log(data)
+        setSavedWebsite(data.getSavedWebsitesOfUser)
         return data.getSavedWebsitesOfUser
     }
 
     useEffect(() => {
         getSavedUrl()
     }, [])
-
-    const addwebsite = async()=>{
-        const res = await fetch("http://localhost:4000/graphql",{
-            method:"POST",
-            headers:{"Conent-type":"application/json"},
-            credentials:"include",
-            body:JSON.stringify({query:`query saveWebsite(){
-                saveWebsite
-                }`})
-        })
-    }
-
     const { c } = useColorContext()
 
     return (
@@ -108,7 +117,7 @@ const SavedTargetsView = ({ savedQuery, setSavedQuery, startScan, setNewTestUrl 
                         <div className="mb-4 grid grid-cols-3 gap-2 text-center">
                             <div>
                                 <p className="text-xs" style={{ color: c.textFaint }}>Last Tested</p>
-                                <p className="text-xs font-medium">{t.lastTested}</p>
+                                <p className="text-xs font-medium">{formatDate(t.lastTested)}</p>
                             </div>
                             <div>
                                 <p className="text-xs" style={{ color: c.textFaint }}>Score</p>
@@ -147,7 +156,7 @@ const SavedTargetsView = ({ savedQuery, setSavedQuery, startScan, setNewTestUrl 
                     ))}
                 </div>
             </div>
-           
+
         </div>
     );
 }
