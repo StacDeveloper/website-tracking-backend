@@ -127,7 +127,7 @@ export class ScanService {
     }
 
     async saveWebsiteOfUser(websiteId: string, userId: string) {
-        if(!websiteId){
+        if (!websiteId) {
             throw new NotFoundException("Website Id not provided")
         }
         const website = await this.prisma.website.findUnique({ where: { id: websiteId } })
@@ -143,7 +143,7 @@ export class ScanService {
 
     async getSavedWebsiteOfUser(userId: string) {
         const websites = await this.prisma.website.findMany({
-            where: { ownerId:userId, isSaved:true },
+            where: { ownerId: userId, isSaved: true },
             include: {
                 scans: {
                     orderBy: { createdAt: "desc" },
@@ -157,15 +157,15 @@ export class ScanService {
             const testResults = latestScan?.testResults ?? []
             const passed = testResults.filter((test) => test.status === "PASSED").length
             const score = testResults.length ? Math.round((passed / testResults.length) * 100) : null
-
+            const categories = testResults.map((test) => test.category)
             return {
                 id: web.id,
                 domain: new URL(web.url).hostname,
                 url: web.url,
                 lastTested: latestScan?.createdAt ?? null,
                 score,
-                tests: testResults.length
-
+                tests: testResults.length,
+                lastCategories: categories ?? []
             }
         })
     }

@@ -90,7 +90,6 @@ const NewTestView = ({ newTestUrl, setNewTestUrl, newTestType, setNewTestType, s
         }
         setScanning(true)
         setCurrentId(result.scan.id)
-
     }
 
 

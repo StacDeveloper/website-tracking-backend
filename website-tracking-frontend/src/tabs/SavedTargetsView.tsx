@@ -21,7 +21,33 @@ interface SaveWebsite {
     lastTested: string
     score: number
     tests: number
+    lastCategories: string[]
 }
+
+const functionToInvokeStartTest = async (url: string, categories: string[]) => {
+    const res = await fetch("http://localhost:4000/graphql", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            query: `mutation StartScan($url: String!, $categories: [String!]!) {
+                startScan(url: $url, categories: $categories) {
+                    message
+                    skippedActiveTest
+                    scan {
+                        id
+                        status
+                    }
+                }
+            }`,
+            variables: { url, categories },
+        }),
+    });
+    const { data, errors } = await res.json();
+    console.log(data, errors);
+    if (errors) return null;
+    return data.startScan;
+};
 
 const SavedTargetsView = ({ savedQuery, setSavedQuery, startScan, setNewTestUrl }: SavedTargetsViewProps) => {
 
@@ -54,6 +80,7 @@ const SavedTargetsView = ({ savedQuery, setSavedQuery, startScan, setNewTestUrl 
                     lastTested
                     score
                     tests
+                    lastCategories
                 }
                 }`})
         })
@@ -130,8 +157,9 @@ const SavedTargetsView = ({ savedQuery, setSavedQuery, startScan, setNewTestUrl 
                         </div>
                         <button
                             onClick={() => {
-                                setNewTestUrl(`https://${t.domain}`);
+                                setNewTestUrl(t.url);
                                 startScan();
+                                functionToInvokeStartTest(t.url, t.lastCategories)
                             }}
                             className="w-full rounded-lg py-2 text-sm font-semibold text-white"
                             style={{ backgroundColor: c.accent }}

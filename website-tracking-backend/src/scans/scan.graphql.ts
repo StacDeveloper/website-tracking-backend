@@ -56,6 +56,7 @@ export class SavedWebsiteList {
     @Field({ nullable: true }) lastTested: Date
     @Field({ nullable: true }) score: number
     @Field({ nullable: true }) tests: number
+    @Field(() => [String], { nullable: true }) lastCategories: string[]
 }
 
 @ObjectType()

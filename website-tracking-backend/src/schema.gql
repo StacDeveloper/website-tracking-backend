@@ -27,6 +27,7 @@ type Query {
 type SavedWebsiteList {
   domain: String
   id: String
+  lastCategories: [String!]
   lastTested: DateTime
   score: Float
   tests: Float
