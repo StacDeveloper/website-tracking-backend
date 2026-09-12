@@ -4,6 +4,8 @@ import { ColorContextProvider } from "./context/useColorContext";
 import { BackendContextProvider } from "./context/useBackendContext";
 import { AuthContextProvider } from "./context/useAuthContext";
 import { RouteGuard } from "@/lib/RouteGuard";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export const metadata: Metadata = {
   title: "WebTest — Test your website. Get real insights.",
@@ -19,11 +21,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="font-sans antialiased">
+        
         <AuthContextProvider>
           <BackendContextProvider>
             <ColorContextProvider>
               <RouteGuard>
                 {children}
+                <ToastContainer position={"top-center"} />
               </RouteGuard>
             </ColorContextProvider>
           </BackendContextProvider>

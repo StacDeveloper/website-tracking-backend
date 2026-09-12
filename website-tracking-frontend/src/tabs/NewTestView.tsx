@@ -4,8 +4,8 @@ import { useColorContext } from "@/app/context/useColorContext";
 import { CardShell } from "@/lib/Reusable-Components/Cardshell";
 import { SectionLabel } from "@/lib/Reusable-Components/SectionLabel";
 import { AlertTriangle, Check, ChevronDown, ClipboardList, Globe, Loader2, Play, Upload } from "lucide-react";
-
 import { useState } from "react";
+import { toast } from "react-toastify";
 
 
 interface NewTestViewProps {
@@ -35,6 +35,12 @@ const PathLinks = [{ key: "loginEndPoint", label: "Login Endpoint", placeholder:
 { key: "sampleResourceUrl", label: "Sample Resource URL", placeholder: "/api/users/1" },
 { key: "massAssignEndPoint", label: "Mass Assignment Endpoint", placeholder: "/api/users/update" }]
 
+const BLOCKED_PATTERNS = [
+    /\.gov$/i,
+    /\.gov\.\w+$/i,
+    /\.mil$/i,
+    /bank/i,
+];
 
 const NewTestView = ({ newTestUrl, setNewTestUrl, newTestType, setNewTestType, selectedTestNames, setSelectedTestNames, toggleTestName, setScanning, setCurrentId }: NewTestViewProps) => {
     const { c } = useColorContext()
@@ -53,6 +59,10 @@ const NewTestView = ({ newTestUrl, setNewTestUrl, newTestType, setNewTestType, s
     const handleStartScan = async () => {
         if (!newTestUrl.trim() || selectedTestNames.size === 0 || newTestUrl.length === 0 || !newTestUrl.includes("https://")) {
             setUrlError(!newTestUrl.trim() ? "Please enter valid url" : !newTestUrl.includes("https://") ? "Please enter verified url" : "Please select ateleast 1 test")
+            return;
+        }
+        if (BLOCKED_PATTERNS.some((pattern) => pattern.test(newTestUrl))) {
+            toast.error("This website cant be tested")
             return;
         }
         const StartScan = async (url: string, categories: string[], config?: WebsiteConfigInput) => {
@@ -90,6 +100,7 @@ const NewTestView = ({ newTestUrl, setNewTestUrl, newTestType, setNewTestType, s
         }
         setScanning(true)
         setCurrentId(result.scan.id)
+        toast.success(`Scanning in progress for ${newTestUrl}`)
     }
 
 

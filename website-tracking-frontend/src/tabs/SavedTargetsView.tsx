@@ -5,6 +5,7 @@ import { formatDate } from "@/lib/FormateDate";
 import { CardShell } from "@/lib/Reusable-Components/Cardshell";
 import { MoreVertical, Plus, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "react-toastify";
 
 
 interface SavedTargetsViewProps {
@@ -27,34 +28,34 @@ interface SaveWebsite {
 
 
 
-const functionToInvokeStartTest = async (url: string, categories: string[]) => {
-    const res = await fetch("http://localhost:4000/graphql", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            query: `mutation StartScan($url: String!, $categories: [String!]!) {
-                startScan(url: $url, categories: $categories) {
-                    message
-                    skippedActiveTest
-                    scan {
-                        id
-                        status
-                    }
-                }
-            }`,
-            variables: { url, categories },
-        }),
-    });
-    const { data, errors } = await res.json();
-    console.log(data, errors);
-    if (errors) return null;
-    return data.startScan;
-};
-
 
 const SavedTargetsView = ({ savedQuery, setSavedQuery, startScan, setNewTestUrl, setCurrentId }: SavedTargetsViewProps) => {
 
+
+    const functionToInvokeStartTest = async (url: string, categories: string[]) => {
+        const res = await fetch("http://localhost:4000/graphql", {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                query: `mutation StartScan($url: String!, $categories: [String!]!) {
+                    startScan(url: $url, categories: $categories) {
+                        message
+                        skippedActiveTest
+                        scan {
+                            id
+                            status
+                        }
+                    }
+                }`,
+                variables: { url, categories },
+            }),
+        });
+        const { data, errors } = await res.json();
+        setCurrentId(data.startScan.scan.id)
+        if (errors) return null; 
+        return data.startScan;
+    };
     const [savedWebsite, setSavedWebsite] = useState<SaveWebsite[] | []>([])
 
     const displayWebsite = useMemo(() => {
@@ -113,6 +114,7 @@ const SavedTargetsView = ({ savedQuery, setSavedQuery, startScan, setNewTestUrl,
                 <button
                     className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white"
                     style={{ backgroundColor: c.accent }}
+
                 >
                     <Plus className="h-4 w-4" />
                     Add Target
@@ -164,6 +166,7 @@ const SavedTargetsView = ({ savedQuery, setSavedQuery, startScan, setNewTestUrl,
                                 setNewTestUrl(t.url);
                                 startScan();
                                 functionToInvokeStartTest(t.url, t.lastCategories)
+                                toast.success(`Scan started for ${t.url}`)
                             }}
                             className="w-full rounded-lg py-2 text-sm font-semibold text-white"
                             style={{ backgroundColor: c.accent }}

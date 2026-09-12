@@ -1,11 +1,24 @@
 import { InjectQueue } from "@nestjs/bullmq";
-import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { ScanStatus, ScanType, TestCategory } from "@prisma/client";
 import { Queue } from "bullmq";
 import { PrismaService } from "../prisma/prisma.service";
 import { ACTIVE_TEST, PASSIVE_TEST } from "./scan.test-catogory";
 import { WebsiteConfigInput } from "./scan.graphql";
 
+const BLOCKED_PATTERNS = [/\.gov$/i,
+    /\.gov\.\w+$/i,
+    /\.mil$/i,
+    /bank/i,]
+
+function checkUrl(url: string): boolean {
+    try {
+        const hostname = new URL(url).hostname
+        return BLOCKED_PATTERNS.some((pat) => pat.test(hostname))
+    } catch (error) {
+        return true
+    }
+}
 
 @Injectable()
 export class ScanService {
@@ -15,7 +28,9 @@ export class ScanService {
     ) { }
 
     async startScan(url: string, userId: string, categories: TestCategory[], config?: WebsiteConfigInput) {
-
+        if (checkUrl(url)) {
+            throw new BadRequestException("This domain cannot be scanned. Government, military, and financial institution websites are not permitted targets for this tool.")
+        }
         const website = await this.prisma.website.upsert({
             where: { url_ownerId: { url, ownerId: userId } },
             update: { ...config },
