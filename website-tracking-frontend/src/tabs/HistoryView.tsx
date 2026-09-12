@@ -5,7 +5,7 @@ import { useColorContext } from "@/app/context/useColorContext";
 import { calculateScore } from "@/lib/CalculateScore";
 import { formatDate } from "@/lib/FormateDate";
 import { CardShell } from "@/lib/Reusable-Components/Cardshell";
-import  {HistoryTest} from "@/app/context/useBackendContext"
+import { HistoryTest } from "@/app/context/useBackendContext"
 import {
     Bookmark,
     BookmarkCheck,
@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import LinkResult from "./LinkResult";
+import { usePagination } from "@/lib/usePagination";
 
 interface HistoryViewProps {
     historyQuery: string;
@@ -38,6 +39,7 @@ const HistoryView = ({
 }: HistoryViewProps) => {
     const { historyTests } = useBackendContext();
     const { c } = useColorContext();
+
     const [savedTests, setSavedTests] = useState<string[]>([]);
 
     const makeApiCallToSave = async (websiteId: string) => {
@@ -78,6 +80,7 @@ const HistoryView = ({
         );
     }, [historyTests, historyQuery]);
 
+    const { page, setPage, paginatedItems, totalPages } = usePagination(filteredHistory, 10)
 
 
     if (viewingId) {
@@ -211,7 +214,7 @@ const HistoryView = ({
                         </thead>
 
                         <tbody>
-                            {filteredHistory.map(
+                            {paginatedItems.map(
                                 (row: HistoryTest, index) => {
                                     const score =
                                         calculateScore(
@@ -341,7 +344,7 @@ const HistoryView = ({
                                                 <button
                                                     type="button"
                                                     onClick={async () => {
-                                                        const nowSaved =   await makeApiCallToSave(row.website.id)
+                                                        const nowSaved = await makeApiCallToSave(row.website.id)
                                                         if (nowSaved === null) return;
                                                         setSavedTests((prev) => nowSaved ? [...prev, row.id] : prev.filter((p) => row.id !== p))
                                                     }}
@@ -442,28 +445,41 @@ const HistoryView = ({
                     {historyTests?.length ?? 0} results
                 </span>
 
-                <div className="flex items-center gap-1">
-                    {[1, 2, 3, 4].map((page) => (
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm" style={{ color: c.textMuted }}>
+                    <span>
+                        Showing {paginatedItems.length > 0 ? (page - 1) * 10 + 1 : 0} to {(page - 1) * 10 + paginatedItems.length} of {filteredHistory.length} results
+                    </span>
+
+                    <div className="flex items-center gap-1">
                         <button
-                            key={page}
-                            className="flex h-8 w-8 items-center justify-center rounded-lg border text-xs"
-                            style={
-                                page === 1
-                                    ? {
-                                        borderColor:
-                                            c.accent,
-                                        color: c.accent,
-                                    }
-                                    : {
-                                        borderColor:
-                                            c.cardBorder,
-                                        color: c.textMuted,
-                                    }
-                            }
+                            onClick={() => setPage((p) => Math.max(1, p - 1))}
+                            disabled={page === 1}
+                            className="flex h-8 w-8 items-center justify-center rounded-lg border text-xs disabled:opacity-40"
+                            style={{ borderColor: c.cardBorder, color: c.textMuted }}
                         >
-                            {page}
+                            ‹
                         </button>
-                    ))}
+
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                            <button
+                                key={p}
+                                onClick={() => setPage(p)}
+                                className="flex h-8 w-8 items-center justify-center rounded-lg border text-xs"
+                                style={p === page ? { borderColor: c.accent, color: c.accent } : { borderColor: c.cardBorder, color: c.textMuted }}
+                            >
+                                {p}
+                            </button>
+                        ))}
+
+                        <button
+                            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                            disabled={page === totalPages}
+                            className="flex h-8 w-8 items-center justify-center rounded-lg border text-xs disabled:opacity-40"
+                            style={{ borderColor: c.cardBorder, color: c.textMuted }}
+                        >
+                            ›
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

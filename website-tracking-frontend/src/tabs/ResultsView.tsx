@@ -8,6 +8,7 @@ import { categoryMeta } from "@/app/assets/assets";
 import { Search, ShieldCheck, X } from "lucide-react";
 import { useMemo } from "react";
 import { ResultRow } from "./TestDetailView";
+import { usePagination } from "@/lib/usePagination";
 
 interface ResultViewProps {
     resultsTab: string;
@@ -61,7 +62,7 @@ const ResultsListView = ({
                 return {
                     id: `${test.id}-${category}-${index}`,
                     websiteId: `${test.id}`,
-                    url:`${test.website?.url}`,
+                    url: `${test.website?.url}`,
                     name:
                         categoryMeta[category]?.name ??
                         category
@@ -99,7 +100,7 @@ const ResultsListView = ({
         });
     }, [tests]);
 
-    console.log(resultsRow)
+    const { page, paginatedItems, setPage, totalPages } = usePagination(resultsRow, 10)
 
 
     const resultTabsList = [
@@ -268,7 +269,7 @@ const ResultsListView = ({
                         borderColor: c.cardBorder,
                     }}
                 >
-                    {filteredRows.map((row) => {
+                    {paginatedItems.map((row) => {
                         const sev =
                             severityMeta[row.severity] ??
                             severityMeta.Info;
@@ -383,6 +384,41 @@ const ResultsListView = ({
                     )}
                 </div>
             </CardShell>
+            {filteredRows.length > 0 && (
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm" style={{ color: c.textMuted }}>
+                    <span>
+                        Showing {(page - 1) * 10 + 1} to {Math.min(page * 10, filteredRows.length)} of {filteredRows.length} results
+                    </span>
+                    <div className="flex items-center gap-1">
+                        <button
+                            onClick={() => setPage((p) => Math.max(1, p - 1))}
+                            disabled={page === 1}
+                            className="flex h-8 w-8 items-center justify-center rounded-lg border text-xs disabled:opacity-40"
+                            style={{ borderColor: c.cardBorder, color: c.textMuted }}
+                        >
+                            ‹
+                        </button>
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                            <button
+                                key={p}
+                                onClick={() => setPage(p)}
+                                className="flex h-8 w-8 items-center justify-center rounded-lg border text-xs"
+                                style={p === page ? { borderColor: c.accent, color: c.accent } : { borderColor: c.cardBorder, color: c.textMuted }}
+                            >
+                                {p}
+                            </button>
+                        ))}
+                        <button
+                            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                            disabled={page === totalPages}
+                            className="flex h-8 w-8 items-center justify-center rounded-lg border text-xs disabled:opacity-40"
+                            style={{ borderColor: c.cardBorder, color: c.textMuted }}
+                        >
+                            ›
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
