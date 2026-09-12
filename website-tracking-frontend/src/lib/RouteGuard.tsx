@@ -12,7 +12,7 @@ export function RouteGuard({ children }: { children: ReactNode }) {
     const PUBLIC_PATHS = ["/login"]
 
     useEffect(() => {
-        if (isLoading) return; // wait for localStorage read to finish first
+        if (isLoading) return; 
 
         const isPublicPath = PUBLIC_PATHS.includes(pathname);
         const isDisclaimerPath = pathname === "/disclaimer";

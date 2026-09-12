@@ -3,9 +3,9 @@ import { useColorContext } from "@/app/context/useColorContext";
 import { CardShell } from "@/lib/Reusable-Components/Cardshell";
 import { SectionLabel } from "@/lib/Reusable-Components/SectionLabel";
 import { AlertTriangle, ArrowRight, ChevronRight, Copy, ExternalLink, Sparkles } from "lucide-react";
-import { getTestKnowledge } from "@/app/assets/assets"; 
+import { getTestKnowledge } from "@/app/assets/assets";
 
-interface ResultRow {
+export interface ResultRow {
     id: string;
     name: string;
     category: string;
@@ -17,11 +17,11 @@ interface ResultRow {
     aiSummary?: string;
     aiSuggestion?: string | null;
     rawResult?: any;
+    url: string
 }
 
-interface TestDetailViewProps {
+export interface TestDetailViewProps {
     test: ResultRow;
-    url: string;
     setSelectedTest: React.Dispatch<React.SetStateAction<ResultRow | null>>;
     setDetailTab: React.Dispatch<React.SetStateAction<string>>;
     detailTab: string;
@@ -29,12 +29,13 @@ interface TestDetailViewProps {
     codeLang: string;
 }
 
-const TestDetailView = ({ test, url, setSelectedTest, setDetailTab, detailTab, codeLang, setCodeLang }: TestDetailViewProps) => {
+const TestDetailView = ({ test, setSelectedTest, setDetailTab, detailTab, codeLang, setCodeLang }: TestDetailViewProps) => {
+    const url = test.url
+    console.log(url)
     const { c } = useColorContext();
     const sev = severityMeta[test.severity];
     const knowledge = getTestKnowledge(test.category);
     const reproSteps = knowledge.reproduce(test.rawResult, url);
-
     const codeLangKeys = Object.keys(knowledge.codeSamples);
     const activeCodeLang = codeLangKeys.includes(codeLang) ? codeLang : codeLangKeys[0];
 

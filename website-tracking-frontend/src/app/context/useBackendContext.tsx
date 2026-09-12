@@ -99,7 +99,7 @@ export const BackendContextProvider = ({ children }: { children: ReactNode }) =>
       `,
             })
         })
-        const { data, errors } = await res.json()
+        const { data } = await res.json()
         sethistoryTests(data.getHistoryofUser ?? [])
         console.log(data.getHistoryofUser)
         

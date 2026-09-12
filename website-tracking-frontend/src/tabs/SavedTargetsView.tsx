@@ -12,6 +12,7 @@ interface SavedTargetsViewProps {
     setSavedQuery: React.Dispatch<React.SetStateAction<string>>
     startScan: () => void
     setNewTestUrl: React.Dispatch<React.SetStateAction<string>>
+    setCurrentId: React.Dispatch<React.SetStateAction<string>>
 }
 
 interface SaveWebsite {
@@ -23,6 +24,8 @@ interface SaveWebsite {
     tests: number
     lastCategories: string[]
 }
+
+
 
 const functionToInvokeStartTest = async (url: string, categories: string[]) => {
     const res = await fetch("http://localhost:4000/graphql", {
@@ -49,7 +52,8 @@ const functionToInvokeStartTest = async (url: string, categories: string[]) => {
     return data.startScan;
 };
 
-const SavedTargetsView = ({ savedQuery, setSavedQuery, startScan, setNewTestUrl }: SavedTargetsViewProps) => {
+
+const SavedTargetsView = ({ savedQuery, setSavedQuery, startScan, setNewTestUrl, setCurrentId }: SavedTargetsViewProps) => {
 
     const [savedWebsite, setSavedWebsite] = useState<SaveWebsite[] | []>([])
 

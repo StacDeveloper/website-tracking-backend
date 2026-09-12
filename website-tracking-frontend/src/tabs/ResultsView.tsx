@@ -7,28 +7,15 @@ import { CardShell } from "@/lib/Reusable-Components/Cardshell";
 import { categoryMeta } from "@/app/assets/assets";
 import { Search, ShieldCheck, X } from "lucide-react";
 import { useMemo } from "react";
+import { ResultRow } from "./TestDetailView";
 
 interface ResultViewProps {
     resultsTab: string;
     setResultsTab: React.Dispatch<React.SetStateAction<string>>;
     query: string;
     setQuery: React.Dispatch<React.SetStateAction<string>>;
-    openTest: (test: Test) => void;
+    openTest: (test: ResultRow) => void;
     setTestId: React.Dispatch<React.SetStateAction<string>>;
-}
-
-interface ResultRow {
-    id: string;
-    name: string;
-    category: string;
-    severity: keyof typeof severityMeta;
-    issues: number;
-    desc: string;
-    scanType: string;
-    status: string;
-    aiSummary?: string;
-    aiSuggestion?: string | null;
-    rawResult?: unknown;
 }
 
 
@@ -74,6 +61,7 @@ const ResultsListView = ({
                 return {
                     id: `${test.id}-${category}-${index}`,
                     websiteId: `${test.id}`,
+                    url:`${test.website?.url}`,
                     name:
                         categoryMeta[category]?.name ??
                         category
@@ -110,6 +98,8 @@ const ResultsListView = ({
             });
         });
     }, [tests]);
+
+    console.log(resultsRow)
 
 
     const resultTabsList = [
@@ -360,7 +350,7 @@ const ResultsListView = ({
                                     {/* View details */}
                                     <button
                                         onClick={() => {
-                                            openTest(row as unknown as Test
+                                            openTest(row as unknown as ResultRow
                                             ); setTestId(row.id)
                                         }
                                         }

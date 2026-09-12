@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 import {
   CircleCheckBig,
   Moon,
@@ -11,7 +11,7 @@ import {
 
 import OverviewView from "@/tabs/Overview";
 import NewTestView from "@/tabs/NewTestView";
-import TestDetailView from "@/tabs/TestDetailView";
+import TestDetailView, { ResultRow } from "@/tabs/TestDetailView";
 import ResultsListView from "@/tabs/ResultsView";
 import HistoryView from "@/tabs/HistoryView";
 import SavedTargetsView from "@/tabs/SavedTargetsView";
@@ -25,7 +25,7 @@ export default function WebTestApp() {
   const [activeNav, setActiveNav] = useState("Overview");
   const [resultsTab, setResultsTab] = useState("all");
   const [query, setQuery] = useState("");
-  const [selectedTest, setSelectedTest] = useState<Test | null>(null);
+  const [selectedTest, setSelectedTest] = useState<ResultRow | null>(null);
   const [detailTab, setDetailTab] = useState("Overview");
   const [scanning, setScanning] = useState(false);
   const [newTestUrl, setNewTestUrl] = useState("");
@@ -55,11 +55,11 @@ export default function WebTestApp() {
   const [notifyWeekly, setNotifyWeekly] = useState(true);
   const [currentId, setCurrentId] = useState<string>("")
   const [viewingId, setViewingId] = useState<string | null>("")
-  const { c, isDark, theme, setTheme } = useColorContext()
+  const { c, isDark, setTheme } = useColorContext()
 
 
 
-  const openTest = (test: Test) => {
+  const openTest = (test: ResultRow) => {
     setSelectedTest(test);
     setDetailTab("Overview");
   };
@@ -89,11 +89,11 @@ export default function WebTestApp() {
   } else if (activeNav === "New Test") {
     mainContent = <NewTestView newTestType={newTestType} newTestUrl={newTestUrl} selectedTestNames={selectedTestNames} setNewTestType={setNewTestType} setNewTestUrl={setNewTestUrl} setSelectedTestNames={setSelectedTestNames} toggleTestName={toggleTestName} setScanning={setScanning} setCurrentId={setCurrentId} />;
   } else if (activeNav === "Results") {
-    mainContent = selectedTest ? <TestDetailView testId={testId} test={selectedTest} codeLang={codeLang} detailTab={detailTab} setCodeLang={setCodeLang} setDetailTab={setDetailTab} setSelectedTest={setSelectedTest} /> : <ResultsListView setTestId={setTestId} openTest={openTest} query={query} resultsTab={resultsTab} setQuery={setQuery} setResultsTab={setResultsTab} />;
+    mainContent = selectedTest ? <TestDetailView test={selectedTest} codeLang={codeLang} detailTab={detailTab} setCodeLang={setCodeLang} setDetailTab={setDetailTab} setSelectedTest={setSelectedTest} /> : <ResultsListView setTestId={setTestId} openTest={openTest} query={query} resultsTab={resultsTab} setQuery={setQuery} setResultsTab={setResultsTab} />;
   } else if (activeNav === "History") {
     mainContent = <HistoryView historyQuery={historyQuery} setHistoryQuery={setHistoryQuery} viewingId={viewingId} setViewingId={setViewingId} />;
   } else if (activeNav === "Saved Targets") {
-    mainContent = <SavedTargetsView savedQuery={savedQuery} setNewTestUrl={setNewTestUrl} setSavedQuery={setSavedQuery} startScan={startScan} />;
+    mainContent = <SavedTargetsView setCurrentId={setCurrentId} savedQuery={savedQuery} setNewTestUrl={setNewTestUrl} setSavedQuery={setSavedQuery} startScan={startScan} />;
   } else if (activeNav === "Settings") {
     mainContent = <SettingsView accentColor={accentColor} defaultTestType={defaultTestType} email={email} followRedirects={followRedirects} fullName={fullName} maxConcurrency={maxConcurrency} notifyCritical={notifyCritical} notifyScanCompleted={notifyScanCompleted} notifyWeekly={notifyWeekly} requestTimeout={requestTimeout} setAccentColor={setAccentColor} setDefaultTestType={setDefaultTestType} setEmail={setEmail} setFollowRedirects={setFollowRedirects} setFullName={setFullName} setMaxConcurrency={setMaxConcurrency} setNotifyCritical={setNotifyCritical} setNotifyScanCompleted={setNotifyScanCompleted} setNotifyWeekly={setNotifyWeekly} setRequestTimeout={setRequestTimeout} setSettingsTab={setSettingsTab} settingsTab={settingsTab} />;
   } else {
