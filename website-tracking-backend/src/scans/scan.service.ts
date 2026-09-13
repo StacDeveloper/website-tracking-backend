@@ -127,18 +127,24 @@ export class ScanService {
         }
         return tests
     }
-    async getHistoryofUser(userId: string) {
+    async getHistoryofUser(userId: string, cursor?: string, limit: number = 20) {
         const scan = await this.prisma.scan.findMany({
             where: { website: { ownerId: userId } },
+            take: limit + 1,
+            ...(cursor && { cursor: { id: cursor }, skip: 1 }),
             include: { website: true, testResults: true },
             orderBy: { createdAt: "desc" }
         })
-        return scan.map((s) => ({
+        const hasNextPage = scan?.length > limit
+        const trimmed = hasNextPage ? scan.slice(0, -1) : scan
+        const nextCursor = hasNextPage ? trimmed[trimmed.length - 1].id : null
+        const items = trimmed.map((s) => ({
             ...s,
             testResultsCount: s.testResults.length,
             passedCount: s.testResults.filter((test) => test.status === "PASSED").length,
             issueCount: s.testResults.filter((test) => test.status === "FAILED").length
         }))
+        return {items,nextCursor, hasNextPage}
     }
 
     async saveWebsiteOfUser(websiteId: string, userId: string) {

@@ -18,6 +18,13 @@ export class WebsiteType {
     @Field() isVerified: boolean;
     @Field({ nullable: true }) verifiedAt?: Date;
     @Field() createdAt: Date;
+}
+
+@ObjectType()
+export class CursorBasedHistoryOfUser {
+    @Field(() => [String]) items: ScanType[]
+    @Field({ nullable: true }) nextCursor?: string
+    @Field() hasNextPage: boolean
 
 }
 

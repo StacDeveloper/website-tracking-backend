@@ -12,7 +12,7 @@ export interface HistoryTest {
     passedCount: number;
     issueCount: number;
     website: {
-        id:string
+        id: string
         url: string;
     };
 }
@@ -78,31 +78,34 @@ export const BackendContextProvider = ({ children }: { children: ReactNode }) =>
         if (errors) throw new Error(errors[0].message)
     }
 
-    const getHistoryOfUser = async () => {
+    const getHistoryOfUser = async (cursor?: string) => {
         const res = await fetch(url, {
             method: "POST",
             credentials: "include",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 query: `
-        query {
-  getHistoryofUser {
-    id
+        query GetHistory($cursor:String, $limit:Int){
+  getHistoryofUser(cursor:$cursor, limit:$limit) {
+    items{id
     status
     completedAt
     testResultsCount
     passedCount
     website { id,url }
-    issueCount
+    issueCount}
+    nextCursor
+    hasNextPage
   }
+
 }
-      `,
+      `, variable: { cursor, limit:20 }
             })
         })
         const { data } = await res.json()
-        sethistoryTests(data.getHistoryofUser ?? [])
+        sethistoryTests((prev)=> cursor ? [...prev, ...data.getHistoryofUser] : data.getHistoryofUser.items )
         console.log(data.getHistoryofUser)
-        
+
     }
 
 
