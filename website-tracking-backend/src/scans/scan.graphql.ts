@@ -22,10 +22,9 @@ export class WebsiteType {
 
 @ObjectType()
 export class CursorBasedHistoryOfUser {
-    @Field(() => [String]) items: ScanType[]
+    @Field(() => [ScanType]) items: ScanType[]
     @Field({ nullable: true }) nextCursor?: string
     @Field() hasNextPage: boolean
-
 }
 
 @ObjectType()

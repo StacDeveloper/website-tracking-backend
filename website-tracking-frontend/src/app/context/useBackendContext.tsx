@@ -40,7 +40,6 @@ export const BackendContextProvider = ({ children }: { children: ReactNode }) =>
     const [historyTests, sethistoryTests] = useState<HistoryTest[]>([])
 
     useEffect(() => {
-        getHistoryOfUser()
         getMyTests()
     }, [])
 
@@ -78,35 +77,7 @@ export const BackendContextProvider = ({ children }: { children: ReactNode }) =>
         if (errors) throw new Error(errors[0].message)
     }
 
-    const getHistoryOfUser = async (cursor?: string) => {
-        const res = await fetch(url, {
-            method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                query: `
-        query GetHistory($cursor:String, $limit:Int){
-  getHistoryofUser(cursor:$cursor, limit:$limit) {
-    items{id
-    status
-    completedAt
-    testResultsCount
-    passedCount
-    website { id,url }
-    issueCount}
-    nextCursor
-    hasNextPage
-  }
-
-}
-      `, variable: { cursor, limit:20 }
-            })
-        })
-        const { data } = await res.json()
-        sethistoryTests((prev)=> cursor ? [...prev, ...data.getHistoryofUser] : data.getHistoryofUser.items )
-        console.log(data.getHistoryofUser)
-
-    }
+    
 
 
 

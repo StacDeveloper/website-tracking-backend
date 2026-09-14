@@ -16,9 +16,10 @@ import {
     MoreVertical,
     Search,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import LinkResult from "./LinkResult";
 import { usePagination } from "@/lib/usePagination";
+import { toast } from "react-toastify";
 
 interface HistoryViewProps {
     historyQuery: string;
@@ -37,11 +38,57 @@ const HistoryView = ({
     viewingId,
     setViewingId
 }: HistoryViewProps) => {
-    const { historyTests } = useBackendContext();
+    const [historyTests, sethistoryTests] = useState<HistoryTest[]>([])
+    const [hasNextCursor, sethasNextCursor] = useState<string>("")
+    const [hasNextPage, setHasNextPage] = useState<boolean>(false)
+    const [laodingMore, setLoadingMore] = useState<boolean>(false)
     const { c } = useColorContext();
 
     const [savedTests, setSavedTests] = useState<string[]>([]);
 
+    const getHistoryOfUser = async (cursor?: string) => {
+        setLoadingMore(true)
+        try {
+            const res = await fetch("http://localhost:4000/graphql", {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    query:`query GetHistory($cursor: String, $limit: Int) {
+                        getHistoryofUser(cursor: $cursor, limit: $limit) {
+                            items {
+                                id
+                                status
+                                completedAt
+                                testResultsCount
+                                passedCount
+                                website { id url }
+                                issueCount
+                            }
+                            nextCursor
+                            hasNextPage
+                        }
+                    }`, variables: { cursor, limit: 20 }
+                })
+            })
+            const { data } = await res.json()
+            sethistoryTests((prev) => cursor ? [...prev, ...data.getHistoryofUser.items] : data.getHistoryofUser.items)
+            sethasNextCursor(data.getHistoryofUser.nextCursor)
+            setHasNextPage(data.getHistoryofUser.hasNextPage)
+            console.log(data)
+        } catch (error) {
+            toast.error("Failed to load history")
+            return;
+        }
+        finally {
+            setLoadingMore(false)
+        }
+
+    }
+
+    useEffect(() => {
+        getHistoryOfUser()
+    }, [])
     const makeApiCallToSave = async (websiteId: string) => {
         const response = await fetch("http://localhost:4000/graphql", {
             method: "POST",
@@ -432,55 +479,19 @@ const HistoryView = ({
             </CardShell>
 
             {/* Footer / Pagination */}
-            <div
-                className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm"
-                style={{
-                    color: c.textMuted,
-                }}
-            >
-                <span>
-                    Showing{" "}
-                    {filteredHistory.length > 0 ? 1 : 0} to{" "}
-                    {filteredHistory.length} of{" "}
-                    {historyTests?.length ?? 0} results
-                </span>
+            <div className="mt-4 flex flex-col items-center gap-3 text-sm" style={{ color: c.textMuted }}>
+                <span>Showing {filteredHistory.length} result{filteredHistory.length === 1 ? "" : "s"}</span>
 
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm" style={{ color: c.textMuted }}>
-                    <span>
-                        Showing {paginatedItems.length > 0 ? (page - 1) * 10 + 1 : 0} to {(page - 1) * 10 + paginatedItems.length} of {filteredHistory.length} results
-                    </span>
-
-                    <div className="flex items-center gap-1">
-                        <button
-                            onClick={() => setPage((p) => Math.max(1, p - 1))}
-                            disabled={page === 1}
-                            className="flex h-8 w-8 items-center justify-center rounded-lg border text-xs disabled:opacity-40"
-                            style={{ borderColor: c.cardBorder, color: c.textMuted }}
-                        >
-                            ‹
-                        </button>
-
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                            <button
-                                key={p}
-                                onClick={() => setPage(p)}
-                                className="flex h-8 w-8 items-center justify-center rounded-lg border text-xs"
-                                style={p === page ? { borderColor: c.accent, color: c.accent } : { borderColor: c.cardBorder, color: c.textMuted }}
-                            >
-                                {p}
-                            </button>
-                        ))}
-
-                        <button
-                            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                            disabled={page === totalPages}
-                            className="flex h-8 w-8 items-center justify-center rounded-lg border text-xs disabled:opacity-40"
-                            style={{ borderColor: c.cardBorder, color: c.textMuted }}
-                        >
-                            ›
-                        </button>
-                    </div>
-                </div>
+                {hasNextPage && !historyQuery && (
+                    <button
+                        onClick={() => getHistoryOfUser(hasNextCursor ?? undefined)}
+                        disabled={laodingMore}
+                        className="rounded-lg border px-5 py-2 text-sm font-medium disabled:opacity-50"
+                        style={{ borderColor: c.cardBorder, color: c.accent }}
+                    >
+                        {laodingMore ? "Loading…" : "Load More"}
+                    </button>
+                )}
             </div>
         </div>
     );

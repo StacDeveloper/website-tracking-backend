@@ -1,4 +1,4 @@
-import { Args, Mutation, Resolver, ID, Query, Subscription } from "@nestjs/graphql";
+import { Args, Mutation, Resolver, ID, Query, Subscription, Int } from "@nestjs/graphql";
 import { ScanService } from "./scan.service";
 import { CursorBasedHistoryOfUser, SavedWebsiteList, ScanType, StartScanResponse, WebsiteConfigInput } from "./scan.graphql";
 import { pubsub } from "../queues/pubsub.provider";
@@ -46,8 +46,8 @@ export class ScanResolver {
         return this.scansService.getMyTests(user.id)
     }
     @UseGuards(AuthGuard)
-    @Query(() => [CursorBasedHistoryOfUser])
-    async getHistoryofUser(@CurrentUser() user: any, cursor?: string, limit?: number) {
+    @Query(() => CursorBasedHistoryOfUser)
+    async getHistoryofUser(@CurrentUser() user: any, @Args("cursor", { nullable: true }) cursor?: string, @Args("limit", { type: () => Int, nullable: true }) limit?: number) {
         return this.scansService.getHistoryofUser(user.id, cursor, limit)
     }
 
