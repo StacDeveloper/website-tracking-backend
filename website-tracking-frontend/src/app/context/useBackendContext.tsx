@@ -35,53 +35,9 @@ export const useBackendContext = () => {
 }
 
 export const BackendContextProvider = ({ children }: { children: ReactNode }) => {
+    const value: any = {
 
-    const [tests, setTests] = useState<Test[]>([])
-    const [historyTests, sethistoryTests] = useState<HistoryTest[]>([])
-
-    useEffect(() => {
-        getMyTests()
-    }, [])
-
-    const url = "http://localhost:4000/graphql"
-
-    const getMyTests = async () => {
-        const res = await fetch(url, {
-            method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                query: `
-        query {
-          getAlluserTests {
-            id
-            status
-            scanType
-            aiSummary
-            testResults {
-              category
-              status
-              severity
-              rawResult
-              aiSuggestion
-            }
-          }
-        }
-      `,
-            })
-        })
-
-        const { data, errors } = await res.json()
-        console.log(data)
-        setTests(data.getAlluserTests ?? [])
-        if (errors) throw new Error(errors[0].message)
     }
-
-    
-
-
-
-    const value: any = { tests, setTests, historyTests, sethistoryTests }
 
     return <BackendContext.Provider value={value}>
         {children}

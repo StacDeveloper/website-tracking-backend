@@ -6,8 +6,9 @@ import { useColorContext } from "@/app/context/useColorContext";
 import { CardShell } from "@/lib/Reusable-Components/Cardshell";
 import { categoryMeta } from "@/app/assets/assets";
 import { Search, ShieldCheck, X } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ResultRow } from "./TestDetailView";
+import { toast } from "react-toastify";
 
 interface ResultViewProps {
     resultsTab: string;
@@ -35,9 +36,64 @@ const ResultsListView = ({
     openTest,
     setTestId
 }: ResultViewProps) => {
-    const { tests } = useBackendContext();
+    const [tests, setTests] = useState<Test[]>([])
     const { c } = useColorContext();
+    const [cursorStack, setCursorStack] = useState<(string | undefined)[]>([undefined]);
+    const [pageIndex, setPageIndex] = useState(0);
+    const [hasNextPage, setHasNextPage] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
 
+    const getMyTests = async (index: number) => {
+        if (index < 0) return;
+        setLoadingMore(true)
+        try {
+            const res = await fetch("http://localhost:4000/graphql", {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    query: `query GetMyTests($cursor: String, $limit: Int) {
+        getMyTests(cursor: $cursor, limit: $limit) {
+            items {
+                id
+                status
+                scanType
+                aiSummary
+                website { id url }
+                testResults {
+                    category
+                    status
+                    severity
+                    rawResult
+                    aiSuggestion
+                }
+            }
+            nextCursor
+            hasNextPage
+        }
+    }`,
+                    variables: { cursor: cursorStack[index], limit: 20 },
+                })
+            })
+            const { data, errors } = await res.json()
+            console.log(data)
+            const result = data.getAlluserTests
+            setTests(result.items ?? [])
+            setHasNextPage(result.hasNextPage)
+            if (index === cursorStack.length - 1 && result.nextCursor) {
+                setCursorStack((prev) => [...prev, result.nextCursor])
+            }
+            setPageIndex(index)
+            if (errors) throw new Error(errors[0].message)
+        } catch (error: any) {
+            toast.error(error.message || "Failed to fetch results")
+        }
+
+    }
+
+    useEffect(() => {
+        getMyTests(0)
+    }, [])
     const resultsRow = useMemo<ResultRow[]>(() => {
         if (!Array.isArray(tests)) {
             return [];
@@ -382,41 +438,28 @@ const ResultsListView = ({
                     )}
                 </div>
             </CardShell>
-            {/* {filteredRows.length > 0 && (
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm" style={{ color: c.textMuted }}>
-                    <span>
-                        Showing {(page - 1) * 10 + 1} to {Math.min(page * 10, filteredRows.length)} of {filteredRows.length} results
-                    </span>
-                    <div className="flex items-center gap-1">
-                        <button
-                            onClick={() => setPage((p) => Math.max(1, p - 1))}
-                            disabled={page === 1}
-                            className="flex h-8 w-8 items-center justify-center rounded-lg border text-xs disabled:opacity-40"
-                            style={{ borderColor: c.cardBorder, color: c.textMuted }}
-                        >
-                            ‹
-                        </button>
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                            <button
-                                key={p}
-                                onClick={() => setPage(p)}
-                                className="flex h-8 w-8 items-center justify-center rounded-lg border text-xs"
-                                style={p === page ? { borderColor: c.accent, color: c.accent } : { borderColor: c.cardBorder, color: c.textMuted }}
-                            >
-                                {p}
-                            </button>
-                        ))}
-                        <button
-                            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                            disabled={page === totalPages}
-                            className="flex h-8 w-8 items-center justify-center rounded-lg border text-xs disabled:opacity-40"
-                            style={{ borderColor: c.cardBorder, color: c.textMuted }}
-                        >
-                            ›
-                        </button>
-                    </div>
+            <div className="mt-4 flex items-center justify-between gap-3 text-sm" style={{ color: c.textMuted }}>
+                <span>Showing {resultsRow.length} result{resultsRow.length === 1 ? "" : "s"}</span>
+
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => getMyTests(pageIndex - 1)}
+                        disabled={pageIndex === 0 || loadingMore}
+                        className="rounded-lg border px-4 py-2 text-sm font-medium disabled:opacity-40"
+                        style={{ borderColor: c.cardBorder, color: c.textSecondary }}
+                    >
+                        ‹ Previous
+                    </button>
+                    <button
+                        onClick={() => getMyTests(pageIndex + 1)}
+                        disabled={!hasNextPage || loadingMore}
+                        className="rounded-lg border px-4 py-2 text-sm font-medium disabled:opacity-40"
+                        style={{ borderColor: c.cardBorder, color: c.accent }}
+                    >
+                        Next ›
+                    </button>
                 </div>
-            )} */}
+            </div>
         </div>
     );
 };

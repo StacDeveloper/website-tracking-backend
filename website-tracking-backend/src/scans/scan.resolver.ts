@@ -42,8 +42,8 @@ export class ScanResolver {
     }
     @UseGuards(AuthGuard)
     @Query(() => [ScanType])
-    async getAlluserTests(@CurrentUser() user: any) {
-        return this.scansService.getMyTests(user.id)
+    async getAlluserTests(@CurrentUser() user: any, @Args("cursor", { type: () => String, nullable: true }) cursor?: string, @Args("limit", { type: () => Int, nullable: true }) limit: number = 20) {
+        return this.scansService.getMyTests(user.id, cursor, limit)
     }
     @UseGuards(AuthGuard)
     @Query(() => CursorBasedHistoryOfUser)

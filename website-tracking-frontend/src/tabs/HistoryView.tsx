@@ -80,10 +80,10 @@ const HistoryView = ({
             }
 
             const result = data.getHistoryofUser;
-            sethistoryTests(result.items); // always REPLACE, never append
+            sethistoryTests(result.items);
             setHasNextPage(result.hasNextPage);
 
-            // only push a new cursor if we're moving into unseen territory
+
             if (index === cursorStack.length - 1 && result.nextCursor) {
                 setCursorStack((prev) => [...prev, result.nextCursor]);
             }
