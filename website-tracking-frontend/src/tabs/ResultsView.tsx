@@ -8,7 +8,6 @@ import { categoryMeta } from "@/app/assets/assets";
 import { Search, ShieldCheck, X } from "lucide-react";
 import { useMemo } from "react";
 import { ResultRow } from "./TestDetailView";
-import { usePagination } from "@/lib/usePagination";
 
 interface ResultViewProps {
     resultsTab: string;
@@ -100,7 +99,6 @@ const ResultsListView = ({
         });
     }, [tests]);
 
-    const { page, paginatedItems, setPage, totalPages } = usePagination(resultsRow, 10)
 
 
     const resultTabsList = [
@@ -269,7 +267,7 @@ const ResultsListView = ({
                         borderColor: c.cardBorder,
                     }}
                 >
-                    {paginatedItems.map((row) => {
+                    {resultsRow.map((row) => {
                         const sev =
                             severityMeta[row.severity] ??
                             severityMeta.Info;
@@ -384,7 +382,7 @@ const ResultsListView = ({
                     )}
                 </div>
             </CardShell>
-            {filteredRows.length > 0 && (
+            {/* {filteredRows.length > 0 && (
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm" style={{ color: c.textMuted }}>
                     <span>
                         Showing {(page - 1) * 10 + 1} to {Math.min(page * 10, filteredRows.length)} of {filteredRows.length} results
@@ -418,7 +416,7 @@ const ResultsListView = ({
                         </button>
                     </div>
                 </div>
-            )}
+            )} */}
         </div>
     );
 };

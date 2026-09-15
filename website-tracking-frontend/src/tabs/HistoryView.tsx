@@ -1,6 +1,5 @@
 
 import { historyIcons } from "@/app/assets/assets";
-import { useBackendContext } from "@/app/context/useBackendContext";
 import { useColorContext } from "@/app/context/useColorContext";
 import { calculateScore } from "@/lib/CalculateScore";
 import { formatDate } from "@/lib/FormateDate";
@@ -18,7 +17,6 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import LinkResult from "./LinkResult";
-import { usePagination } from "@/lib/usePagination";
 import { toast } from "react-toastify";
 
 interface HistoryViewProps {
@@ -39,56 +37,67 @@ const HistoryView = ({
     setViewingId
 }: HistoryViewProps) => {
     const [historyTests, sethistoryTests] = useState<HistoryTest[]>([])
-    const [hasNextCursor, sethasNextCursor] = useState<string>("")
+    const [cursorStack, setCursorStack] = useState<(string | undefined)[]>([undefined])
     const [hasNextPage, setHasNextPage] = useState<boolean>(false)
     const [laodingMore, setLoadingMore] = useState<boolean>(false)
+    const [pageIndex, setPageIndex] = useState<number>(0)
+
     const { c } = useColorContext();
 
     const [savedTests, setSavedTests] = useState<string[]>([]);
-
-    const getHistoryOfUser = async (cursor?: string) => {
-        setLoadingMore(true)
+    const getHistoryOfUser = async (index: number) => {
+        if (index < 0) return; // guard against negative index
+        const cursor = cursorStack[index];
+        setLoadingMore(true);
         try {
             const res = await fetch("http://localhost:4000/graphql", {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    query:`query GetHistory($cursor: String, $limit: Int) {
-                        getHistoryofUser(cursor: $cursor, limit: $limit) {
-                            items {
-                                id
-                                status
-                                completedAt
-                                testResultsCount
-                                passedCount
-                                website { id url }
-                                issueCount
-                            }
-                            nextCursor
-                            hasNextPage
+                    query: `query GetHistory($cursor: String, $limit: Int) {
+                    getHistoryofUser(cursor: $cursor, limit: $limit) {
+                        items {
+                            id
+                            status
+                            completedAt
+                            testResultsCount
+                            passedCount
+                            website { id url }
+                            issueCount
                         }
-                    }`, variables: { cursor, limit: 20 }
-                })
-            })
-            const { data } = await res.json()
-            sethistoryTests((prev) => cursor ? [...prev, ...data.getHistoryofUser.items] : data.getHistoryofUser.items)
-            sethasNextCursor(data.getHistoryofUser.nextCursor)
-            setHasNextPage(data.getHistoryofUser.hasNextPage)
-            console.log(data)
-        } catch (error) {
-            toast.error("Failed to load history")
-            return;
-        }
-        finally {
-            setLoadingMore(false)
-        }
+                        nextCursor
+                        hasNextPage
+                    }
+                }`,
+                    variables: { cursor, limit: 20 },
+                }),
+            });
+            const { data, errors } = await res.json();
+            if (errors) {
+                toast.error("Failed to load history");
+                return;
+            }
 
-    }
+            const result = data.getHistoryofUser;
+            sethistoryTests(result.items); // always REPLACE, never append
+            setHasNextPage(result.hasNextPage);
+
+            // only push a new cursor if we're moving into unseen territory
+            if (index === cursorStack.length - 1 && result.nextCursor) {
+                setCursorStack((prev) => [...prev, result.nextCursor]);
+            }
+            setPageIndex(index);
+        } catch {
+            toast.error("Failed to load history");
+        } finally {
+            setLoadingMore(false);
+        }
+    };
 
     useEffect(() => {
-        getHistoryOfUser()
-    }, [])
+        getHistoryOfUser(0);
+    }, []);
     const makeApiCallToSave = async (websiteId: string) => {
         const response = await fetch("http://localhost:4000/graphql", {
             method: "POST",
@@ -126,8 +135,6 @@ const HistoryView = ({
                 .includes(search)
         );
     }, [historyTests, historyQuery]);
-
-    const { page, setPage, paginatedItems, totalPages } = usePagination(filteredHistory, 10)
 
 
     if (viewingId) {
@@ -261,7 +268,7 @@ const HistoryView = ({
                         </thead>
 
                         <tbody>
-                            {paginatedItems.map(
+                            {filteredHistory.map(
                                 (row: HistoryTest, index) => {
                                     const score =
                                         calculateScore(
@@ -479,19 +486,27 @@ const HistoryView = ({
             </CardShell>
 
             {/* Footer / Pagination */}
-            <div className="mt-4 flex flex-col items-center gap-3 text-sm" style={{ color: c.textMuted }}>
+            <div className="mt-4 flex items-center justify-between gap-3 text-sm" style={{ color: c.textMuted }}>
                 <span>Showing {filteredHistory.length} result{filteredHistory.length === 1 ? "" : "s"}</span>
 
-                {hasNextPage && !historyQuery && (
+                <div className="flex items-center gap-2">
                     <button
-                        onClick={() => getHistoryOfUser(hasNextCursor ?? undefined)}
-                        disabled={laodingMore}
-                        className="rounded-lg border px-5 py-2 text-sm font-medium disabled:opacity-50"
+                        onClick={() => getHistoryOfUser(pageIndex - 1)}
+                        disabled={pageIndex === 0 || laodingMore}
+                        className="rounded-lg border px-4 py-2 text-sm font-medium disabled:opacity-40"
+                        style={{ borderColor: c.cardBorder, color: c.textSecondary }}
+                    >
+                        ‹ Previous
+                    </button>
+                    <button
+                        onClick={() => getHistoryOfUser(pageIndex + 1)}
+                        disabled={!hasNextPage || laodingMore}
+                        className="rounded-lg border px-4 py-2 text-sm font-medium disabled:opacity-40"
                         style={{ borderColor: c.cardBorder, color: c.accent }}
                     >
-                        {laodingMore ? "Loading…" : "Load More"}
+                        Next ›
                     </button>
-                )}
+                </div>
             </div>
         </div>
     );
