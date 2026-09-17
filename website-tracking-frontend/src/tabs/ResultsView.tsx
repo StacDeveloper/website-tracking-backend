@@ -46,6 +46,7 @@ const ResultsListView = ({
     const getMyTests = async (index: number) => {
         if (index < 0) return;
         setLoadingMore(true)
+        const cursor = cursorStack[index];
         try {
             const res = await fetch("http://localhost:4000/graphql", {
                 method: "POST",
@@ -53,7 +54,7 @@ const ResultsListView = ({
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     query: `query GetMyTests($cursor: String, $limit: Int) {
-        getMyTests(cursor: $cursor, limit: $limit) {
+        getAlluserTests(cursor: $cursor, limit: $limit) {
             items {
                 id
                 status
@@ -72,7 +73,7 @@ const ResultsListView = ({
             hasNextPage
         }
     }`,
-                    variables: { cursor: cursorStack[index], limit: 20 },
+                    variables: { cursor, limit: 2 },
                 })
             })
             const { data, errors } = await res.json()
@@ -87,6 +88,8 @@ const ResultsListView = ({
             if (errors) throw new Error(errors[0].message)
         } catch (error: any) {
             toast.error(error.message || "Failed to fetch results")
+        } finally{
+             setLoadingMore(false)
         }
 
     }
@@ -323,7 +326,7 @@ const ResultsListView = ({
                         borderColor: c.cardBorder,
                     }}
                 >
-                    {resultsRow.map((row) => {
+                    {filteredRows.map((row) => {
                         const sev =
                             severityMeta[row.severity] ??
                             severityMeta.Info;

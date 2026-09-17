@@ -43,10 +43,14 @@ export class ScanType {
     @Field(() => Int, { nullable: true }) expectedCount?: number
     @Field(() => Int) issueCount?: number
     @Field(() => Int) issuesFound?: number
-    @Field(() => Boolean, { nullable: true }) hasNextPage?: boolean
-    @Field(() => [String], { nullable: true }) items?: string[]
-    @Field(() => String, { nullable: true }) nextCursor?: string
 
+}
+
+@ObjectType()
+export class ResultTest {
+    @Field(() => [ScanType]) items: string[]
+    @Field() hasNextPage: boolean
+    @Field({ nullable: true }) nextCursor?: string
 }
 
 @InputType()

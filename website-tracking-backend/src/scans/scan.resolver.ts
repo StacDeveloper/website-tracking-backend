@@ -1,6 +1,6 @@
 import { Args, Mutation, Resolver, ID, Query, Subscription, Int } from "@nestjs/graphql";
 import { ScanService } from "./scan.service";
-import { CursorBasedHistoryOfUser, SavedWebsiteList, ScanType, StartScanResponse, WebsiteConfigInput } from "./scan.graphql";
+import { CursorBasedHistoryOfUser, ResultTest, SavedWebsiteList, ScanType, StartScanResponse, WebsiteConfigInput } from "./scan.graphql";
 import { pubsub } from "../queues/pubsub.provider";
 import { UseGuards } from "@nestjs/common";
 import { AuthGuard } from "../auth/auth.guard";
@@ -41,14 +41,14 @@ export class ScanResolver {
         return pubsub.asyncIterableIterator("scanUpdated")
     }
     @UseGuards(AuthGuard)
-    @Query(() => [ScanType])
-    async getAlluserTests(@CurrentUser() user: any, @Args("cursor", { type: () => String, nullable: true }) cursor?: string, @Args("limit", { type: () => Int, nullable: true }) limit: number = 20) {
-        return this.scansService.getMyTests(user.id, cursor, limit)
+    @Query(() => ResultTest)
+    async getAlluserTests(@CurrentUser() user: any, @Args("cursor", { type: () => String, nullable: true }) cursor?: string, @Args("limit", { type: () => Int, nullable: true }) limit?:number) {
+        return this.scansService.getMyTests(user.id, cursor, limit ?? 20)
     }
     @UseGuards(AuthGuard)
     @Query(() => CursorBasedHistoryOfUser)
     async getHistoryofUser(@CurrentUser() user: any, @Args("cursor", { nullable: true }) cursor?: string, @Args("limit", { type: () => Int, nullable: true }) limit?: number) {
-        return this.scansService.getHistoryofUser(user.id, cursor, limit)
+        return this.scansService.getHistoryofUser(user.id, cursor, limit )
     }
 
     @UseGuards(AuthGuard)

@@ -130,11 +130,7 @@ export class ScanService {
         const hasNextPage = tests.length > limit
         const trimmed = hasNextPage ? tests.slice(0, -1) : tests
         const nextCursor = hasNextPage ? trimmed[trimmed.length - 1].id : null
-        return {
-            items: trimmed,
-            hasNextPage,
-            nextCursor
-        }
+        return {items:trimmed, hasNextPage, nextCursor}
     }
     async getHistoryofUser(userId: string, cursor?: string, limit: number = 20) {
         const scan = await this.prisma.scan.findMany({

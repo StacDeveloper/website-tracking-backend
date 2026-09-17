@@ -24,10 +24,16 @@ type Mutation {
 }
 
 type Query {
-  getAlluserTests(cursor: String, limit: Int): [ScanType!]!
+  getAlluserTests(cursor: String, limit: Int): ResultTest!
   getHistoryofUser(cursor: String, limit: Int): CursorBasedHistoryOfUser!
   getSavedWebsitesOfUser: [SavedWebsiteList!]!
   scanStatus(scanId: ID!): ScanType!
+}
+
+type ResultTest {
+  hasNextPage: Boolean!
+  items: [ScanType!]!
+  nextCursor: String
 }
 
 type SavedWebsiteList {
@@ -45,12 +51,9 @@ type ScanType {
   completedAt: DateTime
   createdAt: DateTime!
   expectedCount: Int
-  hasNextPage: Boolean
   id: ID!
   issueCount: Int!
   issuesFound: Int!
-  items: [String!]
-  nextCursor: String
   passedCount: Int!
   scanType: String!
   startedAt: DateTime
