@@ -88,8 +88,8 @@ const ResultsListView = ({
             if (errors) throw new Error(errors[0].message)
         } catch (error: any) {
             toast.error(error.message || "Failed to fetch results")
-        } finally{
-             setLoadingMore(false)
+        } finally {
+            setLoadingMore(false)
         }
 
     }

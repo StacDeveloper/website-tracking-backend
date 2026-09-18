@@ -8,6 +8,18 @@ interface AuthContextProps {
     hasAcceptedDisclaimer: boolean;
     isLoading: boolean;
     acceptDisclaimer: () => void;
+    user: UserInterface | null
+    setUser: React.Dispatch<React.SetStateAction<UserInterface | null>>
+}
+
+interface UserInterface {
+    id: string;
+    createdAt: Date;
+    updatedAt: Date;
+    email: string;
+    emailVerified: boolean;
+    name: string;
+    image?: string | null | undefined;
 }
 
 const AuthContext = createContext<AuthContextProps | null>(null)
@@ -20,14 +32,14 @@ export const useAuthContext = () => {
 }
 
 export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
-
     const { data: session, isPending } = useSession()
     const [hasAcceptedDisclaimer, setHasAcceptedDisclaimer] = useState(false)
-
+    const [user, setUser] = useState<UserInterface | null>()
     const isAuthenticated = !!session?.user
 
     useEffect(() => {
         if (session?.user) {
+            setUser(session?.user)
             setHasAcceptedDisclaimer(localStorage.getItem(`disclaimer_${session.user.id}`) === "true")
         }
 
@@ -40,7 +52,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     }
 
     const value: any = {
-        isAuthenticated, hasAcceptedDisclaimer, isLoading: isPending, acceptDisclaimer
+        isAuthenticated, hasAcceptedDisclaimer, isLoading: isPending, acceptDisclaimer, user, setUser
     }
 
     return <AuthContext.Provider value={value}>

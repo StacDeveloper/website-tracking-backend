@@ -19,6 +19,7 @@ import SettingsView from "@/tabs/SettingsView";
 import { accentColors, individualTestOptions, NavItems, Test } from "../assets/assets";
 import { useColorContext } from "../context/useColorContext";
 import ScanningView from "@/tabs/ScanningView";
+import { useAuthContext } from "../context/useAuthContext";
 
 
 export default function WebTestApp() {
@@ -31,6 +32,7 @@ export default function WebTestApp() {
   const [newTestUrl, setNewTestUrl] = useState("");
   const [codeLang, setCodeLang] = useState("Node.js (mysql2)");
   const [testId, setTestId] = useState<string>("")
+  const { user, setUser } = useAuthContext()
   // New Test form state
   const [newTestType, setNewTestType] = useState<"Active" | "Passive">("Active");
   const [selectedTestNames, setSelectedTestNames] = useState<Set<string>>(new Set(individualTestOptions));
@@ -184,7 +186,7 @@ export default function WebTestApp() {
             {isDark ? <Moon className="h-4 w-4" style={{ color: c.textSecondary }} /> : <Sun className="h-4 w-4" style={{ color: c.textSecondary }} />}
           </button>
           <span className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold" style={{ backgroundColor: c.activeNavBg, color: c.accent }}>
-            A
+            {user?.image ? <img src={user?.image} style={{ width: '35px', height: '38px', borderRadius: '50%' }} /> : user?.name.slice(0, 8)[0]}
           </span>
         </div>
         {mainContent}
