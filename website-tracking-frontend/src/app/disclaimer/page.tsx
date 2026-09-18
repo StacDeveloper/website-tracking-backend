@@ -58,7 +58,7 @@ export default function DisclaimerPage() {
   const [agreed, setAgreed] = useState(false);
   const router = useRouter()
 
-  function handleClick(){
+  const handleClick = () => {
     acceptDisclaimer()
     router.replace("/")
   }

@@ -10,9 +10,10 @@ export function RouteGuard({ children }: { children: ReactNode }) {
     const pathname = usePathname();
     const router = useRouter();
     const PUBLIC_PATHS = ["/login"]
-
+    const isAllowedToOpenPages = ["/", "/tests"]
     useEffect(() => {
-        if (isLoading) return;
+
+        if (isLoading || hasAcceptedDisclaimer === null) return;
 
         const isPublicPath = PUBLIC_PATHS.includes(pathname);
         const isDisclaimerPath = pathname === "/disclaimer";
@@ -23,11 +24,12 @@ export function RouteGuard({ children }: { children: ReactNode }) {
         } else if (isAuthenticated && !hasAcceptedDisclaimer && !isDisclaimerPath) {
             router.replace("/disclaimer");
             return;
-        } else if (isAuthenticated && hasAcceptedDisclaimer && (isPublicPath || isDisclaimerPath)) {
-            router.replace("/tests");
+        } else if (isAuthenticated && hasAcceptedDisclaimer && isPublicPath) {
+            router.replace(isAllowedToOpenPages[1]);
             return;
         }
     }, [isAuthenticated, hasAcceptedDisclaimer, isLoading, pathname, router]);
+
 
     return <>{children}</>;
 }

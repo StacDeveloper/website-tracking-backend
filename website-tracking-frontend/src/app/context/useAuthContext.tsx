@@ -34,7 +34,7 @@ export const useAuthContext = () => {
 
 export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     const { data: session, isPending } = useSession()
-    const [hasAcceptedDisclaimer, setHasAcceptedDisclaimer] = useState(false)
+    const [hasAcceptedDisclaimer, setHasAcceptedDisclaimer] = useState<boolean | null>(null)
     const router = useRouter()
     const [user, setUser] = useState<UserInterface | null>()
     const isAuthenticated = !!session?.user
@@ -42,25 +42,18 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         if (session?.user) {
             setUser(session?.user)
+            const stored = localStorage.getItem(`disclaimer_${session.user.id}`);
             setHasAcceptedDisclaimer(localStorage.getItem(`disclaimer_${session.user.id}`) === "true")
         }
 
     }, [session?.user])
 
     const acceptDisclaimer = () => {
-        if (!session?.user) {
-            setHasAcceptedDisclaimer(false)
-            return;
-        }
-        const key = `disclaimer_${session?.user?.id}`
-        const acceptDisclaimer = localStorage.getItem(key)
-
-        const today = new Date().toISOString().split("T")[0]
-        setHasAcceptedDisclaimer(acceptDisclaimer === today)
+        if (!session?.user) return;
+        const key = `disclaimer_${session.user.id}`;
+        localStorage.setItem(key, "true")
+        setHasAcceptedDisclaimer(true);
     }
-    useEffect(() => {
-        acceptDisclaimer()
-    }, [session?.user?.id])
 
     const value: any = {
         isAuthenticated, hasAcceptedDisclaimer, isLoading: isPending, acceptDisclaimer, user, setUser
