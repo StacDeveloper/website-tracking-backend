@@ -13,6 +13,7 @@ import {
   Server,
 } from "lucide-react";
 import { useAuthContext } from "../context/useAuthContext";
+import { useRouter } from "next/navigation";
 
 const policies = [
   {
@@ -55,6 +56,12 @@ const policies = [
 export default function DisclaimerPage() {
   const { acceptDisclaimer } = useAuthContext();
   const [agreed, setAgreed] = useState(false);
+  const router = useRouter()
+
+  function handleClick(){
+    acceptDisclaimer()
+    router.replace("/")
+  }
 
   return (
     <div className="min-h-screen w-full bg-[#050510] px-6 py-10 text-white">
@@ -147,7 +154,7 @@ export default function DisclaimerPage() {
             </span>
           </label>
           <button
-            onClick={acceptDisclaimer}
+            onClick={handleClick}
             disabled={!agreed}
             className="flex shrink-0 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-indigo-500 to-indigo-600 px-6 py-3 text-sm font-semibold text-white transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-40"
           >

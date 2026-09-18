@@ -1,6 +1,7 @@
 "use client"
 
 import { useSession } from "@/auth/auth";
+import { useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
 
 interface AuthContextProps {
@@ -34,6 +35,7 @@ export const useAuthContext = () => {
 export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     const { data: session, isPending } = useSession()
     const [hasAcceptedDisclaimer, setHasAcceptedDisclaimer] = useState(false)
+    const router = useRouter()
     const [user, setUser] = useState<UserInterface | null>()
     const isAuthenticated = !!session?.user
 
@@ -46,10 +48,19 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     }, [session?.user])
 
     const acceptDisclaimer = () => {
-        if (!session?.user) return
-        localStorage.setItem(`disclaimer_${session.user.id}`, "true")
-        setHasAcceptedDisclaimer(true)
+        if (!session?.user) {
+            setHasAcceptedDisclaimer(false)
+            return;
+        }
+        const key = `disclaimer_${session?.user?.id}`
+        const acceptDisclaimer = localStorage.getItem(key)
+
+        const today = new Date().toISOString().split("T")[0]
+        setHasAcceptedDisclaimer(acceptDisclaimer === today)
     }
+    useEffect(() => {
+        acceptDisclaimer()
+    }, [session?.user?.id])
 
     const value: any = {
         isAuthenticated, hasAcceptedDisclaimer, isLoading: isPending, acceptDisclaimer, user, setUser

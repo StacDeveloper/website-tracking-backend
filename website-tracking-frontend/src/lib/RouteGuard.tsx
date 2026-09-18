@@ -12,17 +12,20 @@ export function RouteGuard({ children }: { children: ReactNode }) {
     const PUBLIC_PATHS = ["/login"]
 
     useEffect(() => {
-        if (isLoading) return; 
+        if (isLoading) return;
 
         const isPublicPath = PUBLIC_PATHS.includes(pathname);
         const isDisclaimerPath = pathname === "/disclaimer";
 
         if (!isAuthenticated && !isPublicPath) {
             router.replace("/login");
+            return;
         } else if (isAuthenticated && !hasAcceptedDisclaimer && !isDisclaimerPath) {
             router.replace("/disclaimer");
+            return;
         } else if (isAuthenticated && hasAcceptedDisclaimer && (isPublicPath || isDisclaimerPath)) {
             router.replace("/tests");
+            return;
         }
     }, [isAuthenticated, hasAcceptedDisclaimer, isLoading, pathname, router]);
 

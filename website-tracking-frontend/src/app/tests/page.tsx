@@ -20,6 +20,7 @@ import { accentColors, individualTestOptions, NavItems, Test } from "../assets/a
 import { useColorContext } from "../context/useColorContext";
 import ScanningView from "@/tabs/ScanningView";
 import { useAuthContext } from "../context/useAuthContext";
+import { signOut } from "@/auth/auth";
 
 
 export default function WebTestApp() {
@@ -184,6 +185,28 @@ export default function WebTestApp() {
             style={{ backgroundColor: c.toggleBg }}
           >
             {isDark ? <Moon className="h-4 w-4" style={{ color: c.textSecondary }} /> : <Sun className="h-4 w-4" style={{ color: c.textSecondary }} />}
+          </button>
+          <button
+            onClick={() => signOut()}
+            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200"
+            style={{
+              backgroundColor: isDark ? "rgba(239, 68, 68, 0.08)" : "#fff1f2",
+              color: isDark ? "#f87171" : "#dc2626",
+              border: `1px solid ${isDark ? "rgba(239, 68, 68, 0.15)" : "#fecdd3"
+                }`,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = isDark
+                ? "rgba(239, 68, 68, 0.15)"
+                : "#ffe4e6";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = isDark
+                ? "rgba(239, 68, 68, 0.08)"
+                : "#fff1f2";
+            }}
+          >
+            Sign Out
           </button>
           <span className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold" style={{ backgroundColor: c.activeNavBg, color: c.accent }}>
             {user?.image ? <img src={user?.image} style={{ width: '35px', height: '38px', borderRadius: '50%' }} /> : user?.name.slice(0, 8)[0]}
