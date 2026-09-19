@@ -190,7 +190,7 @@ const NewTestView = ({ newTestUrl, setNewTestUrl, newTestType, setNewTestType, s
                                 onChange={(e) =>
                                     setConfig((prev) => ({
                                         ...prev,
-                                        [endpoint.key]: e.target.value,
+                                        [endpoint.key]: (e.target.value).trim(),
                                     }))
                                 }
                                 placeholder={endpoint.placeholder}

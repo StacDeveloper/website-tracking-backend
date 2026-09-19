@@ -31,7 +31,6 @@ export interface TestDetailViewProps {
 
 const TestDetailView = ({ test, setSelectedTest, setDetailTab, detailTab, codeLang, setCodeLang }: TestDetailViewProps) => {
     const url = test.url
-    console.log(url)
     const { c } = useColorContext();
     const sev = severityMeta[test.severity];
     const knowledge = getTestKnowledge(test.category);

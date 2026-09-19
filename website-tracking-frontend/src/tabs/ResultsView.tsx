@@ -110,7 +110,6 @@ const ResultsListView = ({
             return test.testResults.map((result: any, index: number) => {
                 const category = result.category ?? "UNKNOWN";
 
-
                 const severity =
                     result.severity &&
                         severityMeta[result.severity as keyof typeof severityMeta]
@@ -142,7 +141,7 @@ const ResultsListView = ({
 
                     desc:
                         result.aiSuggestion ||
-                        "No description available",
+                        `${test.website.url}` ,
 
                     scanType: test.scanType ?? "UNKNOWN",
 

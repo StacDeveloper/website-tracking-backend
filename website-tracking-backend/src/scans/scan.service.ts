@@ -51,19 +51,18 @@ export class ScanService {
 
         const totalExpected = requestedPassive.length + willRunActive.length
 
-
-
-
         const scan = await this.prisma.scan.create({
             data: {
                 websiteId: website.id,
                 scanType: website.isVerified ? ScanType.ACTIVE : ScanType.PASSIVE,
-                status: ScanStatus.PENDING,
-                expectedCount: totalExpected
+                status: totalExpected === 0 ? ScanStatus.COMPLETED : ScanStatus.PENDING,
+                expectedCount: totalExpected,
+                completedAt: totalExpected === 0 ? new Date() : null,
             }
-        })
+        });
 
         for (const category of requestedPassive) {
+            console.log("Passive Scan Started")
             await this.passiveQueue.add(
                 "run-test-Passive-Queue",
                 { scanId: scan.id, website, url: website.url, category },
@@ -71,6 +70,7 @@ export class ScanService {
             )
         }
         for (const category of willRunActive) {
+            console.log("Active scan Started")
             await this.activeQueue.add(
                 "run-test-Active-Queue",
                 {
@@ -86,11 +86,14 @@ export class ScanService {
                 { jobId: `${scan.id}-${category}`, attempts: 1 }
             )
         }
+        if (totalExpected > 0) {
+            await this.prisma.scan.update({
+                where: { id: scan.id },
+                data: { status: ScanStatus.RUNNING, startedAt: new Date() }
+            })
+        }
 
-        await this.prisma.scan.update({
-            where: { id: scan.id },
-            data: { status: ScanStatus.RUNNING, startedAt: new Date() }
-        })
+
         return {
             scan,
             skippedActiveTest: skippedActiveTest.length > 0,
@@ -130,7 +133,7 @@ export class ScanService {
         const hasNextPage = tests.length > limit
         const trimmed = hasNextPage ? tests.slice(0, -1) : tests
         const nextCursor = hasNextPage ? trimmed[trimmed.length - 1].id : null
-        return {items:trimmed, hasNextPage, nextCursor}
+        return { items: trimmed, hasNextPage, nextCursor }
     }
     async getHistoryofUser(userId: string, cursor?: string, limit: number = 20) {
         const scan = await this.prisma.scan.findMany({
