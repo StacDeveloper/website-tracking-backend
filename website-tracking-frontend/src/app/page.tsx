@@ -13,6 +13,8 @@ import {
 import Link from "next/link";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import { useAuthContext } from "./context/useAuthContext";
+import { signOut } from "@/auth/auth";
 
 
 
@@ -21,7 +23,7 @@ const HomePage = () => {
   const [theme, setTheme] = useState("dark");
   const isDark = theme === "dark";
   const router = useRouter()
-
+  const { user } = useAuthContext()
 
   const c = {
     bg: isDark ? "#050510" : "#f7f7fb",
@@ -49,6 +51,10 @@ const HomePage = () => {
     /bank/i,
   ];
   async function handleSubmit(url: string) {
+
+    if (user === null) {
+      router.replace("/login")
+    }
     if (!url.trim() || url.length === 0 || !url.includes("https://")) {
       toast.error("Pleas provide valid URL to perform tests")
       return;
@@ -142,14 +148,15 @@ const HomePage = () => {
                 <Sun className="h-4 w-4" style={{ color: c.textSecondary }} />
               )}
             </button>
-            <button
-              className="rounded-lg border px-4 py-2 text-sm font-medium transition-colors hover:bg-white/5"
-              style={{ borderColor: c.navBorder, color: c.textSecondary }}
-            >
-              Log in
+
+
+            <button className={` ${!user && "rounded-lg bg-gradient-to-r from-indigo-500 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 hover:scale-[1.03] transition-transform"}`} >
+              {user ? <img style={{ width: '35px', height: '38px', borderRadius: '50%' }} src={user?.image || user.name.slice(0, 8)[0]} /> : "Sign up"}
             </button>
-            <button className="rounded-lg bg-gradient-to-r from-indigo-500 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 hover:scale-[1.03] transition-transform">
-              Sign up
+            <button
+              onClick={() => signOut()}
+              className="rounded-lg bg-gradient-to-r from-indigo-500 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 hover:scale-[1.03] transition-transform" >
+              Sign Out
             </button>
           </div>
         </header>

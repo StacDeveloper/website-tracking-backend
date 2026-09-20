@@ -38,13 +38,17 @@ export const NavItems: {
         { label: "Settings", icon: Settings },
     ]
 export const detailTabs = ["Overview", "Request / Response", "Evidence", "AI Suggestion", "References"];
-
 export const severityMeta: Record<string, { text: string; bg: string; dot: string; ring: string }> = {
     Critical: { text: "text-red-400", bg: "bg-red-500/10", dot: "bg-red-500", ring: "#ef4444" },
     High: { text: "text-orange-400", bg: "bg-orange-500/10", dot: "bg-orange-500", ring: "#f97316" },
     Medium: { text: "text-amber-400", bg: "bg-amber-500/10", dot: "bg-amber-500", ring: "#f59e0b" },
     Low: { text: "text-sky-400", bg: "bg-sky-500/10", dot: "bg-sky-500", ring: "#38bdf8" },
     Info: { text: "text-cyan-400", bg: "bg-cyan-500/10", dot: "bg-cyan-500", ring: "#22d3ee" },
+    CRITICAL: { text: "text-red-400", bg: "bg-red-500/10", dot: "bg-red-500", ring: "#ef4444" },
+    HIGH: { text: "text-orange-400", bg: "bg-orange-500/10", dot: "bg-orange-500", ring: "#f97316" },
+    MEDIUM: { text: "text-amber-400", bg: "bg-amber-500/10", dot: "bg-amber-500", ring: "#f59e0b" },
+    LOW: { text: "text-sky-400", bg: "bg-sky-500/10", dot: "bg-sky-500", ring: "#38bdf8" },
+    INFO: { text: "text-cyan-400", bg: "bg-cyan-500/10", dot: "bg-cyan-500", ring: "#22d3ee" },
 };
 
 export const summaryCards: {
@@ -223,12 +227,12 @@ export const historyRows = [
 ]
 
 export const savedTargetLists = [
-    {  icon: Globe, iconBg: "bg-indigo-500/10", iconColor: "text-indigo-400"},
-    {  icon: Server, iconBg: "bg-sky-500/10", iconColor: "text-sky-400"},
-    {  icon: ShoppingCart, iconBg: "bg-red-500/10", iconColor: "text-red-400" },
+    { icon: Globe, iconBg: "bg-indigo-500/10", iconColor: "text-indigo-400" },
+    { icon: Server, iconBg: "bg-sky-500/10", iconColor: "text-sky-400" },
+    { icon: ShoppingCart, iconBg: "bg-red-500/10", iconColor: "text-red-400" },
     { icon: FileText, iconBg: "bg-emerald-500/10", iconColor: "text-emerald-400" },
     { icon: Layers, iconBg: "bg-fuchsia-500/10", iconColor: "text-fuchsia-400" },
-    {  icon: Smartphone, iconBg: "bg-cyan-500/10", iconColor: "text-cyan-400" },
+    { icon: Smartphone, iconBg: "bg-cyan-500/10", iconColor: "text-cyan-400" },
 ]
 
 export const settingsNav = [
@@ -410,8 +414,8 @@ export const testknowledgebase: Record<string, TestKnowLedge> = {
                     : `Payload "${f.payload}" triggered a database error or timing anomaly (${f.errorMatch ? "error signature matched" : "time-based delay detected"}).`
             );
         },
-       codeSamples: {
-    "Node.js": `// Vulnerable
+        codeSamples: {
+            "Node.js": `// Vulnerable
 db.query(\`SELECT * FROM users WHERE email = '\${email}'\`);
 
 // Fixed — parameterized query
@@ -420,7 +424,7 @@ db.query(
   [email]
 );`,
 
-    "Java": `// Fixed — use PreparedStatement
+            "Java": `// Fixed — use PreparedStatement
 String sql = "SELECT * FROM users WHERE email = ?";
 
 PreparedStatement stmt = connection.prepareStatement(sql);
@@ -428,19 +432,19 @@ stmt.setString(1, email);
 
 ResultSet result = stmt.executeQuery();`,
 
-    "Python": `# Fixed — parameterized query
+            "Python": `# Fixed — parameterized query
 cursor.execute(
     "SELECT * FROM users WHERE email = %s",
     (email,)
 )`,
 
-    "Go": `// Fixed — use parameterized queries
+            "Go": `// Fixed — use parameterized queries
 row := db.QueryRow(
     "SELECT * FROM users WHERE email = ?",
     email,
 )`,
 
-    "C#": `// Fixed — use parameterized queries
+            "C#": `// Fixed — use parameterized queries
 using var command = new SqlCommand(
     "SELECT * FROM Users WHERE Email = @email",
     connection
@@ -449,7 +453,7 @@ using var command = new SqlCommand(
 command.Parameters.AddWithValue("@email", email);
 
 using var reader = command.ExecuteReader();`,
-},
+        },
     },
 
     XSS: {
@@ -462,35 +466,35 @@ using var reader = command.ExecuteReader();`,
             if (!findings.length) return ["No reflected payload recorded for this finding."];
             return findings.slice(0, 3).map((f: any) => `Payload "${f.payload}" was reflected unescaped in the response at ${f.url}.`);
         },
-       codeSamples: {
-    "Node.js": `// Fixed — escape untrusted output
+        codeSamples: {
+            "Node.js": `// Fixed — escape untrusted output
 import { escape } from "html-escaper";
 
 res.send(\`<div>\${escape(userInput)}</div>\`);`,
 
-    "Java": `// Fixed — escape untrusted HTML
+            "Java": `// Fixed — escape untrusted HTML
 import org.apache.commons.text.StringEscapeUtils;
 
 String safe = StringEscapeUtils.escapeHtml4(userInput);
 response.getWriter().write("<div>" + safe + "</div>");`,
 
-    "Python": `# Fixed — escape untrusted output
+            "Python": `# Fixed — escape untrusted output
 import html
 
 safe = html.escape(user_input)
 return f"<div>{safe}</div>"`,
 
-    "Go": `// Go templates escape HTML by default
+            "Go": `// Go templates escape HTML by default
 tmpl, _ := template.ParseFiles("page.html")
 tmpl.Execute(w, map[string]string{
     "Input": userInput,
 })`,
 
-    "C#": `// Razor automatically HTML-encodes output
+            "C#": `// Razor automatically HTML-encodes output
 <div>@Model.UserInput</div>
 
 // Avoid Html.Raw() with untrusted input`,
-},
+        },
     },
 
     RATE_LIMIT: {
@@ -501,8 +505,8 @@ tmpl.Execute(w, map[string]string{
         reproduce: (raw) => [
             `Sent ${raw?.totalRequest ?? 30} rapid requests to the target; ${raw?.got429 ? "some were throttled." : "none received a 429 (Too Many Requests) response."}`,
         ],
-       codeSamples: {
-    "Node.js": `import rateLimit from "express-rate-limit";
+        codeSamples: {
+            "Node.js": `import rateLimit from "express-rate-limit";
 
 const limiter = rateLimit({
   windowMs: 60_000,
@@ -511,7 +515,7 @@ const limiter = rateLimit({
 
 app.use("/api/", limiter);`,
 
-    "Java": `// Spring Boot — use a rate limiting filter/library
+            "Java": `// Spring Boot — use a rate limiting filter/library
 // Example with Bucket4j
 Bucket bucket = Bucket.builder()
     .addLimit(Bandwidth.simple(20, Duration.ofMinutes(1)))
@@ -523,7 +527,7 @@ if (!bucket.tryConsume(1)) {
     );
 }`,
 
-    "Python": `# Flask-Limiter
+            "Python": `# Flask-Limiter
 from flask_limiter import Limiter
 
 limiter = Limiter(
@@ -536,7 +540,7 @@ limiter = Limiter(
 def login():
     return "OK"`,
 
-    "Go": `// golang.org/x/time/rate
+            "Go": `// golang.org/x/time/rate
 limiter := rate.NewLimiter(
     rate.Every(time.Minute/20),
     20,
@@ -551,7 +555,7 @@ if !limiter.Allow() {
     return
 }`,
 
-    "C#": `// ASP.NET Core
+            "C#": `// ASP.NET Core
 builder.Services.AddRateLimiter(options =>
 {
     options.AddFixedWindowLimiter(
@@ -564,7 +568,7 @@ builder.Services.AddRateLimiter(options =>
 });
 
 app.UseRateLimiter();`,
-},
+        },
     },
 
     BOT: {
@@ -576,7 +580,7 @@ app.UseRateLimiter();`,
             `Requests sent with a non-browser User-Agent (curl) returned status codes: ${(raw?.statusCodes ?? []).join(", ")} — ${raw?.blocked ? "some were blocked." : "none were blocked."}`,
         ],
         codeSamples: {
-    "Node.js": `// Fixed — add bot protection to sensitive endpoints
+            "Node.js": `// Fixed — add bot protection to sensitive endpoints
 import rateLimit from "express-rate-limit";
 
 const loginLimiter = rateLimit({
@@ -591,7 +595,7 @@ app.post(
   login
 );`,
 
-    "Java": `// Spring Security / application layer
+            "Java": `// Spring Security / application layer
 // Add CAPTCHA verification and rate limiting
 // before processing sensitive operations.
 
@@ -604,7 +608,7 @@ public ResponseEntity<?> login(
     // Authenticate user...
 }`,
 
-    "Python": `# Flask example
+            "Python": `# Flask example
 @app.route("/login", methods=["POST"])
 @limiter.limit("10 per minute")
 def login():
@@ -616,7 +620,7 @@ def login():
     # Authenticate user...
     return authenticate_user()`,
 
-    "Go": `// Add rate limiting and CAPTCHA verification
+            "Go": `// Add rate limiting and CAPTCHA verification
 func login(w http.ResponseWriter, r *http.Request) {
 
     if !captchaValid(r) {
@@ -631,7 +635,7 @@ func login(w http.ResponseWriter, r *http.Request) {
     // Authenticate user...
 }`,
 
-    "C#": `// ASP.NET Core
+            "C#": `// ASP.NET Core
 [HttpPost("login")]
 [EnableRateLimiting("login")]
 public IActionResult Login(LoginRequest request)
@@ -644,7 +648,7 @@ public IActionResult Login(LoginRequest request)
     // Authenticate user...
     return Ok();
 }`,
-},
+        },
     },
 
     FAKE_USER: {
@@ -665,7 +669,7 @@ public IActionResult Login(LoginRequest request)
         impact: ["Remote code execution", "Server compromise", "Malware hosting", "Defacement"],
         reproduce: (raw) => (raw?.findings ?? []).map((f: any) => f.issue) ?? ["A .php file was accepted without extension filtering."],
         codeSamples: {
-    "Node.js": `const allowed = [".png", ".jpg", ".pdf"];
+            "Node.js": `const allowed = [".png", ".jpg", ".pdf"];
 
 if (!allowed.includes(
     path.extname(file.originalname).toLowerCase()
@@ -673,7 +677,7 @@ if (!allowed.includes(
     throw new Error("File type not allowed");
 }`,
 
-    "Java": `String filename =
+            "Java": `String filename =
     StringUtils.cleanPath(file.getOriginalFilename());
 
 Set<String> allowed =
@@ -688,7 +692,7 @@ if (!allowed.contains(extension)) {
     );
 }`,
 
-    "Python": `from pathlib import Path
+            "Python": `from pathlib import Path
 
 allowed = {".png", ".jpg", ".pdf"}
 
@@ -697,7 +701,7 @@ extension = Path(file.filename).suffix.lower()
 if extension not in allowed:
     raise ValueError("File type not allowed")`,
 
-    "Go": `allowed := map[string]bool{
+            "Go": `allowed := map[string]bool{
     ".png": true,
     ".jpg": true,
     ".pdf": true,
@@ -716,7 +720,7 @@ if !allowed[ext] {
     return
 }`,
 
-    "C#": `var allowed = new[]
+            "C#": `var allowed = new[]
 {
     ".png",
     ".jpg",
@@ -733,7 +737,7 @@ if (!allowed.Contains(extension))
         "File type not allowed"
     );
 }`,
-},
+        },
     },
 
     COMMAND_INJECTION_XXE: {
@@ -743,10 +747,10 @@ if (!allowed.Contains(extension))
         impact: ["Remote code execution", "File system access", "Full server compromise"],
         reproduce: (raw) => (raw?.findings ?? []).map((f: any) => f.type === "xxe" ? `XXE payload leaked local file contents (${f.evidence}).` : `Command injection payload "${f.payload}" executed successfully.`),
         codeSamples: {
-    "Node.js": `// Fixed — avoid shell interpolation
+            "Node.js": `// Fixed — avoid shell interpolation
 execFile("ping", [userInput]);`,
 
-    "Java": `// Fixed — pass arguments separately
+            "Java": `// Fixed — pass arguments separately
 ProcessBuilder process =
     new ProcessBuilder(
         "ping",
@@ -755,14 +759,14 @@ ProcessBuilder process =
 
 process.start();`,
 
-    "Python": `# Fixed — never use shell=True
+            "Python": `# Fixed — never use shell=True
 subprocess.run(
     ["ping", user_input],
     shell=False,
     check=True
 )`,
 
-    "Go": `// Fixed — pass arguments separately
+            "Go": `// Fixed — pass arguments separately
 cmd := exec.Command(
     "ping",
     userInput,
@@ -770,7 +774,7 @@ cmd := exec.Command(
 
 err := cmd.Run()`,
 
-    "C#": `// Fixed — avoid shell command strings
+            "C#": `// Fixed — avoid shell command strings
 var process = new Process();
 
 process.StartInfo.FileName = "ping";
@@ -778,7 +782,7 @@ process.StartInfo.ArgumentList.Add(userInput);
 process.StartInfo.UseShellExecute = false;
 
 process.Start();`,
-},
+        },
     },
 
     BROKEN_ACCESS_CONTROL: {
@@ -787,8 +791,8 @@ process.Start();`,
         riskDescription: "An attacker can access or modify other users' data simply by changing an ID in the request, without needing valid credentials for that account.",
         impact: ["Unauthorized data access", "Privacy violation", "Account takeover", "Data tampering"],
         reproduce: (raw) => (raw?.findings ?? []).map((f: any) => `Resource with ID "${f.id}" was accessible without proper authorization.`),
-       codeSamples: {
-    "Node.js": `const resource = await db.resource.findUnique({
+        codeSamples: {
+            "Node.js": `const resource = await db.resource.findUnique({
   where: { id },
 });
 
@@ -796,7 +800,7 @@ if (resource.ownerId !== req.user.id) {
   throw new ForbiddenError();
 }`,
 
-    "Java": `Resource resource =
+            "Java": `Resource resource =
     resourceService.findById(id);
 
 if (!resource.getOwnerId()
@@ -806,12 +810,12 @@ if (!resource.getOwnerId()
     );
 }`,
 
-    "Python": `resource = get_resource(resource_id)
+            "Python": `resource = get_resource(resource_id)
 
 if resource.owner_id != current_user.id:
     abort(403)`,
 
-    "Go": `resource := getResource(id)
+            "Go": `resource := getResource(id)
 
 if resource.OwnerID != currentUser.ID {
     http.Error(
@@ -822,14 +826,14 @@ if resource.OwnerID != currentUser.ID {
     return
 }`,
 
-    "C#": `var resource =
+            "C#": `var resource =
     await db.Resources.FindAsync(id);
 
 if (resource.OwnerId != userId)
 {
     return Forbid();
 }`,
-},
+        },
     },
 
     API_MASS_ASSIGNMENT: {
@@ -839,7 +843,7 @@ if (resource.OwnerId != userId)
         impact: ["Privilege escalation", "Account takeover", "Data integrity violation"],
         reproduce: (raw) => [`Submitting a request with an added "isAdmin"/"role" field ${raw?.accepted ? "was accepted by the server." : "was rejected."}`],
         codeSamples: {
-    "Node.js": `// Vulnerable
+            "Node.js": `// Vulnerable
 await db.user.update({
   where: { id },
   data: req.body,
@@ -856,7 +860,7 @@ await db.user.update({
   },
 });`,
 
-    "Java": `// Fixed — use a DTO containing only
+            "Java": `// Fixed — use a DTO containing only
 // fields the user is allowed to modify.
 
 public class UpdateUserRequest {
@@ -869,7 +873,7 @@ public class UpdateUserRequest {
 // Do not bind fields such as:
 // role, isAdmin, permissions, etc.`,
 
-    "Python": `# Fixed — explicitly select fields
+            "Python": `# Fixed — explicitly select fields
 name = request.json.get("name")
 bio = request.json.get("bio")
 
@@ -881,7 +885,7 @@ db.session.commit()
 # Do not pass the entire request body
 # directly into the model.`,
 
-    "Go": `// Fixed — use a dedicated request struct
+            "Go": `// Fixed — use a dedicated request struct
 type UpdateUserRequest struct {
     Name string \`json:"name"\`
     Bio  string \`json:"bio"\`
@@ -902,7 +906,7 @@ if err := json.NewDecoder(
 
 // Update only permitted fields.`,
 
-    "C#": `// Fixed — use a DTO with only
+            "C#": `// Fixed — use a DTO with only
 // user-controllable properties
 public class UpdateUserRequest
 {
@@ -925,7 +929,7 @@ public async Task<IActionResult> Update(
 
     return Ok();
 }`,
-},
+        },
     },
 
     SECURITY_HEADERS: {
@@ -934,12 +938,12 @@ public async Task<IActionResult> Update(
         riskDescription: "Missing headers like CSP or HSTS reduce the browser's built-in protections against common attacks like XSS and man-in-the-middle downgrade attacks.",
         impact: ["Increased XSS risk", "Clickjacking exposure", "Protocol downgrade attacks"],
         reproduce: (raw) => [`Missing headers: ${(raw?.missing ?? []).join(", ") || "see evidence"}.`],
-       codeSamples: {
-    "Node.js": `import helmet from "helmet";
+        codeSamples: {
+            "Node.js": `import helmet from "helmet";
 
 app.use(helmet());`,
 
-    "Java": `// Spring Security
+            "Java": `// Spring Security
 http
     .headers(headers -> headers
         .contentSecurityPolicy(
@@ -952,7 +956,7 @@ http
         )
     );`,
 
-    "Python": `# Flask example
+            "Python": `# Flask example
 @app.after_request
 def security_headers(response):
     response.headers[
@@ -965,7 +969,7 @@ def security_headers(response):
 
     return response`,
 
-    "Go": `func securityHeaders(
+            "Go": `func securityHeaders(
     next http.Handler,
 ) http.Handler {
     return http.HandlerFunc(
@@ -985,7 +989,7 @@ def security_headers(response):
     )
 }`,
 
-    "C#": `app.Use(async (context, next) =>
+            "C#": `app.Use(async (context, next) =>
 {
     context.Response.Headers.Append(
         "X-Frame-Options",
@@ -999,7 +1003,7 @@ def security_headers(response):
 
     await next();
 });`,
-},
+        },
     },
 
     TLS_SSL: {
@@ -1010,8 +1014,8 @@ def security_headers(response):
         reproduce: (raw) => [
             raw?.expired ? `Certificate expired on ${raw?.validTo}.` : `Server negotiated protocol ${raw?.protocol}, which is considered outdated.`,
         ],
-     codeSamples: {
-    "Node.js": `// Fixed — create an HTTPS server with TLS 1.2+
+        codeSamples: {
+            "Node.js": `// Fixed — create an HTTPS server with TLS 1.2+
 // and use a valid certificate.
 
 import https from "https";
@@ -1025,7 +1029,7 @@ const options = {
 
 https.createServer(options, app).listen(443);`,
 
-    "Java": `// Fixed — require TLS 1.2 or newer
+            "Java": `// Fixed — require TLS 1.2 or newer
 // in your server / connector configuration.
 
 // Example JVM configuration:
@@ -1033,7 +1037,7 @@ https.createServer(options, app).listen(443);`,
 
 // Avoid enabling TLSv1.0 and TLSv1.1.`,
 
-    "Python": `# Fixed — require TLS 1.2+
+            "Python": `# Fixed — require TLS 1.2+
 import ssl
 
 context = ssl.SSLContext(
@@ -1047,7 +1051,7 @@ context.load_cert_chain(
     "server.key"
 )`,
 
-    "Go": `// Fixed — require TLS 1.2+
+            "Go": `// Fixed — require TLS 1.2+
 server := &http.Server{
     Addr: ":443",
     TLSConfig: &tls.Config{
@@ -1060,7 +1064,7 @@ err := server.ListenAndServeTLS(
     "server.key",
 )`,
 
-    "C#": `// Fixed — enable TLS 1.2+
+            "C#": `// Fixed — enable TLS 1.2+
 var handler = new HttpClientHandler();
 
 // For modern .NET versions, TLS 1.2+
@@ -1070,7 +1074,7 @@ var handler = new HttpClientHandler();
 handler.SslProtocols =
     SslProtocols.Tls12 |
     SslProtocols.Tls13;`,
-},
+        },
     },
 
     CORS: {
@@ -1080,12 +1084,12 @@ handler.SslProtocols =
         impact: ["Cross-origin data theft", "CSRF-like attacks on APIs", "Session abuse"],
         reproduce: (raw) => [`Server responded with Access-Control-Allow-Origin: ${raw?.allowedOrigin ?? "*"} for an arbitrary origin.`],
         codeSamples: {
-    "Node.js": `app.use(cors({
+            "Node.js": `app.use(cors({
   origin: ["https://yourapp.com"],
   credentials: true,
 }));`,
 
-    "Java": `@Configuration
+            "Java": `@Configuration
 public class CorsConfig
     implements WebMvcConfigurer {
 
@@ -1101,7 +1105,7 @@ public class CorsConfig
     }
 }`,
 
-    "Python": `from flask_cors import CORS
+            "Python": `from flask_cors import CORS
 
 CORS(
     app,
@@ -1109,7 +1113,7 @@ CORS(
     supports_credentials=True
 )`,
 
-    "Go": `// Allow only trusted origins
+            "Go": `// Allow only trusted origins
 w.Header().Set(
     "Access-Control-Allow-Origin",
     "https://yourapp.com",
@@ -1119,8 +1123,8 @@ w.Header().Set(
     "Access-Control-Allow-Credentials",
     "true",
 )`,
-    
-    "C#": `builder.Services.AddCors(options =>
+
+            "C#": `builder.Services.AddCors(options =>
 {
     options.AddPolicy(
         "TrustedOrigins",
@@ -1135,7 +1139,7 @@ w.Header().Set(
 });
 
 app.UseCors("TrustedOrigins");`,
-},
+        },
     },
 
     CLICKJACKING: {
@@ -1167,13 +1171,13 @@ app.UseCors("TrustedOrigins");`,
         impact: ["Session hijacking", "Cookie theft via XSS", "CSRF"],
         reproduce: (raw) => [`Insecure cookies found: ${(raw?.insureCookies ?? raw?.insecureCookies ?? []).join(", ") || "see evidence"}.`],
         codeSamples: {
-    "Node.js": `res.cookie("session", token, {
+            "Node.js": `res.cookie("session", token, {
   httpOnly: true,
   secure: true,
   sameSite: "strict",
 });`,
 
-    "Java": `ResponseCookie cookie =
+            "Java": `ResponseCookie cookie =
     ResponseCookie.from(
         "session",
         token
@@ -1188,7 +1192,7 @@ response.addHeader(
     cookie.toString()
 );`,
 
-    "Python": `response.set_cookie(
+            "Python": `response.set_cookie(
     "session",
     token,
     httponly=True,
@@ -1196,7 +1200,7 @@ response.addHeader(
     samesite="Strict",
 )`,
 
-    "Go": `http.SetCookie(
+            "Go": `http.SetCookie(
     w,
     &http.Cookie{
         Name: "session",
@@ -1208,7 +1212,7 @@ response.addHeader(
     },
 )`,
 
-    "C#": `Response.Cookies.Append(
+            "C#": `Response.Cookies.Append(
     "session",
     token,
     new CookieOptions
@@ -1219,7 +1223,7 @@ response.addHeader(
             SameSiteMode.Strict,
     }
 );`,
-},
+        },
     },
 
     OPEN_REDIRECT: {
@@ -1229,7 +1233,7 @@ response.addHeader(
         impact: ["Phishing", "Brand impersonation", "Credential theft via fake login pages"],
         reproduce: (raw) => [`A redirect parameter pointing to an external domain resulted in a redirect to: ${raw?.location ?? "an external site"}.`],
         codeSamples: {
-    "Node.js": `// Fixed — allowlist redirect destinations
+            "Node.js": `// Fixed — allowlist redirect destinations
 const allowedPaths = new Set([
   "/dashboard",
   "/settings",
@@ -1241,7 +1245,7 @@ if (!allowedPaths.has(redirectTo)) {
 
 res.redirect(redirectTo);`,
 
-    "Java": `// Fixed — allowlist local destinations
+            "Java": `// Fixed — allowlist local destinations
 Set<String> allowedPaths = Set.of(
     "/dashboard",
     "/settings"
@@ -1253,7 +1257,7 @@ if (!allowedPaths.contains(redirectTo)) {
 
 return "redirect:" + redirectTo;`,
 
-    "Python": `# Fixed — allowlist destinations
+            "Python": `# Fixed — allowlist destinations
 from urllib.parse import urlparse
 
 allowed_paths = {
@@ -1268,7 +1272,7 @@ if parsed.netloc or parsed.path not in allowed_paths:
 
 return redirect(redirect_to)`,
 
-    "Go": `// Fixed — allowlist redirect paths
+            "Go": `// Fixed — allowlist redirect paths
 allowed := map[string]bool{
     "/dashboard": true,
     "/settings":  true,
@@ -1285,14 +1289,14 @@ http.Redirect(
     http.StatusFound,
 )`,
 
-    "C#": `// Fixed — only allow local URLs
+            "C#": `// Fixed — only allow local URLs
 if (!Url.IsLocalUrl(returnUrl))
 {
     returnUrl = "/";
 }
 
 return Redirect(returnUrl);`,
-},
+        },
     },
 
     PATH_TRAVERSAL: {
@@ -1302,7 +1306,7 @@ return Redirect(returnUrl);`,
         impact: ["Arbitrary file read", "Source code / config disclosure", "Credential leakage"],
         reproduce: (raw) => (raw?.findings ?? []).map((f: string) => `Payload "${f}" successfully accessed a file outside the intended directory.`),
         codeSamples: {
-    "Node.js": `// Fixed — resolve and verify the path
+            "Node.js": `// Fixed — resolve and verify the path
 const baseDir = path.resolve("./uploads");
 
 const requestedPath = path.resolve(
@@ -1320,7 +1324,7 @@ if (
 
 const data = await fs.readFile(requestedPath);`,
 
-    "Java": `// Fixed — normalize and verify path
+            "Java": `// Fixed — normalize and verify path
 Path baseDir =
     Paths.get("/app/uploads")
         .toAbsolutePath()
@@ -1340,7 +1344,7 @@ if (!requested.startsWith(baseDir)) {
 byte[] data =
     Files.readAllBytes(requested);`,
 
-    "Python": `# Fixed — verify resolved path
+            "Python": `# Fixed — verify resolved path
 from pathlib import Path
 
 base_dir = Path("/app/uploads").resolve()
@@ -1351,7 +1355,7 @@ if base_dir not in requested.parents:
 
 data = requested.read_bytes()`,
 
-    "Go": `// Fixed — clean and validate the path
+            "Go": `// Fixed — clean and validate the path
 baseDir, _ := filepath.Abs("./uploads")
 
 requested := filepath.Join(
@@ -1370,7 +1374,7 @@ if err != nil ||
     return errors.New("invalid path")
 }`,
 
-    "C#": `// Fixed — resolve and verify path
+            "C#": `// Fixed — resolve and verify path
 var baseDir =
     Path.GetFullPath("./uploads");
 
@@ -1391,7 +1395,7 @@ if (!requested.StartsWith(
 
 var data =
     await File.ReadAllBytesAsync(requested);`,
-},
+        },
     },
 
     SSRF: {
@@ -1401,7 +1405,7 @@ var data =
         impact: ["Internal network access", "Cloud credential theft", "Internal service exploitation"],
         reproduce: (raw) => (raw?.findings ?? []).map((f: any) => `Parameter "${f.param}" fetched an internal target (${f.target}), exposing: ${f.evidence}.`),
         codeSamples: {
-    "Node.js": `// Fixed — allowlist trusted hosts
+            "Node.js": `// Fixed — allowlist trusted hosts
 const allowedHosts = new Set([
   "api.example.com",
   "images.example.com",
@@ -1415,7 +1419,7 @@ if (!allowedHosts.has(target.hostname)) {
 
 const response = await fetch(target);`,
 
-    "Java": `// Fixed — allowlist destinations
+            "Java": `// Fixed — allowlist destinations
 URI target = URI.create(userInput);
 
 Set<String> allowedHosts = Set.of(
@@ -1434,7 +1438,7 @@ HttpRequest request =
         .GET()
         .build();`,
 
-    "Python": `# Fixed — allowlist destinations
+            "Python": `# Fixed — allowlist destinations
 from urllib.parse import urlparse
 
 allowed_hosts = {
@@ -1449,7 +1453,7 @@ if target.hostname not in allowed_hosts:
 
 # Perform the request only after validation.`,
 
-    "Go": `// Fixed — allowlist trusted hosts
+            "Go": `// Fixed — allowlist trusted hosts
 allowedHosts := map[string]bool{
     "api.example.com":    true,
     "images.example.com": true,
@@ -1468,7 +1472,7 @@ if !allowedHosts[target.Hostname()] {
 
 resp, err := http.Get(target.String())`,
 
-    "C#": `// Fixed — allowlist trusted hosts
+            "C#": `// Fixed — allowlist trusted hosts
 var allowedHosts = new HashSet<string>
 {
     "api.example.com",
@@ -1486,7 +1490,7 @@ if (!allowedHosts.Contains(target.Host))
 
 var response =
     await httpClient.GetAsync(target);`,
-},
+        },
     },
 
     CSRF: {
@@ -1495,8 +1499,8 @@ var response =
         riskDescription: "An attacker can trick a logged-in user's browser into submitting unwanted requests (e.g. changing their password) without their knowledge.",
         impact: ["Unauthorized actions on behalf of the user", "Account settings tampering"],
         reproduce: () => ["No CSRF token was found in the form or request, meaning cross-site requests would be accepted."],
-       codeSamples: {
-    "Node.js": `// Check dependencies
+        codeSamples: {
+            "Node.js": `// Check dependencies
 npm audit
 
 // Update vulnerable dependencies
@@ -1505,7 +1509,7 @@ npm audit fix
 // Keep dependencies updated
 // and use automated dependency scanning.`,
 
-    "Java": `// Maven — inspect dependencies
+            "Java": `// Maven — inspect dependencies
 mvn dependency:tree
 
 // Check for known vulnerabilities
@@ -1514,7 +1518,7 @@ mvn dependency:tree
 // Example:
 // mvn org.owasp:dependency-check-maven:check`,
 
-    "Python": `# Check installed dependencies
+            "Python": `# Check installed dependencies
 pip-audit
 
 # Generate dependency information
@@ -1522,7 +1526,7 @@ pip freeze > requirements.txt
 
 # Keep dependencies pinned and updated.`,
 
-    "Go": `// Check dependencies
+            "Go": `// Check dependencies
 go list -m all
 
 // Scan for known vulnerabilities
@@ -1530,7 +1534,7 @@ govulncheck ./...
 
 // Keep Go modules updated.`,
 
-    "C#": `// Check vulnerable NuGet packages
+            "C#": `// Check vulnerable NuGet packages
 dotnet list package --vulnerable
 
 // Update packages
@@ -1538,7 +1542,7 @@ dotnet restore
 
 // Keep dependencies patched and
 // use automated vulnerability scanning.`,
-},
+        },
     },
 
     JWT: {
@@ -1547,8 +1551,8 @@ dotnet restore
         riskDescription: "A weak or missing JWT verification allows attackers to forge valid-looking tokens and impersonate any user.",
         impact: ["Account takeover", "Privilege escalation", "Full authentication bypass"],
         reproduce: (raw) => (raw?.findings ?? []).map((f: any) => f.issue),
-       codeSamples: {
-    "Node.js": `jwt.sign(
+        codeSamples: {
+            "Node.js": `jwt.sign(
   payload,
   process.env.JWT_SECRET,
   {
@@ -1557,7 +1561,7 @@ dotnet restore
   }
 );`,
 
-    "Java": `String token = Jwts.builder()
+            "Java": `String token = Jwts.builder()
     .subject(userId)
     .expiration(
         Date.from(
@@ -1568,7 +1572,7 @@ dotnet restore
     .signWith(secretKey)
     .compact();`,
 
-    "Python": `token = jwt.encode(
+            "Python": `token = jwt.encode(
     {
         "sub": user_id,
         "exp": datetime.utcnow()
@@ -1578,7 +1582,7 @@ dotnet restore
     algorithm="HS256",
 )`,
 
-    "Go": `claims := jwt.MapClaims{
+            "Go": `claims := jwt.MapClaims{
     "sub": userID,
     "exp": time.Now()
         .Add(time.Hour)
@@ -1593,7 +1597,7 @@ token := jwt.NewWithClaims(
 signed, err :=
     token.SignedString(secret)`,
 
-    "C#": `var tokenHandler =
+            "C#": `var tokenHandler =
     new JwtSecurityTokenHandler();
 
 var key = Encoding.UTF8.GetBytes(
@@ -1624,7 +1628,7 @@ var descriptor =
 
 var token =
     tokenHandler.CreateToken(descriptor);`,
-},
+        },
     },
 
     DEPENDENCY_CVE: {
@@ -1634,7 +1638,7 @@ var token =
         impact: ["Depends on the specific CVE — ranges from information disclosure to remote code execution"],
         reproduce: (raw) => (raw?.findings ?? []).map((f: any) => `${f.name} ${f.version} has known vulnerabilities: ${(f.vulnerabilities ?? []).join(", ")}.`),
         codeSamples: {
-    "Node.js": `// Check dependencies
+            "Node.js": `// Check dependencies
 npm audit
 
 // Update vulnerable dependencies
@@ -1643,7 +1647,7 @@ npm audit fix
 // Keep dependencies updated
 // and use automated dependency scanning.`,
 
-    "Java": `// Maven — inspect dependencies
+            "Java": `// Maven — inspect dependencies
 mvn dependency:tree
 
 // Check for known vulnerabilities
@@ -1652,7 +1656,7 @@ mvn dependency:tree
 // Example:
 // mvn org.owasp:dependency-check-maven:check`,
 
-    "Python": `# Check installed dependencies
+            "Python": `# Check installed dependencies
 pip-audit
 
 # Generate dependency information
@@ -1660,7 +1664,7 @@ pip freeze > requirements.txt
 
 # Keep dependencies pinned and updated.`,
 
-    "Go": `// Check dependencies
+            "Go": `// Check dependencies
 go list -m all
 
 // Scan for known vulnerabilities
@@ -1668,7 +1672,7 @@ govulncheck ./...
 
 // Keep Go modules updated.`,
 
-    "C#": `// Check vulnerable NuGet packages
+            "C#": `// Check vulnerable NuGet packages
 dotnet list package --vulnerable
 
 // Update packages
@@ -1676,7 +1680,7 @@ dotnet restore
 
 // Keep dependencies patched and
 // use automated vulnerability scanning.`,
-},
+        },
     },
 }
 
