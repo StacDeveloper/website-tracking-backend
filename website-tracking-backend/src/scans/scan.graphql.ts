@@ -8,7 +8,7 @@ export class TestResultType {
     @Field() status: string;
     @Field({ nullable: true }) severity?: string;
     @Field(() => GraphQLJSON, { nullable: true }) rawResult?: any;
-    @Field({ nullable: true }) aiSuggestion?: string;
+    @Field({ nullable: true }) aiSuggstion?: string;
 }
 
 @ObjectType()

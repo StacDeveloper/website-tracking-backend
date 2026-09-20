@@ -12,7 +12,7 @@ interface TestResult {
     category: string
     status: string
     severity: string
-    aiSuggestion?: string
+    aiSuggstion?: string
 }
 
 interface ScanDetail {
@@ -83,7 +83,7 @@ const LinkResult = ({ scanId, onBack }: LinkResultsProps) => {
                                     category
                                     status
                                     severity
-                                    aiSuggestion
+                                    aiSuggstion
                                 }
                             }
                         }`,
@@ -371,7 +371,7 @@ const LinkResult = ({ scanId, onBack }: LinkResultsProps) => {
                             <div key={t.category} className="rounded-lg border p-4" style={{ borderColor: c.cardBorder }}>
                                 <p className="mb-1 text-sm font-semibold">{FormatCategoryMeta(t.category)}</p>
                                 <p className="text-xs" style={{ color: c.textMuted }}>
-                                    {t.aiSuggestion ?? "No suggestion available."}
+                                    {t.aiSuggstion ?? "No suggestion available."}
                                 </p>
                             </div>
                         ))}

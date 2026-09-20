@@ -74,7 +74,7 @@ type Subscription {
 }
 
 type TestResultType {
-  aiSuggestion: String
+  aiSuggstion: String
   category: String!
   id: ID!
   rawResult: JSON

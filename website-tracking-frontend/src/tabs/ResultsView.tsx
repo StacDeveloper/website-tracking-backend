@@ -66,7 +66,7 @@ const ResultsListView = ({
                     status
                     severity
                     rawResult
-                    aiSuggestion
+                    aiSuggstion
                 }
             }
             nextCursor

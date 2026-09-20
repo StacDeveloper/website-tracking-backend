@@ -4,12 +4,12 @@ import OpenAi from "openai"
 @Injectable()
 export class AiSuggestionService {
 
-    private apiKey = process.env.OPENROUTER_API_KEY! as string
-    private model = process.env.OPENROUTER_API_MODEL! as string
+    private apiKey = process.env.GEMINI_API_KEY! as string 
+    private model = "gemini-3.5-flash"
 
     private AiModel = new OpenAi({
         apiKey: this.apiKey,
-        baseURL: "https://openrouter.ai/api/v1"
+        baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/"
     })
 
     constructor(private prisma: PrismaService) { }

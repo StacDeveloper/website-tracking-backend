@@ -1,6 +1,6 @@
 "use client"
 import { useState } from "react";
-import { features, footerItems } from "./assets/assets";
+import { features, footerItems, individualTestOptions } from "./assets/assets";
 import { FadeIn } from "@/lib/Reusable-Components/FadeIn";
 import {
   CircleCheckBig,
@@ -11,6 +11,8 @@ import {
   Sun,
 } from "lucide-react";
 import Link from "next/link";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 
 
@@ -18,6 +20,7 @@ const HomePage = () => {
   const [url, setUrl] = useState("");
   const [theme, setTheme] = useState("dark");
   const isDark = theme === "dark";
+  const router = useRouter()
 
 
   const c = {
@@ -36,6 +39,54 @@ const HomePage = () => {
     gradientTo: isDark ? "#818cf8" : "#4f46e5",
     accentText: isDark ? "#818cf8" : "#4f46e5",
   };
+
+  const defaultCategories = individualTestOptions
+
+  const BLOCKED_PATTERNS = [
+    /\.gov$/i,
+    /\.gov\.\w+$/i,
+    /\.mil$/i,
+    /bank/i,
+  ];
+  async function handleSubmit(url: string) {
+    if (!url.trim() || url.length === 0 || !url.includes("https://")) {
+      toast.error("Pleas provide valid URL to perform tests")
+      return;
+    }
+    if (BLOCKED_PATTERNS.some((pattern) => pattern.test(url))) {
+      toast.error("This website cant be tested")
+      return;
+    }
+    try {
+      const res = await fetch("http://localhost:4000/graphql", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: `mutation StartScan($url: String!, $categories: [String!]!, $config:WebsiteConfigInput) {
+                startScan(url: $url, categories: $categories, config:$config) {
+                  message
+                  skippedActiveTest
+                  scan {
+                    id
+                    status
+                  }
+                },
+              }
+                `,
+          variables: { url, categories: defaultCategories }
+        }),
+      })
+      const { data, errors } = await res.json()
+      console.log(data, errors)
+      return data || "Data failed"
+
+    } catch (error: any) {
+      console.log(error)
+      toast.error(error?.message)
+    }
+  }
+
 
   return (
     <div
@@ -164,6 +215,7 @@ const HomePage = () => {
                 </div>
                 <button
                   type="submit"
+                  onClick={() => handleSubmit(url)}
                   className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 px-5 py-3 text-sm font-semibold text-white hover:scale-[1.02] transition-transform"
                 >
                   Start Testing

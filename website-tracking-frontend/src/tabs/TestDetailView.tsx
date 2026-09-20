@@ -15,7 +15,7 @@ export interface ResultRow {
     scanType: string;
     status: string;
     aiSummary?: string;
-    aiSuggestion?: string | null;
+    aiSuggstion?: string | null;
     rawResult?: any;
     url: string
 }
@@ -147,7 +147,7 @@ const TestDetailView = ({ test, setSelectedTest, setDetailTab, detailTab, codeLa
                             <span className="text-sm font-semibold">AI Generated Suggestion</span>
                         </div>
                         <p className="text-sm" style={{ color: c.textSecondary }}>
-                            {test.aiSuggestion ?? knowledge.riskDescription}
+                            {test.aiSuggstion ?? knowledge.riskDescription}
                         </p>
                     </div>
 
