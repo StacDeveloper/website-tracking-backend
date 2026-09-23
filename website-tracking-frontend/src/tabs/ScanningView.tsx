@@ -1,5 +1,6 @@
 "use client"
 import { liveOutputLines, testIconMap } from "@/app/assets/assets";
+import { useAuthContext } from "@/app/context/useAuthContext";
 import { useColorContext } from "@/app/context/useColorContext";
 import { CardShell } from "@/lib/Reusable-Components/Cardshell";
 import useProgressBar from "@/lib/Reusable-Components/ProgressBar";
@@ -25,7 +26,7 @@ const ScanningView = ({ setScanning, newTestUrl, scanId, selectedTestNames, setS
     const { c } = useColorContext()
     const { isDone, progress, scan } = useProgressBar({ scanId })
     const [error, setError] = useState("")
-    console.log(scan)
+    
 
     const completedCount = scan?.testResultsCount ?? 0;
     const totalCount = selectedTestNames.length;

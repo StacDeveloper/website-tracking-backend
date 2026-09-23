@@ -1,4 +1,5 @@
 import { testIconMap } from "@/app/assets/assets";
+import { useAuthContext } from "@/app/context/useAuthContext";
 import { useColorContext } from "@/app/context/useColorContext";
 import { FormatCategoryMeta } from "@/lib/FormatCategory";
 import { CardShell } from "@/lib/Reusable-Components/Cardshell";
@@ -63,10 +64,10 @@ const LinkResult = ({ scanId, onBack }: LinkResultsProps) => {
     const [loading, setLoading] = useState<boolean>(true)
     const [error, setError] = useState<string>("")
     const [activeTab, setActiveTab] = useState<"overview" | "results" | "ai">("overview")
-
+    const {backendurl} = useAuthContext()
     const fetchScan = async () => {
         try {
-            const res = await fetch("http://localhost:4000/graphql", {
+            const res = await fetch(backendurl, {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },

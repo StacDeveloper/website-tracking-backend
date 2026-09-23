@@ -1,7 +1,6 @@
 "use client"
 
 import { useSession } from "@/auth/auth";
-import { useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
 
 interface AuthContextProps {
@@ -11,6 +10,7 @@ interface AuthContextProps {
     acceptDisclaimer: () => void;
     user: UserInterface | null
     setUser: React.Dispatch<React.SetStateAction<UserInterface | null>>
+    backendurl: string
 }
 
 interface UserInterface {
@@ -55,8 +55,9 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
         setHasAcceptedDisclaimer(true);
     }
 
+    const backendurl = process.env.NEXT_PUBLIC_BACKEND_URL! as string
     const value: any = {
-        isAuthenticated, hasAcceptedDisclaimer, isLoading: isPending, acceptDisclaimer, user, setUser
+        isAuthenticated, hasAcceptedDisclaimer, isLoading: isPending, acceptDisclaimer, user, setUser, backendurl
     }
 
     return <AuthContext.Provider value={value}>

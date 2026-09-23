@@ -18,6 +18,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import LinkResult from "./LinkResult";
 import { toast } from "react-toastify";
+import { useAuthContext } from "@/app/context/useAuthContext";
 
 interface HistoryViewProps {
     historyQuery: string;
@@ -41,7 +42,7 @@ const HistoryView = ({
     const [hasNextPage, setHasNextPage] = useState<boolean>(false)
     const [laodingMore, setLoadingMore] = useState<boolean>(false)
     const [pageIndex, setPageIndex] = useState<number>(0)
-
+    const { backendurl } = useAuthContext()
     const { c } = useColorContext();
 
     const [savedTests, setSavedTests] = useState<string[]>([]);
@@ -50,7 +51,7 @@ const HistoryView = ({
         const cursor = cursorStack[index];
         setLoadingMore(true);
         try {
-            const res = await fetch("http://localhost:4000/graphql", {
+            const res = await fetch(backendurl, {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },

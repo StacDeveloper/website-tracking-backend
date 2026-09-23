@@ -9,6 +9,7 @@ import { Search, ShieldCheck, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { ResultRow } from "./TestDetailView";
 import { toast } from "react-toastify";
+import { useAuthContext } from "@/app/context/useAuthContext";
 
 interface ResultViewProps {
     resultsTab: string;
@@ -42,13 +43,13 @@ const ResultsListView = ({
     const [pageIndex, setPageIndex] = useState(0);
     const [hasNextPage, setHasNextPage] = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);
-
+    const { backendurl } = useAuthContext()
     const getMyTests = async (index: number) => {
         if (index < 0) return;
         setLoadingMore(true)
         const cursor = cursorStack[index];
         try {
-            const res = await fetch("http://localhost:4000/graphql", {
+            const res = await fetch(backendurl, {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },
@@ -141,7 +142,7 @@ const ResultsListView = ({
 
                     desc:
                         result.aiSuggestion ||
-                        `${test.website.url}` ,
+                        `${test.website.url}`,
 
                     scanType: test.scanType ?? "UNKNOWN",
 

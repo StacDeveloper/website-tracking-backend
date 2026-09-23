@@ -1,5 +1,6 @@
 "use client"
 import { individualTestOptions, testNameToEnum } from "@/app/assets/assets";
+import { useAuthContext } from "@/app/context/useAuthContext";
 import { useColorContext } from "@/app/context/useColorContext";
 import { CardShell } from "@/lib/Reusable-Components/Cardshell";
 import { SectionLabel } from "@/lib/Reusable-Components/SectionLabel";
@@ -54,7 +55,7 @@ const NewTestView = ({ newTestUrl, setNewTestUrl, newTestType, setNewTestType, s
     });
     const [urlError, setUrlError] = useState<string>("");
 
-
+    const { backendurl } = useAuthContext()
 
     const handleStartScan = async () => {
         if (!newTestUrl.trim() || selectedTestNames.size === 0 || newTestUrl.length === 0 || !newTestUrl.includes("https://")) {
@@ -66,7 +67,7 @@ const NewTestView = ({ newTestUrl, setNewTestUrl, newTestType, setNewTestType, s
             return;
         }
         const StartScan = async (url: string, categories: string[], config?: WebsiteConfigInput) => {
-            const res = await fetch("http://localhost:4000/graphql", {
+            const res = await fetch(backendurl, {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },

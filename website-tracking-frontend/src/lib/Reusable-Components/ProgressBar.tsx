@@ -1,3 +1,4 @@
+import { useAuthContext } from "@/app/context/useAuthContext"
 import { useEffect, useRef, useState } from "react"
 
 interface ScanStatusData {
@@ -28,12 +29,13 @@ export default function useProgressBar({ scanId }: { scanId: string }) {
         }
     }, [scanId])
 
+    const { backendurl } = useAuthContext()
 
     useEffect(() => {
         if (!scanId) return
 
         const poll = async () => {
-            const res = await fetch("http://localhost:4000/graphql", {
+            const res = await fetch(backendurl, {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },

@@ -7,6 +7,7 @@ import { Download, Globe, ShieldAlert } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { formatDate } from "@/lib/FormateDate";
 import { severityMeta } from "@/app/assets/assets";
+import { useAuthContext } from "@/app/context/useAuthContext";
 
 function formatCategoryName(category: string) {
     return category.toLowerCase().split("_").map((w) => w[0].toUpperCase() + w.slice(1)).join(" ");
@@ -16,10 +17,10 @@ const OverviewView = ({ setActiveNav }: { setActiveNav: React.Dispatch<React.Set
     const { c } = useColorContext();
     const [scans, setScans] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-
+    const { backendurl } = useAuthContext()
     const fetchOverview = async () => {
         try {
-            const res = await fetch("http://localhost:4000/graphql", {
+            const res = await fetch(backendurl, {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },

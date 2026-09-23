@@ -1,5 +1,6 @@
 "use client"
 import { savedTargetLists } from "@/app/assets/assets";
+import { useAuthContext } from "@/app/context/useAuthContext";
 import { useColorContext } from "@/app/context/useColorContext";
 import { formatDate } from "@/lib/FormateDate";
 import { CardShell } from "@/lib/Reusable-Components/Cardshell";
@@ -31,9 +32,9 @@ interface SaveWebsite {
 
 const SavedTargetsView = ({ savedQuery, setSavedQuery, startScan, setNewTestUrl, setCurrentId }: SavedTargetsViewProps) => {
 
-
+    const { backendurl } = useAuthContext()
     const functionToInvokeStartTest = async (url: string, categories: string[]) => {
-        const res = await fetch("http://localhost:4000/graphql", {
+        const res = await fetch(backendurl, {
             method: "POST",
             credentials: "include",
             headers: { "Content-Type": "application/json" },
@@ -53,7 +54,7 @@ const SavedTargetsView = ({ savedQuery, setSavedQuery, startScan, setNewTestUrl,
         });
         const { data, errors } = await res.json();
         setCurrentId(data.startScan.scan.id)
-        if (errors) return null; 
+        if (errors) return null;
         return data.startScan;
     };
     const [savedWebsite, setSavedWebsite] = useState<SaveWebsite[] | []>([])

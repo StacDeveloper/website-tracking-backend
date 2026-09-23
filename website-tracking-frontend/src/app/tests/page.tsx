@@ -21,6 +21,7 @@ import { useColorContext } from "../context/useColorContext";
 import ScanningView from "@/tabs/ScanningView";
 import { useAuthContext } from "../context/useAuthContext";
 import { signOut } from "@/auth/auth";
+import { useRouter } from "next/navigation";
 
 
 export default function WebTestApp() {
@@ -34,6 +35,7 @@ export default function WebTestApp() {
   const [codeLang, setCodeLang] = useState("Node.js (mysql2)");
   const [testId, setTestId] = useState<string>("")
   const { user, setUser } = useAuthContext()
+  const router = useRouter()
   // New Test form state
   const [newTestType, setNewTestType] = useState<"Active" | "Passive">("Active");
   const [selectedTestNames, setSelectedTestNames] = useState<Set<string>>(new Set(individualTestOptions));
@@ -119,7 +121,7 @@ export default function WebTestApp() {
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-400 to-indigo-600">
               <CircleCheckBig className="h-5 w-5 text-white" strokeWidth={2.5} />
             </span>
-            <span className="text-lg font-bold tracking-tight">
+            <span className="text-lg font-bold tracking-tight cursor-pointer" onClick={() => router.push("/")}>
               Web<span style={{ color: c.accent }}>Test</span>
             </span>
           </div>
@@ -146,33 +148,7 @@ export default function WebTestApp() {
           </nav>
         </div>
 
-        <div className="flex flex-col gap-4">
-          <div className="rounded-xl border p-4" style={{ borderColor: c.cardBorder, backgroundColor: c.cardBg }}>
-            <div className="mb-1 flex items-center gap-2">
-              <Crown className="h-4 w-4 text-amber-400" />
-              <span className="text-sm font-semibold">Pro Plan</span>
-            </div>
-            <p className="text-xs" style={{ color: c.textMuted }}>Tests Remaining</p>
-            <p className="text-lg font-bold">78 / 100</p>
-            <div className="my-2 h-1.5 w-full overflow-hidden rounded-full" style={{ backgroundColor: c.inputBg }}>
-              <div className="h-full rounded-full bg-gradient-to-r from-indigo-400 to-indigo-600" style={{ width: "78%" }} />
-            </div>
-            <button className="mt-2 w-full rounded-lg border py-1.5 text-xs font-semibold" style={{ borderColor: c.cardBorder, color: c.textPrimary }}>
-              Upgrade Plan
-            </button>
-          </div>
 
-          <div className="rounded-xl border p-4" style={{ borderColor: c.cardBorder, backgroundColor: c.cardBg }}>
-            <div className="mb-1 flex items-center gap-2">
-              <Headphones className="h-4 w-4" style={{ color: c.textMuted }} />
-              <span className="text-sm font-semibold">Need Help?</span>
-            </div>
-            <p className="mb-3 text-xs" style={{ color: c.textMuted }}>Check our docs or contact support.</p>
-            <button className="w-full rounded-lg border py-1.5 text-xs font-semibold" style={{ borderColor: c.cardBorder, color: c.textPrimary }}>
-              View Docs
-            </button>
-          </div>
-        </div>
       </aside>
 
       {/* Main */}
@@ -186,7 +162,7 @@ export default function WebTestApp() {
           >
             {isDark ? <Moon className="h-4 w-4" style={{ color: c.textSecondary }} /> : <Sun className="h-4 w-4" style={{ color: c.textSecondary }} />}
           </button>
-          <button
+          {user && <button
             onClick={() => signOut()}
             className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200"
             style={{
@@ -207,7 +183,7 @@ export default function WebTestApp() {
             }}
           >
             Sign Out
-          </button>
+          </button>}
           <span className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold" style={{ backgroundColor: c.activeNavBg, color: c.accent }}>
             {user?.image ? <img src={user?.image} style={{ width: '35px', height: '38px', borderRadius: '50%' }} /> : user?.name.slice(0, 8)[0]}
           </span>
