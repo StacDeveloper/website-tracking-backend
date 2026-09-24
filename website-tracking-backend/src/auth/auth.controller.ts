@@ -6,8 +6,6 @@ import { getAuth } from "./auth";
 
 @Controller("/api/auth")
 export class AuthController {
-
-
     @All("*")
     async handleAuth(@Req() req: Request, @Res() res: Response) {
         const auth = await getAuth()
