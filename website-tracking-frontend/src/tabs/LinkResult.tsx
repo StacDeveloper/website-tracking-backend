@@ -64,7 +64,7 @@ const LinkResult = ({ scanId, onBack }: LinkResultsProps) => {
     const [loading, setLoading] = useState<boolean>(true)
     const [error, setError] = useState<string>("")
     const [activeTab, setActiveTab] = useState<"overview" | "results" | "ai">("overview")
-    const {backendurl} = useAuthContext()
+    const { backendurl } = useAuthContext()
     const fetchScan = async () => {
         try {
             const res = await fetch(`${backendurl}/graphql`, {
