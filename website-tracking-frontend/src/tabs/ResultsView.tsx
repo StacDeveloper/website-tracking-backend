@@ -49,7 +49,7 @@ const ResultsListView = ({
         setLoadingMore(true)
         const cursor = cursorStack[index];
         try {
-            const res = await fetch(backendurl, {
+            const res = await fetch(`${backendurl}/graphql`, {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },

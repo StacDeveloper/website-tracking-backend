@@ -67,7 +67,7 @@ const NewTestView = ({ newTestUrl, setNewTestUrl, newTestType, setNewTestType, s
             return;
         }
         const StartScan = async (url: string, categories: string[], config?: WebsiteConfigInput) => {
-            const res = await fetch(backendurl, {
+            const res = await fetch(`${backendurl}/graphql`, {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },

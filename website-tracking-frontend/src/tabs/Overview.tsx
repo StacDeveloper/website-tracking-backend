@@ -20,7 +20,7 @@ const OverviewView = ({ setActiveNav }: { setActiveNav: React.Dispatch<React.Set
     const { backendurl } = useAuthContext()
     const fetchOverview = async () => {
         try {
-            const res = await fetch(backendurl, {
+            const res = await fetch(`${backendurl}/graphql`, {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },

@@ -51,7 +51,7 @@ const HistoryView = ({
         const cursor = cursorStack[index];
         setLoadingMore(true);
         try {
-            const res = await fetch(backendurl, {
+            const res = await fetch(`${backendurl}/graphql` , {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },

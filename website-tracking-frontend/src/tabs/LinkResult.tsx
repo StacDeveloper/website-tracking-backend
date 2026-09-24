@@ -67,7 +67,7 @@ const LinkResult = ({ scanId, onBack }: LinkResultsProps) => {
     const {backendurl} = useAuthContext()
     const fetchScan = async () => {
         try {
-            const res = await fetch(backendurl, {
+            const res = await fetch(`${backendurl}/graphql`, {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },

@@ -64,7 +64,7 @@ const HomePage = () => {
       return;
     }
     try {
-      const res = await fetch("http://localhost:4000/graphql", {
+      const res = await fetch(`${url}/graphql`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },

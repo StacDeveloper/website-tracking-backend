@@ -35,7 +35,7 @@ export default function useProgressBar({ scanId }: { scanId: string }) {
         if (!scanId) return
 
         const poll = async () => {
-            const res = await fetch(backendurl, {
+            const res = await fetch(`${backendurl}/graphql` , {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },

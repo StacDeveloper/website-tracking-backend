@@ -34,7 +34,7 @@ const SavedTargetsView = ({ savedQuery, setSavedQuery, startScan, setNewTestUrl,
 
     const { backendurl } = useAuthContext()
     const functionToInvokeStartTest = async (url: string, categories: string[]) => {
-        const res = await fetch(backendurl, {
+        const res = await fetch(`${backendurl}/graphql`, {
             method: "POST",
             credentials: "include",
             headers: { "Content-Type": "application/json" },
