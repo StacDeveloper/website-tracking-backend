@@ -6,6 +6,7 @@ import { AuthContextProvider } from "./context/useAuthContext";
 import { RouteGuard } from "@/lib/RouteGuard";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { QueryProvider } from "@/lib/Reusable-Components/QueryClient";
 
 export const metadata: Metadata = {
   title: "WebTest — Test your website. Get real insights.",
@@ -13,20 +14,20 @@ export const metadata: Metadata = {
     "Run automated tests, check performance, SEO, accessibility and more. Everything you need to make your website better.",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+
+export default function RootLayout({ children }: { children: React.ReactNode; }) {
+
   return (
     <html lang="en">
       <body className="font-sans antialiased">
-        
+
         <AuthContextProvider>
           <BackendContextProvider>
             <ColorContextProvider>
               <RouteGuard>
-                {children}
+                <QueryProvider>
+                  {children}
+                </QueryProvider>
                 <ToastContainer position={"top-center"} />
               </RouteGuard>
             </ColorContextProvider>

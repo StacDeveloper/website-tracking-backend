@@ -19,8 +19,7 @@ export default function LoginPage() {
     const [showConfirm, setShowConfirm] = useState(false);
     const [agreed, setAgreed] = useState(true);
     const [loginPage, setLoginPage] = useState(false)
-    const url = process.env.NEXT_PUBLIC_BACKEND_URL!
-
+    
     function getPasswordStrength(password: string) {
         let score = 0;
         if (password.length >= 8) score++;

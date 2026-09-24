@@ -5,8 +5,6 @@ import {
   CircleCheckBig,
   Moon,
   Sun,
-  Crown,
-  Headphones,
 } from "lucide-react";
 
 import OverviewView from "@/tabs/Overview";

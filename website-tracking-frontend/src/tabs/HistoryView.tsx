@@ -47,7 +47,7 @@ const HistoryView = ({
 
     const [savedTests, setSavedTests] = useState<string[]>([]);
     const getHistoryOfUser = async (index: number) => {
-        if (index < 0) return; // guard against negative index
+        if (index < 0) return; 
         const cursor = cursorStack[index];
         setLoadingMore(true);
         try {
@@ -83,8 +83,6 @@ const HistoryView = ({
             const result = data.getHistoryofUser;
             sethistoryTests(result.items);
             setHasNextPage(result.hasNextPage);
-
-
             if (index === cursorStack.length - 1 && result.nextCursor) {
                 setCursorStack((prev) => [...prev, result.nextCursor]);
             }

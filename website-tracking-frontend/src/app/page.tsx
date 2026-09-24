@@ -114,7 +114,7 @@ const HomePage = () => {
         {/* Navbar */}
         <header className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 lg:px-8">
           <div className="flex items-center gap-2">
-            <span  className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-400 to-indigo-600 cursor-pointer">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-400 to-indigo-600 cursor-pointer">
               <CircleCheckBig className="h-5 w-5 text-white" strokeWidth={2.5} />
             </span>
             <span className="text-lg font-bold tracking-tight" style={{ color: c.textPrimary }}>
@@ -126,7 +126,7 @@ const HomePage = () => {
             {["Features", "Tests", "Pricing", "FAQ"].map((label, index) => (
               <Link
                 key={index}
-                href={label.toLowerCase()}
+                href={!user ? "login" : label.toLowerCase()}
                 className="text-sm transition-colors"
                 style={{ color: c.textSecondary }}
               >
