@@ -3,7 +3,6 @@
   "version": "0.0.1",
   "description": "",
   "author": "",
-  "type":"module",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
@@ -36,7 +35,7 @@
     "@openrouter/sdk": "^1.2.4",
     "@prisma/client": "^6.19.3",
     "axios": "^1.18.1",
-    "better-auth": "^1.6.27",
+    "better-auth": "1.6.27",
     "bullmq": "^5.81.2",
     "form-data": "^4.0.6",
     "graphql": "^16.14.0",
