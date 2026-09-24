@@ -1,7 +1,5 @@
 import { TestCategory } from "@prisma/client";
-console.log("========== PRISMA TEST CATEGORY ==========");
-console.log(TestCategory);
-console.log("==========================================");
+
 export const ACTIVE_TEST: TestCategory[] = [
     TestCategory.SQL_INJECTION,
     TestCategory.XSS,
