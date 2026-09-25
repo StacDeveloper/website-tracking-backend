@@ -18,7 +18,10 @@ export const getAuth = async () => {
                 },
                 defaultCookieAttributes: {
                     sameSite: "none",
-                    secure: true
+                    secure: true,
+                },
+                ipAddress:{
+                    ipAddressHeaders: ["x-forwarded-for"],
                 }
             },
             socialProviders: {
