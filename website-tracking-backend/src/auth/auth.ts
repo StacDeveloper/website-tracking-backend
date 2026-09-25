@@ -8,7 +8,7 @@ export const getAuth = async () => {
         const { prismaAdapter } = await import('better-auth/adapters/prisma');
         const { PrismaClient } = await import('@prisma/client');
         const prisma = new PrismaClient()
-        betterAuth({
+        auth = betterAuth({
             database: prismaAdapter(prisma, { provider: "postgresql" }),
             baseURL: process.env.BETTER_AUTH_URL!,
             trustedOrigins: [process.env.FRONTEND_URL!],
