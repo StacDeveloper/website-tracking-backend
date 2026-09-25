@@ -17,8 +17,8 @@ import { AuthModule } from './auth/auth.module';
   imports: [
     BullModule.forRoot({
       connection: {
-        host: "localhost",
-        port: 6379
+        url:process.env.REDIS_URL,
+        tls:{}
       }
     }), ConfigModule.forRoot({
       isGlobal: true
