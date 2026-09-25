@@ -12,6 +12,15 @@ export const getAuth = async () => {
             database: prismaAdapter(prisma, { provider: "postgresql" }),
             baseURL: process.env.BETTER_AUTH_URL!,
             trustedOrigins: [process.env.FRONTEND_URL!],
+            advanced: {
+                crossSubDomainCookies: {
+                    enabled: false
+                },
+                defaultCookieAttributes: {
+                    sameSite: "none",
+                    secure: true
+                }
+            },
             socialProviders: {
                 google: {
                     clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -29,5 +38,4 @@ export const getAuth = async () => {
         })
     }
     return auth
-
 }
