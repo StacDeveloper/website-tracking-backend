@@ -66,10 +66,10 @@ export class ScanService {
             const job = await this.passiveQueue.add(
                 "run-test-Passive-Queue",
                 { scanId: scan.id, website, url: website.url, category },
-                { jobId: `${scan.id}-${category}`, attempts: 2 } 
+                { jobId: `${scan.id}-${category}`, attempts: 2 }
             )
             console.log("Job added, id:", job.id, "on queue:", job.queueName);
-            
+
         }
         for (const category of willRunActive) {
             console.log("Active scan Started")

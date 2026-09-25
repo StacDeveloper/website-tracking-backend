@@ -22,7 +22,9 @@ if (!url) throw new Error("Redis is not initialized properly")
         host: url.host,
         port: Number(url.port),
         password: url.password,
-        tls: url.protocol === "rediss:'" ? {} : undefined
+        tls: url.protocol === "rediss:'" ? {} : undefined,
+        maxRetriesPerRequest:null,
+        enableReadyCheck:false
       }
     }), ConfigModule.forRoot({
       isGlobal: true
