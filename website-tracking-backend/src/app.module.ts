@@ -13,17 +13,15 @@ import { join } from 'path';
 import GraphQLJSON from 'graphql-type-json';
 import { AuthModule } from './auth/auth.module';
 
-const url = new URL(process.env.REDIS_URL! as string)
+const url = process.env.REDIS_URL! as string
 if (!url) throw new Error("Redis is not initialized properly")
 @Module({
   imports: [
     BullModule.forRoot({
       connection: {
-        host: url.host,
-        port: Number(url.port),
-        password: url.password,
-        tls:  {},
-        maxRetriesPerRequest:null,
+        url: url,
+        tls: {},
+        maxRetriesPerRequest: null
       }
     }), ConfigModule.forRoot({
       isGlobal: true
