@@ -14,6 +14,7 @@ import {
     Filter,
     MoreVertical,
     Search,
+    Trash2,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import LinkResult from "./LinkResult";
@@ -47,11 +48,11 @@ const HistoryView = ({
 
     const [savedTests, setSavedTests] = useState<string[]>([]);
     const getHistoryOfUser = async (index: number) => {
-        if (index < 0) return; 
+        if (index < 0) return;
         const cursor = cursorStack[index];
         setLoadingMore(true);
         try {
-            const res = await fetch(`${backendurl}/graphql` , {
+            const res = await fetch(`${backendurl}/graphql`, {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },
@@ -435,28 +436,46 @@ const HistoryView = ({
                                             </td>
 
                                             {/* Actions */}
+                                            {/* Actions */}
                                             <td className="px-5 py-4">
                                                 <div className="flex items-center gap-2">
+
+                                                    {/* View Report */}
                                                     <button
-                                                        className="whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-medium"
+                                                        type="button"
+                                                        className="whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors"
                                                         style={{
-                                                            borderColor:
-                                                                c.cardBorder,
-                                                            color:
-                                                                c.accent,
+                                                            borderColor: c.cardBorder,
+                                                            color: c.accent,
                                                         }}
                                                         onClick={() => setViewingId(row.id)}
                                                     >
                                                         View Report
                                                     </button>
 
-                                                    <MoreVertical
-                                                        className="h-4 w-4 cursor-pointer"
+                                                    {/* Delete */}
+                                                    <button
+                                                        type="button"
+                                                        title="Delete test"
+                                                        className="group flex h-8 w-8 items-center justify-center rounded-lg border transition-all duration-150"
                                                         style={{
-                                                            color:
-                                                                c.textFaint,
+                                                            borderColor: c.cardBorder,
+                                                            color: c.textFaint,
                                                         }}
-                                                    />
+                                                        onMouseEnter={(e) => {
+                                                            e.currentTarget.style.color = "#f87171";
+                                                            e.currentTarget.style.borderColor = "rgba(248, 113, 113, 0.35)";
+                                                            e.currentTarget.style.backgroundColor = "rgba(248, 113, 113, 0.08)";
+                                                        }}
+                                                        onMouseLeave={(e) => {
+                                                            e.currentTarget.style.color = c.textFaint;
+                                                            e.currentTarget.style.borderColor = c.cardBorder;
+                                                            e.currentTarget.style.backgroundColor = "transparent";
+                                                        }}
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </button>
+
                                                 </div>
                                             </td>
                                         </tr>
