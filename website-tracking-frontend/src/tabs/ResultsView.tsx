@@ -78,7 +78,6 @@ const ResultsListView = ({
                 })
             })
             const { data, errors } = await res.json()
-            console.log(data)
             const result = data.getAlluserTests
             setTests(result.items ?? [])
             setHasNextPage(result.hasNextPage)

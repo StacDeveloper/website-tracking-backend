@@ -39,7 +39,6 @@ const OverviewView = ({ setActiveNav }: { setActiveNav: React.Dispatch<React.Set
                 }),
             });
             const { data, errors } = await res.json();
-            console.log(data)
             if (errors) {
                 console.error(errors);
                 return;
@@ -120,7 +119,6 @@ const OverviewView = ({ setActiveNav }: { setActiveNav: React.Dispatch<React.Set
             </div>
         );
     }
-    console.log("RENDER, scans:", scans)
 
     return (
         <div className="px-8 pb-16">

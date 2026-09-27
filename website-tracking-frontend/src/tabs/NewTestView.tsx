@@ -57,6 +57,20 @@ const NewTestView = ({ newTestUrl, setNewTestUrl, newTestType, setNewTestType, s
 
     const { backendurl } = useAuthContext()
 
+    const BLOCKED_HOST = [
+        "https://website-tracking-backend.vercel.app",
+        "https://website-tracking-backend.onrender.com"
+    ]
+    const checkUrlofSubmittingUrl = (url: string): boolean => {
+        try {
+            const hostname = new URL(url).hostname.toLowerCase()
+            return BLOCKED_HOST.some((name) => name === hostname || hostname.endsWith(`${name}`))
+        } catch (error) {
+            return false
+        }
+
+    }
+
     const handleStartScan = async () => {
         if (!newTestUrl.trim() || selectedTestNames.size === 0 || newTestUrl.length === 0 || !newTestUrl.includes("https://")) {
             setUrlError(!newTestUrl.trim() ? "Please enter valid url" : !newTestUrl.includes("https://") ? "Please enter verified url" : "Please select ateleast 1 test")
@@ -67,6 +81,12 @@ const NewTestView = ({ newTestUrl, setNewTestUrl, newTestType, setNewTestType, s
             return;
         }
         const StartScan = async (url: string, categories: string[], config?: WebsiteConfigInput) => {
+            toast.info("Please make sure your submitting right url")
+
+            if (checkUrlofSubmittingUrl(url)) {
+                toast.warn("Nice try mate!")
+                return;
+            }
             const res = await fetch(`${backendurl}/graphql`, {
                 method: "POST",
                 credentials: "include",
@@ -134,17 +154,7 @@ const NewTestView = ({ newTestUrl, setNewTestUrl, newTestType, setNewTestType, s
                     <p className="mt-2 text-xs" style={{ color: c.textFaint }}>Enter the full URL including https://</p>
                 </CardShell>
 
-                <div
-                    className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-5 text-center"
-                    style={{ borderColor: c.cardBorder }}
-                >
-                    <p className="mb-3 text-sm font-medium" style={{ color: c.textSecondary }}>or Upload File</p>
-                    <Upload className="mb-3 h-6 w-6" style={{ color: c.textFaint }} />
-                    <p className="mb-3 text-xs" style={{ color: c.textFaint }}>Drag &amp; drop your file here or</p>
-                    <button className="rounded-lg px-3 py-1.5 text-xs font-semibold text-white" style={{ backgroundColor: c.accent }}>
-                        Choose File
-                    </button>
-                </div>
+                
             </div>
             <CardShell className="mb-4 p-5">
                 <div className="mb-4 flex items-center justify-between">
