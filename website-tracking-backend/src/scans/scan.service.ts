@@ -201,5 +201,19 @@ export class ScanService {
         })
     }
 
+    async deleteScanOfUser(scanId: string, userId: string,) {
+        const deleteScanOfUser = await this.prisma.scan.findUnique({
+            where: { id: scanId },
+            include: { website: true }
+        })
+        if (!deleteScanOfUser) throw new NotFoundException("Scan doesnot exist")
+        if (deleteScanOfUser.website.ownerId !== userId) throw new ForbiddenException("This is not your website")
+
+        await this.prisma.$transaction([
+            this.prisma.testResult.deleteMany({ where: { scanId } }),
+            this.prisma.scan.delete({ where: { id: scanId } })
+        ])
+        return true
+    }
 }
 

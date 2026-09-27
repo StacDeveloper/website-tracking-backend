@@ -98,8 +98,33 @@ const HistoryView = ({
     useEffect(() => {
         getHistoryOfUser(0);
     }, []);
+
+    const deleteScanOfUser = async (scanId: string) => {
+        try {
+            const result = await fetch(`${backendurl}/graphql`, {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    query: `mutation DeleteScan($scanId:ID!){
+                         deleteScanOfUser(scanId:$scanId)
+                    }`, variables: { scanId }
+                })
+            })
+            const { data, errors } = await result.json()
+            if (data.deleteScanOfUser === true) {
+                sethistoryTests((prev) => prev.filter((test) => test.id !== scanId))
+                toast.success(`Deleted Scan ${historyTests.find((test) => test.id === scanId)?.website.url}`)
+            }
+            if (errors) console.error(errors)
+            return;
+        } catch (error: any) {
+            console.log(error)
+            toast.error(error)
+        }
+    }
     const makeApiCallToSave = async (websiteId: string) => {
-        const response = await fetch("http://localhost:4000/graphql", {
+        const response = await fetch(`${backendurl}/graphql`, {
             method: "POST",
             headers: { "Content-type": "application/json" },
             credentials: "include",
@@ -473,7 +498,7 @@ const HistoryView = ({
                                                             e.currentTarget.style.backgroundColor = "transparent";
                                                         }}
                                                     >
-                                                        <Trash2 className="h-4 w-4" />
+                                                        <Trash2 className="h-4 w-4" onClick={() => deleteScanOfUser(row.id)} />
                                                     </button>
 
                                                 </div>

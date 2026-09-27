@@ -42,13 +42,13 @@ export class ScanResolver {
     }
     @UseGuards(AuthGuard)
     @Query(() => ResultTest)
-    async getAlluserTests(@CurrentUser() user: any, @Args("cursor", { type: () => String, nullable: true }) cursor?: string, @Args("limit", { type: () => Int, nullable: true }) limit?:number) {
+    async getAlluserTests(@CurrentUser() user: any, @Args("cursor", { type: () => String, nullable: true }) cursor?: string, @Args("limit", { type: () => Int, nullable: true }) limit?: number) {
         return this.scansService.getMyTests(user.id, cursor, limit ?? 20)
     }
     @UseGuards(AuthGuard)
     @Query(() => CursorBasedHistoryOfUser)
     async getHistoryofUser(@CurrentUser() user: any, @Args("cursor", { nullable: true }) cursor?: string, @Args("limit", { type: () => Int, nullable: true }) limit?: number) {
-        return this.scansService.getHistoryofUser(user.id, cursor, limit )
+        return this.scansService.getHistoryofUser(user.id, cursor, limit)
     }
 
     @UseGuards(AuthGuard)
@@ -61,5 +61,11 @@ export class ScanResolver {
     @Query(() => [SavedWebsiteList])
     async getSavedWebsitesOfUser(@CurrentUser() user: any) {
         return this.scansService.getSavedWebsiteOfUser(user.id)
+    }
+    @UseGuards(AuthGuard)
+    @Mutation(() => Boolean)
+
+    async deleteScanOfUser(@Args("scanId", { type: () => ID }) scanId: string, @CurrentUser() user: any) {
+        return this.scansService.deleteScanOfUser(scanId, user.id)
     }
 }
