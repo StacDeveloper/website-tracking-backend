@@ -150,7 +150,9 @@ const HomePage = () => {
             </button>
 
 
-            <button className={` ${!user && "rounded-lg bg-gradient-to-r from-indigo-500 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 hover:scale-[1.03] transition-transform"}`} >
+            <button
+              onClick={() => !user && router.push("/login")}
+              className={` ${!user && "rounded-lg bg-gradient-to-r from-indigo-500 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 hover:scale-[1.03] transition-transform"}`} >
               {user ? <img style={{ width: '35px', height: '38px', borderRadius: '50%' }} src={user?.image || user.name.slice(0, 8)[0]} /> : "Sign up"}
             </button>
             <button
