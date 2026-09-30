@@ -222,8 +222,6 @@ export default function WebTestApp() {
 
           {/* Right side */}
           <div className="flex items-center gap-3">
-
-            {/* your existing theme button */}
             <button
               onClick={() => setTheme(isDark ? "light" : "dark")}
               aria-label="Toggle theme"

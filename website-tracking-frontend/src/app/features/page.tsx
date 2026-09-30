@@ -1,5 +1,12 @@
 import {
-    ShieldCheck, Bot, Sparkles, Settings2, History, Bookmark, Gauge, Lock,
+    ShieldCheck,
+    Bot,
+    Sparkles,
+    Settings2,
+    History,
+    Bookmark,
+    Gauge,
+    Lock,
 } from "lucide-react";
 
 const features = [
@@ -47,47 +54,116 @@ const features = [
 
 export default function FeaturesPage() {
     return (
-        <main className="min-h-screen bg-[#0a0a0f] text-white">
-            <section className="mx-auto max-w-5xl px-6 pb-16 pt-24 text-center">
-                <span className="mb-4 inline-block rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-300">
-                    Built for developers
-                </span>
-                <h1 className="mb-4 text-4xl font-bold tracking-tight sm:text-5xl">
-                    Everything you need to test your website&apos;s security
-                </h1>
-                <p className="mx-auto max-w-2xl text-base text-slate-400">
-                    One tool, 21 automated tests, and AI-generated fixes — from quick passive
-                    checks to deep active vulnerability scans.
-                </p>
-            </section>
+        <div
+            className="
+                min-h-screen
+                w-full
+                overflow-y-auto
+                bg-[#050510]
+                text-white
+            "
+        >
+            {/* Background */}
+            <div
+                className="
+                    pointer-events-none
+                    fixed
+                    inset-0
+                    -z-0
+                    bg-[radial-gradient(125%_125%_at_50%_10%,#000_40%,#63e_100%)]
+                    opacity-70
+                "
+            />
 
-            <section className="mx-auto max-w-6xl px-6 pb-24">
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                    {features.map((f) => (
-                        <div
-                            key={f.title}
-                            className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-colors hover:border-indigo-500/40"
-                        >
-                            <span className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-500/10">
-                                <f.icon className="h-5 w-5 text-indigo-400" />
-                            </span>
-                            <h3 className="mb-2 text-base font-semibold">{f.title}</h3>
-                            <p className="text-sm leading-relaxed text-slate-400">{f.desc}</p>
-                        </div>
-                    ))}
-                </div>
-            </section>
+            {/* Content */}
+            <div className="relative z-10">
 
-            <section className="border-t border-white/10 py-16 text-center">
-                <h2 className="mb-3 text-2xl font-bold">Ready to test your site?</h2>
-                <p className="mb-6 text-sm text-slate-400">No credit card required to get started.</p>
-                <a
-                    href="/login"
-                    className="inline-block rounded-lg bg-indigo-500 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-indigo-600"
-                >
-                    Start a Free Test
-                </a>
-            </section>
-        </main>
+                {/* Header */}
+                <section className="mx-auto max-w-5xl px-6 pb-12 pt-20 text-center sm:pt-24">
+                    <span className="mb-4 inline-block rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-300">
+                        Built for developers
+                    </span>
+
+                    <h1 className="mb-4 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+                        Everything you need to test your website&apos;s security
+                    </h1>
+
+                    <p className="mx-auto max-w-2xl text-base leading-relaxed text-slate-400 sm:text-lg">
+                        One tool, 21 automated tests, and AI-generated fixes —
+                        from quick passive checks to deep active vulnerability scans.
+                    </p>
+                </section>
+
+                {/* Features */}
+                <section className="mx-auto max-w-6xl px-6 pb-20">
+                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                        {features.map((f) => (
+                            <div
+                                key={f.title}
+                                className="
+                                    rounded-2xl
+                                    border
+                                    border-white/10
+                                    bg-white/[0.03]
+                                    p-6
+                                    transition-all
+                                    duration-200
+                                    hover:-translate-y-1
+                                    hover:border-indigo-500/40
+                                    hover:bg-white/[0.05]
+                                "
+                            >
+                                <span className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-500/10">
+                                    <f.icon className="h-5 w-5 text-indigo-400" />
+                                </span>
+
+                                <h3 className="mb-2 text-base font-semibold">
+                                    {f.title}
+                                </h3>
+
+                                <p className="text-sm leading-relaxed text-slate-400">
+                                    {f.desc}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                {/* CTA */}
+                <section className="border-t border-white/10 px-6 py-16 text-center">
+                    <h2 className="mb-3 text-2xl font-bold">
+                        Ready to test your site?
+                    </h2>
+
+                    <p className="mb-6 text-sm text-slate-400">
+                        No credit card required to get started.
+                    </p>
+
+                    <a
+                        href="/login"
+                        className="
+                            inline-flex
+                            items-center
+                            justify-center
+                            rounded-lg
+                            bg-indigo-500
+                            px-6
+                            py-3
+                            text-sm
+                            font-semibold
+                            text-white
+                            transition-all
+                            duration-200
+                            hover:bg-indigo-600
+                            hover:shadow-lg
+                            hover:shadow-indigo-500/20
+                        "
+                    >
+                        Start a Free Test
+                    </a>
+                </section>
+
+            </div>
+        </div>
     );
 }

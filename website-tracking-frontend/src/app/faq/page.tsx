@@ -48,54 +48,88 @@ const faqs = [
 
 function FaqItem({ q, a }: { q: string; a: string }) {
     const [open, setOpen] = useState(false);
+
     return (
-        <div className="border-b border-white/10 py-2">
+        <div className="border-b border-white/10 py-2 last:border-b-0">
             <button
                 onClick={() => setOpen((o) => !o)}
-                className="flex w-full items-center justify-between gap-4 py-4 text-left"
+                className="group flex w-full items-center justify-between gap-4 py-4 text-left"
             >
-                <span className="text-sm font-medium sm:text-base">{q}</span>
+                <span className="text-sm font-medium text-slate-200 transition-colors group-hover:text-white sm:text-base">
+                    {q}
+                </span>
+
                 <ChevronDown
-                    className={`h-4 w-4 shrink-0 text-slate-400 transition-transform ${open ? "rotate-180" : ""}`}
+                    className={`h-4 w-4 shrink-0 text-slate-500 transition-all duration-200 group-hover:text-indigo-400 ${open ? "rotate-180 text-indigo-400" : ""
+                        }`}
                 />
             </button>
+
             {open && (
-                <p className="pb-4 pr-8 text-sm leading-relaxed text-slate-400">{a}</p>
+                <p className="pb-5 pr-8 text-sm leading-relaxed text-slate-400">
+                    {a}
+                </p>
             )}
         </div>
     );
 }
 
-export default function FaqPage() {
+const FaqPage = ()=> {
     return (
-        <main className="min-h-screen bg-[#0a0a0f] text-white">
-            <section className="mx-auto max-w-3xl px-6 pb-10 pt-24 text-center">
-                <h1 className="mb-4 text-4xl font-bold tracking-tight">
-                    Frequently Asked Questions
-                </h1>
-                <p className="text-base text-slate-400">
-                    Everything you need to know before running your first scan.
-                </p>
-            </section>
+        <div className="relative min-h-screen w-full overflow-y-auto bg-[#050510] text-white">
+            {/* Background */}
+            <div className="pointer-events-none fixed inset-0 -z-0 bg-[radial-gradient(125%_125%_at_50%_10%,#050510_40%,#312e81_100%)] opacity-70" />
 
-            <section className="mx-auto max-w-3xl px-6 pb-24">
-                <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-6">
-                    {faqs.map((item) => (
-                        <FaqItem key={item.q} q={item.q} a={item.a} />
-                    ))}
-                </div>
-            </section>
+            <div className="relative z-10">
+                {/* Header */}
+                <section className="mx-auto max-w-3xl px-6 pb-10 pt-24 text-center">
+                    <span className="mb-4 inline-block rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-300">
+                        Got questions?
+                    </span>
 
-            <section className="border-t border-white/10 py-16 text-center">
-                <h2 className="mb-3 text-xl font-semibold">Still have questions?</h2>
-                <p className="mb-6 text-sm text-slate-400">We're happy to help.</p>
-                <a
-                    href="/login"
-                    className="inline-block rounded-lg bg-indigo-500 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-indigo-600"
-                >
-                    Get Started
-                </a>
-            </section>
-        </main>
+                    <h1 className="mb-4 text-4xl font-bold tracking-tight text-white sm:text-5xl">
+                        Frequently Asked Questions
+                    </h1>
+
+                    <p className="mx-auto max-w-2xl text-base leading-relaxed text-slate-400">
+                        Everything you need to know before running your first scan.
+                    </p>
+                </section>
+
+                {/* FAQ */}
+                <section className="mx-auto max-w-3xl px-6 pb-24">
+                    <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-6 shadow-2xl shadow-black/20">
+                        {faqs.map((item) => (
+                            <FaqItem
+                                key={item.q}
+                                q={item.q}
+                                a={item.a}
+                            />
+                        ))}
+                    </div>
+                </section>
+
+                {/* CTA */}
+                <section className="border-t border-white/10 py-16 text-center">
+                    <h2 className="mb-3 text-xl font-semibold text-white">
+                        Still have questions?
+                    </h2>
+
+                    <p className="mb-6 text-sm text-slate-400">
+                        We're happy to help.
+                    </p>
+
+                    <a
+                        href="/login"
+                        className="inline-block rounded-lg bg-indigo-500 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-indigo-600"
+                    >
+                        Get Started
+                    </a>
+                </section>
+            </div>
+        </div>
     );
 }
+
+export default FaqPage
+
