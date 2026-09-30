@@ -23,8 +23,8 @@ const HomePage = () => {
   const [theme, setTheme] = useState("dark");
   const isDark = theme === "dark";
   const router = useRouter()
-  const { user } = useAuthContext()
-
+  const { user, backendurl } = useAuthContext()
+  
   const c = {
     bg: isDark ? "#050510" : "#f7f7fb",
     panelBg: isDark ? "rgba(12,12,26,0.8)" : "rgba(255,255,255,0.9)",
@@ -64,7 +64,7 @@ const HomePage = () => {
       return;
     }
     try {
-      const res = await fetch(`${url}/graphql`, {
+      const res = await fetch(`${backendurl}/graphql`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -85,6 +85,8 @@ const HomePage = () => {
       })
       const { data, errors } = await res.json()
       console.log(data, errors)
+      toast.success(`Scan in progress for ${url}`)
+      router.push("/tests")
       return data || "Data failed"
 
     } catch (error: any) {
