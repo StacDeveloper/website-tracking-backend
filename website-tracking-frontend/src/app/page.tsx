@@ -123,7 +123,7 @@ const HomePage = () => {
           </div>
 
           <nav className="hidden items-center gap-8 md:flex">
-            {["Features", "Tests", "Pricing", "FAQ"].map((label, index) => (
+            {["Features", "Tests", "SEO", "FAQ"].map((label, index) => (
               <Link
                 key={index}
                 href={!user ? "login" : label.toLowerCase()}

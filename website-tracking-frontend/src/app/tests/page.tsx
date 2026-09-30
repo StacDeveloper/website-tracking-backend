@@ -3,8 +3,10 @@
 import { useState } from "react";
 import {
   CircleCheckBig,
+  Menu,
   Moon,
   Sun,
+  X
 } from "lucide-react";
 
 import OverviewView from "@/tabs/Overview";
@@ -33,6 +35,7 @@ export default function WebTestApp() {
   const [codeLang, setCodeLang] = useState("Node.js (mysql2)");
   const [testId, setTestId] = useState<string>("")
   const { user, setUser } = useAuthContext()
+  const [sideBar, setSideBar] = useState(false)
   const router = useRouter()
   // New Test form state
   const [newTestType, setNewTestType] = useState<"Active" | "Passive">("Active");
@@ -113,13 +116,35 @@ export default function WebTestApp() {
   return (
     <div className="flex min-h-screen w-full" style={{ backgroundColor: c.mainBg, color: c.textPrimary, transition: "background-color 0.3s, color 0.3s" }}>
       {/* Sidebar */}
-      <aside className="flex w-64 shrink-0 flex-col justify-between border-r px-4 py-6" style={{ backgroundColor: c.sidebarBg, borderColor: c.cardBorder }}>
+      <aside
+        className={`flex shrink-0 flex-col justify-between border-r px-4 py-6 transition-all duration-300 ease-in-out ${sideBar ? "w-64" : "w-20"
+          }`}
+        style={{
+          backgroundColor: c.sidebarBg,
+          borderColor: c.cardBorder,
+        }}
+      >
         <div>
-          <div className="mb-8 flex items-center gap-2 px-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-400 to-indigo-600">
-              <CircleCheckBig className="h-5 w-5 text-white" strokeWidth={2.5} />
+          <div
+            className={`mb-8 flex items-center px-2 ${sideBar ? "justify-start gap-2" : "justify-center"
+              }`}
+          >
+            <span
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-400 to-indigo-600 cursor-pointer"
+              onClick={() => router.push("/")}
+            >
+              <CircleCheckBig
+                className="h-5 w-5 text-white"
+                strokeWidth={2.5}
+              />
             </span>
-            <span className="text-lg font-bold tracking-tight cursor-pointer" onClick={() => router.push("/")}>
+
+            <span
+              className={`overflow-hidden whitespace-nowrap text-lg font-bold tracking-tight transition-all duration-200 ${sideBar
+                ? "max-w-[120px] opacity-100"
+                : "max-w-0 opacity-0"
+                }`}
+            >
               Web<span style={{ color: c.accent }}>Test</span>
             </span>
           </div>
@@ -133,13 +158,38 @@ export default function WebTestApp() {
                     setActiveNav(item.label);
                     setSelectedTest(null);
                     setScanning(false);
-                    if (item.label === "Results") setResultsTab("all");
+
+                    if (item.label === "Results") {
+                      setResultsTab("all");
+                    }
                   }}
-                  className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors"
-                  style={{ backgroundColor: active ? c.activeNavBg : "transparent", color: active ? c.accent : c.textSecondary }}
+                  title={!sideBar ? item.label : undefined}
+                  className={`flex w-full items-center rounded-lg py-2.5 text-sm font-medium transition-all duration-200 ${sideBar
+                    ? "gap-3 px-3"
+                    : "justify-center px-0"
+                    }`}
+                  style={{
+                    backgroundColor: active
+                      ? c.activeNavBg
+                      : "transparent",
+                    color: active
+                      ? c.accent
+                      : c.textSecondary,
+                  }}
                 >
-                  <item.icon className="h-4 w-4" strokeWidth={2} />
-                  {item.label}
+                  <item.icon
+                    className="h-4 w-4 shrink-0"
+                    strokeWidth={2}
+                  />
+
+                  <span
+                    className={`overflow-hidden whitespace-nowrap transition-all duration-200 ${sideBar
+                      ? "max-w-[140px] opacity-100"
+                      : "max-w-0 opacity-0"
+                      }`}
+                  >
+                    {item.label}
+                  </span>
                 </button>
               );
             })}
@@ -153,13 +203,47 @@ export default function WebTestApp() {
       <main className="flex-1 overflow-x-hidden">
         <div className="flex items-center justify-end gap-3 px-8 py-6">
           <button
-            onClick={() => setTheme(isDark ? "light" : "dark")}
-            aria-label="Toggle theme"
-            className="flex h-9 w-9 items-center justify-center rounded-full"
-            style={{ backgroundColor: c.toggleBg }}
+            type="button"
+            onClick={() => setSideBar((prev) => !prev)}
+            aria-label={sideBar ? "Collapse sidebar" : "Expand sidebar"}
+            className="flex h-9 w-9 items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105"
+            style={{
+              backgroundColor: c.toggleBg,
+              borderColor: c.cardBorder,
+              color: c.textSecondary,
+            }}
           >
-            {isDark ? <Moon className="h-4 w-4" style={{ color: c.textSecondary }} /> : <Sun className="h-4 w-4" style={{ color: c.textSecondary }} />}
+            {sideBar ? (
+              <X className="h-4 w-4" />
+            ) : (
+              <Menu className="h-4 w-4" />
+            )}
           </button>
+
+          {/* Right side */}
+          <div className="flex items-center gap-3">
+
+            {/* your existing theme button */}
+            <button
+              onClick={() => setTheme(isDark ? "light" : "dark")}
+              aria-label="Toggle theme"
+              className="flex h-9 w-9 items-center justify-center rounded-full"
+              style={{ backgroundColor: c.toggleBg }}
+            >
+              {isDark ? (
+                <Moon
+                  className="h-4 w-4"
+                  style={{ color: c.textSecondary }}
+                />
+              ) : (
+                <Sun
+                  className="h-4 w-4"
+                  style={{ color: c.textSecondary }}
+                />
+              )}
+            </button>
+          </div>
+
           {user && <button
             onClick={() => signOut()}
             className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200"
