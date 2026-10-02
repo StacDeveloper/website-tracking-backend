@@ -24,7 +24,7 @@ const HomePage = () => {
   const isDark = theme === "dark";
   const router = useRouter()
   const { user, backendurl } = useAuthContext()
-  
+
   const c = {
     bg: isDark ? "#050510" : "#f7f7fb",
     panelBg: isDark ? "rgba(12,12,26,0.8)" : "rgba(255,255,255,0.9)",
@@ -128,7 +128,7 @@ const HomePage = () => {
             {["Features", "Tests", "SEO", "FAQ"].map((label, index) => (
               <Link
                 key={index}
-                href={!user ? "login" : label.toLowerCase()}
+                href={!user ? "login" : label === "SEO" ? "https://seo-ranking-plum.vercel.app/" : label.toLowerCase()}
                 className="text-sm transition-colors"
                 style={{ color: c.textSecondary }}
               >
