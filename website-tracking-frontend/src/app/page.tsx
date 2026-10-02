@@ -50,6 +50,20 @@ const HomePage = () => {
     /\.mil$/i,
     /bank/i,
   ];
+  const myUrls = [
+    "https://website-tracking-backend.vercel.app",
+    "https://website-tracking-backend.onrender.com",
+    "https://seo-ranking-plum.vercel.app",
+  ]
+
+  const checkURL = (weWillGiveurl: string): boolean => {
+    const normaliseUrl = weWillGiveurl.trim().replace(/\/+$/, "")
+    if (myUrls.includes(normaliseUrl)) {
+      toast.error("Nice try mate!")
+      return false
+    }
+    return true
+  }
   async function handleSubmit(url: string) {
 
     if (user === null) {
@@ -63,13 +77,14 @@ const HomePage = () => {
       toast.error("This website cant be tested")
       return;
     }
-    try {
-      const res = await fetch(`${backendurl}/graphql`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: `mutation StartScan($url: String!, $categories: [String!]!, $config:WebsiteConfigInput) {
+    if (checkURL(url)) {
+      try {
+        const res = await fetch(`${backendurl}/graphql`, {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: `mutation StartScan($url: String!, $categories: [String!]!, $config:WebsiteConfigInput) {
                 startScan(url: $url, categories: $categories, config:$config) {
                   message
                   skippedActiveTest
@@ -80,21 +95,21 @@ const HomePage = () => {
                 },
               }
                 `,
-          variables: { url, categories: defaultCategories }
-        }),
-      })
-      const { data, errors } = await res.json()
-      console.log(data, errors)
-      toast.success(`Scan in progress for ${url}`)
-      router.push("/tests")
-      return data || "Data failed"
+            variables: { url, categories: defaultCategories }
+          }),
+        })
+        const { data, errors } = await res.json()
+        console.log(data, errors)
+        toast.success(`Scan in progress for ${url}`)
+        router.push("/tests")
+        return data || "Data failed"
 
-    } catch (error: any) {
-      console.log(error)
-      toast.error(error?.message)
+      } catch (error: any) {
+        console.log(error)
+        toast.error(error?.message)
+      }
     }
   }
-
 
   return (
     <div

@@ -4,6 +4,7 @@ import { useAuthContext } from "@/app/context/useAuthContext";
 import { useColorContext } from "@/app/context/useColorContext";
 import { CardShell } from "@/lib/Reusable-Components/Cardshell";
 import { SectionLabel } from "@/lib/Reusable-Components/SectionLabel";
+import { url } from "inspector";
 import { AlertTriangle, Check, ChevronDown, ClipboardList, Globe, Loader2, Play, Upload } from "lucide-react";
 import { useState } from "react";
 import { toast } from "react-toastify";
@@ -57,19 +58,21 @@ const NewTestView = ({ newTestUrl, setNewTestUrl, newTestType, setNewTestType, s
 
     const { backendurl } = useAuthContext()
 
-    const BLOCKED_HOST = [
+    const myUrls = [
         "https://website-tracking-backend.vercel.app",
-        "https://website-tracking-backend.onrender.com"
+        "https://website-tracking-backend.onrender.com",
+        "https://seo-ranking-plum.vercel.app",
     ]
-    const checkUrlofSubmittingUrl = (url: string): boolean => {
-        try {
-            const hostname = new URL(url).hostname.toLowerCase()
-            return BLOCKED_HOST.some((name) => name === hostname || hostname.endsWith(`${name}`))
-        } catch (error) {
+
+    const checkURL = (weWillGiveurl: string): boolean => {
+        const normaliseUrl = weWillGiveurl.trim().replace(/\/+$/, "")
+        if (myUrls.includes(normaliseUrl)) {
+            toast.error("Nice try mate!")
             return false
         }
-
+        return true
     }
+
 
     const handleStartScan = async () => {
         if (!newTestUrl.trim() || selectedTestNames.size === 0 || newTestUrl.length === 0 || !newTestUrl.includes("https://")) {
@@ -80,19 +83,16 @@ const NewTestView = ({ newTestUrl, setNewTestUrl, newTestType, setNewTestType, s
             toast.error("This website cant be tested")
             return;
         }
-        const StartScan = async (url: string, categories: string[], config?: WebsiteConfigInput) => {
-            toast.info("Please make sure your submitting right url")
-
-            if (checkUrlofSubmittingUrl(url)) {
-                toast.warn("Nice try mate!")
-                return;
-            }
-            const res = await fetch(`${backendurl}/graphql`, {
-                method: "POST",
-                credentials: "include",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    query: `mutation StartScan($url: String!, $categories: [String!]!, $config:WebsiteConfigInput) {
+        console.log(checkURL(newTestUrl))
+        if (checkURL(newTestUrl)) {
+            const StartScan = async (url: string, categories: string[], config?: WebsiteConfigInput) => {
+                toast.info("Please make sure your submitting right url")
+                const res = await fetch(`${backendurl}/graphql`, {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        query: `mutation StartScan($url: String!, $categories: [String!]!, $config:WebsiteConfigInput) {
                 startScan(url: $url, categories: $categories, config:$config) {
                   message
                   skippedActiveTest
@@ -103,26 +103,28 @@ const NewTestView = ({ newTestUrl, setNewTestUrl, newTestType, setNewTestType, s
                 },
               }
                 `,
-                    variables: { url, categories, config }
-                }),
-            })
-            const { data, errors } = await res.json()
-            if (errors) {
-                console.error(errors)
-                return null
+                        variables: { url, categories, config }
+                    }),
+                })
+                const { data, errors } = await res.json()
+                if (errors) {
+                    console.error(errors)
+                    return null
+                }
+                return data.startScan
             }
-            return data.startScan
+            const enumCategories = Array.from(selectedTestNames).map((test: any) => testNameToEnum[test]).filter(Boolean)
+            const result = await StartScan(newTestUrl, enumCategories, config)
+            if (!result?.scan?.id) {
+                console.log(result)
+                return console.error("Scan Failed to start")
+            }
+            setScanning(true)
+            setCurrentId(result.scan.id)
+            toast.success(`Scanning in progress for ${newTestUrl}`)
         }
-        const enumCategories = Array.from(selectedTestNames).map((test: any) => testNameToEnum[test]).filter(Boolean)
-        const result = await StartScan(newTestUrl, enumCategories, config)
-        if (!result?.scan?.id) {
-            console.log(result)
-            return console.error("Scan Failed to start")
-        }
-        setScanning(true)
-        setCurrentId(result.scan.id)
-        toast.success(`Scanning in progress for ${newTestUrl}`)
     }
+
 
 
     return (
@@ -154,7 +156,7 @@ const NewTestView = ({ newTestUrl, setNewTestUrl, newTestType, setNewTestType, s
                     <p className="mt-2 text-xs" style={{ color: c.textFaint }}>Enter the full URL including https://</p>
                 </CardShell>
 
-                
+
             </div>
             <CardShell className="mb-4 p-5">
                 <div className="mb-4 flex items-center justify-between">
