@@ -9,6 +9,8 @@ import {
   ArrowRight,
   Moon,
   Sun,
+  Menu,
+  X
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "react-toastify";
@@ -24,6 +26,7 @@ const HomePage = () => {
   const isDark = theme === "dark";
   const router = useRouter()
   const { user, backendurl } = useAuthContext()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const c = {
     bg: isDark ? "#050510" : "#f7f7fb",
@@ -116,6 +119,110 @@ const HomePage = () => {
       className="min-h-screen w-full relative overflow-hidden"
       style={{ backgroundColor: c.bg, color: c.textPrimary, transition: "background-color 0.3s ease, color 0.3s ease" }}
     >
+      {/* Mobile Navigation Overlay */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-[100] md:hidden"
+          style={{
+            backgroundColor: isDark
+              ? "rgba(5, 5, 16, 0.75)"
+              : "rgba(247, 247, 251, 0.75)",
+            backdropFilter: "blur(18px)",
+            WebkitBackdropFilter: "blur(18px)",
+          }}
+        >
+          <div className="flex min-h-full flex-col px-6 py-6">
+
+            {/* Menu Header */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-400 to-indigo-600">
+                  <CircleCheckBig
+                    className="h-5 w-5 text-white"
+                    strokeWidth={2.5}
+                  />
+                </span>
+
+                <span
+                  className="text-lg font-bold tracking-tight"
+                  style={{ color: c.textPrimary }}
+                >
+                  Web<span style={{ color: c.accentText }}>Test</span>
+                </span>
+              </div>
+
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                aria-label="Close menu"
+                className="flex h-9 w-9 items-center justify-center rounded-full"
+                style={{ backgroundColor: c.toggleBg }}
+              >
+                <X
+                  className="h-5 w-5"
+                  style={{ color: c.textSecondary }}
+                />
+              </button>
+            </div>
+
+            {/* Navigation */}
+            <nav className="mt-16 flex flex-col gap-3">
+              {["Features", "Tests", "SEO", "FAQ"].map((label) => (
+                <Link
+                  key={label}
+                  href={
+                    !user
+                      ? "/login"
+                      : label === "SEO"
+                        ? "https://seo-ranking-plum.vercel.app/"
+                        : `/${label.toLowerCase()}`
+                  }
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="rounded-xl px-4 py-4 text-lg font-medium transition-colors"
+                  style={{
+                    color: c.textPrimary,
+                    backgroundColor: c.cardBg,
+                    border: `1px solid ${c.cardBorder}`,
+                  }}
+                >
+                  <div className="flex items-center justify-between">
+                    <span>{label}</span>
+
+                    <ArrowRight
+                      className="h-4 w-4"
+                      style={{ color: c.textFaint }}
+                    />
+                  </div>
+                </Link>
+              ))}
+            </nav>
+
+            {/* Auth */}
+            <div className="mt-auto pb-4">
+              {!user ? (
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false)
+                    router.push("/login")
+                  }}
+                  className="w-full rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20"
+                >
+                  Sign up
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false)
+                    signOut()
+                  }}
+                  className="w-full rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20"
+                >
+                  Sign Out
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       {/* dot grid background */}
       <div
         className="pointer-events-none absolute inset-0 h-[900px] w-full"
@@ -153,6 +260,7 @@ const HomePage = () => {
           </nav>
 
           <div className="flex items-center gap-3">
+            {/* Theme Toggle */}
             <button
               onClick={() => setTheme(isDark ? "light" : "dark")}
               aria-label="Toggle theme"
@@ -160,23 +268,60 @@ const HomePage = () => {
               style={{ backgroundColor: c.toggleBg }}
             >
               {isDark ? (
-                <Moon className="h-4 w-4" style={{ color: c.textSecondary }} />
+                <Moon
+                  className="h-4 w-4"
+                  style={{ color: c.textSecondary }}
+                />
               ) : (
-                <Sun className="h-4 w-4" style={{ color: c.textSecondary }} />
+                <Sun
+                  className="h-4 w-4"
+                  style={{ color: c.textSecondary }}
+                />
               )}
             </button>
 
+            {/* Mobile Hamburger */}
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              aria-label="Open menu"
+              className="flex h-9 w-9 items-center justify-center rounded-full transition-colors md:hidden"
+              style={{ backgroundColor: c.toggleBg }}
+            >
+              <Menu
+                className="h-5 w-5"
+                style={{ color: c.textSecondary }}
+              />
+            </button>
 
-            <button
-              onClick={() => !user && router.push("/login")}
-              className={` ${!user && "rounded-lg bg-gradient-to-r from-indigo-500 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 hover:scale-[1.03] transition-transform"}`} >
-              {user ? <img style={{ width: '35px', height: '38px', borderRadius: '50%' }} src={user?.image || user.name.slice(0, 8)[0]} /> : "Sign up"}
-            </button>
-            <button
-              onClick={() => signOut()}
-              className="rounded-lg bg-gradient-to-r from-indigo-500 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 hover:scale-[1.03] transition-transform" >
-              Sign Out
-            </button>
+            {/* Desktop Auth */}
+            <div className="hidden items-center gap-3 md:flex">
+              <button
+                onClick={() => !user && router.push("/login")}
+                className={`${!user &&
+                  "rounded-lg bg-gradient-to-r from-indigo-500 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 hover:scale-[1.03] transition-transform"
+                  }`}
+              >
+                {user ? (
+                  <img
+                    style={{
+                      width: "35px",
+                      height: "38px",
+                      borderRadius: "50%",
+                    }}
+                    src={user?.image || user.name.slice(0, 8)[0]}
+                  />
+                ) : (
+                  "Sign up"
+                )}
+              </button>
+
+              <button
+                onClick={() => signOut()}
+                className="rounded-lg bg-gradient-to-r from-indigo-500 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 hover:scale-[1.03] transition-transform"
+              >
+                Sign Out
+              </button>
+            </div>
           </div>
         </header>
 

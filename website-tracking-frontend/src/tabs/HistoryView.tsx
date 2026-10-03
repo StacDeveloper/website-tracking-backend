@@ -45,8 +45,12 @@ const HistoryView = ({
     const [pageIndex, setPageIndex] = useState<number>(0)
     const { backendurl } = useAuthContext()
     const { c } = useColorContext();
-
+    const [statusFilter, setStatusFilter] = useState("ALL")
+    const [scoreFilter, setScoreFilter] = useState("ALL")
+    const [dateFilter, setDateFilter] = useState("ALL")
+    const [openFilter, setOpenFilter] = useState<"status" | "score" | "date" | null>(null)
     const [savedTests, setSavedTests] = useState<string[]>([]);
+
     const getHistoryOfUser = async (index: number) => {
         if (index < 0) return;
         const cursor = cursorStack[index];
@@ -58,20 +62,20 @@ const HistoryView = ({
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     query: `query GetHistory($cursor: String, $limit: Int) {
-                    getHistoryofUser(cursor: $cursor, limit: $limit) {
-                        items {
-                            id
-                            status
-                            completedAt
-                            testResultsCount
-                            passedCount
-                            website { id url }
-                            issueCount
+                        getHistoryofUser(cursor: $cursor, limit: $limit) {
+                            items {
+                                id
+                                status
+                                completedAt
+                                testResultsCount
+                                passedCount
+                                website { id url }
+                                issueCount
+                            }
+                            nextCursor
+                            hasNextPage
                         }
-                        nextCursor
-                        hasNextPage
-                    }
-                }`,
+                    }`,
                     variables: { cursor, limit: 20 },
                 }),
             });
@@ -107,8 +111,8 @@ const HistoryView = ({
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     query: `mutation DeleteScan($scanId:ID!){
-                         deleteScanOfUser(scanId:$scanId)
-                    }`, variables: { scanId }
+                            deleteScanOfUser(scanId:$scanId)
+                        }`, variables: { scanId }
                 })
             })
             const { data, errors } = await result.json()
@@ -130,8 +134,8 @@ const HistoryView = ({
             credentials: "include",
             body: JSON.stringify({
                 query: `mutation postSavedUrl($websiteId:ID!){
-                saveWebsite(websiteId:$websiteId)
-                }`, variables: { websiteId }
+                    saveWebsite(websiteId:$websiteId)
+                    }`, variables: { websiteId }
             })
         })
         const { data, errors } = await response.json()
@@ -145,21 +149,79 @@ const HistoryView = ({
 
     const filteredHistory = useMemo(() => {
         if (!Array.isArray(historyTests)) {
-            return [];
+            return []
         }
 
-        const search = historyQuery.trim().toLowerCase();
+        const search = historyQuery.trim().toLowerCase()
 
-        if (!search) {
-            return historyTests;
-        }
+        return historyTests.filter((row: HistoryTest) => {
+            // Search
+            const matchesSearch =
+                !search ||
+                row.website?.url?.toLowerCase().includes(search)
 
-        return historyTests.filter((row: HistoryTest) =>
-            row.website?.url
-                ?.toLowerCase()
-                .includes(search)
-        );
-    }, [historyTests, historyQuery]);
+            if (!matchesSearch) return false
+
+            // Status
+            const matchesStatus =
+                statusFilter === "ALL" ||
+                row.status === statusFilter
+
+            if (!matchesStatus) return false
+
+            // Score
+            const score = calculateScore(
+                row.passedCount,
+                row.testResultsCount
+            )
+
+            let matchesScore = true
+
+            if (scoreFilter === "90+") {
+                matchesScore = score >= 90
+            } else if (scoreFilter === "75-89") {
+                matchesScore = score >= 75 && score < 90
+            } else if (scoreFilter === "50-74") {
+                matchesScore = score >= 50 && score < 75
+            } else if (scoreFilter === "0-49") {
+                matchesScore = score < 50
+            }
+
+            if (!matchesScore) return false
+
+            // Date
+            if (dateFilter !== "ALL") {
+                const completedDate = new Date(row.completedAt)
+                const now = new Date()
+
+                const startDate = new Date()
+
+                if (dateFilter === "TODAY") {
+                    startDate.setHours(0, 0, 0, 0)
+                }
+
+                if (dateFilter === "7_DAYS") {
+                    startDate.setDate(now.getDate() - 7)
+                }
+
+                if (dateFilter === "30_DAYS") {
+                    startDate.setDate(now.getDate() - 30)
+                }
+
+                if (completedDate < startDate) {
+                    return false
+                }
+            }
+
+            return true
+        })
+    }, [
+        historyTests,
+        historyQuery,
+        statusFilter,
+        scoreFilter,
+        dateFilter
+    ])
 
 
     if (viewingId) {
@@ -184,17 +246,6 @@ const HistoryView = ({
                         View and manage all your past security tests.
                     </p>
                 </div>
-
-                <button
-                    className="flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm font-medium"
-                    style={{
-                        borderColor: c.cardBorder,
-                        color: c.textSecondary,
-                    }}
-                >
-                    <Download className="h-4 w-4" />
-                    Export Report
-                </button>
             </div>
 
             {/* Search / Filters */}
@@ -229,42 +280,207 @@ const HistoryView = ({
                 </div>
 
                 {/* Status Filter */}
-                <button
-                    className="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm"
-                    style={{
-                        borderColor: c.cardBorder,
-                        color: c.textSecondary,
-                    }}
-                >
-                    <Filter className="h-3.5 w-3.5" />
-                    Filter by Status
-                    <ChevronDown className="h-3.5 w-3.5" />
-                </button>
+                <div className="relative">
+                    <button
+                        type="button"
+                        onClick={() =>
+                            setOpenFilter(
+                                openFilter === "status" ? null : "status"
+                            )
+                        }
+                        className="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm"
+                        style={{
+                            borderColor:
+                                statusFilter !== "ALL"
+                                    ? c.accent
+                                    : c.cardBorder,
+                            color:
+                                statusFilter !== "ALL"
+                                    ? c.accent
+                                    : c.textSecondary,
+                        }}
+                    >
+                        <Filter className="h-3.5 w-3.5" />
+
+                        {statusFilter === "ALL"
+                            ? "Filter by Status"
+                            : statusFilter}
+
+                        <ChevronDown className="h-3.5 w-3.5" />
+                    </button>
+
+                    {openFilter === "status" && (
+                        <div
+                            className="absolute right-0 top-full z-50 mt-2 w-44 rounded-lg border p-1 shadow-xl"
+                            style={{
+                                backgroundColor: c.cardBg,
+                                borderColor: c.cardBorder,
+                            }}
+                        >
+                            {[
+                                ["ALL", "All Status"],
+                                ["COMPLETED", "Completed"],
+                                ["FAILED", "Failed"],
+                                ["RUNNING", "Running"],
+                            ].map(([value, label]) => (
+                                <button
+                                    key={value}
+                                    type="button"
+                                    onClick={() => {
+                                        setStatusFilter(value)
+                                        setOpenFilter(null)
+                                    }}
+                                    className="w-full rounded-md px-3 py-2 text-left text-sm transition-colors"
+                                    style={{
+                                        color:
+                                            statusFilter === value
+                                                ? c.accent
+                                                : c.textSecondary,
+                                    }}
+                                >
+                                    {label}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
 
                 {/* Score Filter */}
-                <button
-                    className="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm"
-                    style={{
-                        borderColor: c.cardBorder,
-                        color: c.textSecondary,
-                    }}
-                >
-                    <Filter className="h-3.5 w-3.5" />
-                    Filter by Score
-                    <ChevronDown className="h-3.5 w-3.5" />
-                </button>
+                <div className="relative">
+                    <button
+                        type="button"
+                        onClick={() =>
+                            setOpenFilter(
+                                openFilter === "score" ? null : "score"
+                            )
+                        }
+                        className="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm"
+                        style={{
+                            borderColor:
+                                scoreFilter !== "ALL"
+                                    ? c.accent
+                                    : c.cardBorder,
+                            color:
+                                scoreFilter !== "ALL"
+                                    ? c.accent
+                                    : c.textSecondary,
+                        }}
+                    >
+                        <Filter className="h-3.5 w-3.5" />
+
+                        {scoreFilter === "ALL"
+                            ? "Filter by Score"
+                            : scoreFilter === "90+"
+                                ? "Score: 90+"
+                                : `Score: ${scoreFilter}`}
+
+                        <ChevronDown className="h-3.5 w-3.5" />
+                    </button>
+
+                    {openFilter === "score" && (
+                        <div
+                            className="absolute right-0 top-full z-50 mt-2 w-44 rounded-lg border p-1 shadow-xl"
+                            style={{
+                                backgroundColor: c.cardBg,
+                                borderColor: c.cardBorder,
+                            }}
+                        >
+                            {[
+                                ["ALL", "All Scores"],
+                                ["90+", "90 - 100"],
+                                ["75-89", "75 - 89"],
+                                ["50-74", "50 - 74"],
+                                ["0-49", "0 - 49"],
+                            ].map(([value, label]) => (
+                                <button
+                                    key={value}
+                                    type="button"
+                                    onClick={() => {
+                                        setScoreFilter(value)
+                                        setOpenFilter(null)
+                                    }}
+                                    className="w-full rounded-md px-3 py-2 text-left text-sm"
+                                    style={{
+                                        color:
+                                            scoreFilter === value
+                                                ? c.accent
+                                                : c.textSecondary,
+                                    }}
+                                >
+                                    {label}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
 
                 {/* Date Range */}
-                <button
-                    className="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm"
-                    style={{
-                        borderColor: c.cardBorder,
-                        color: c.textSecondary,
-                    }}
-                >
-                    <Calendar className="h-3.5 w-3.5" />
-                    Select Date Range
-                </button>
+                <div className="relative">
+                    <button
+                        type="button"
+                        onClick={() =>
+                            setOpenFilter(
+                                openFilter === "date" ? null : "date"
+                            )
+                        }
+                        className="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm"
+                        style={{
+                            borderColor:
+                                dateFilter !== "ALL"
+                                    ? c.accent
+                                    : c.cardBorder,
+                            color:
+                                dateFilter !== "ALL"
+                                    ? c.accent
+                                    : c.textSecondary,
+                        }}
+                    >
+                        <Calendar className="h-3.5 w-3.5" />
+
+                        {dateFilter === "ALL"
+                            ? "Select Date Range"
+                            : dateFilter === "TODAY"
+                                ? "Today"
+                                : dateFilter === "7_DAYS"
+                                    ? "Last 7 Days"
+                                    : "Last 30 Days"}
+                    </button>
+
+                    {openFilter === "date" && (
+                        <div
+                            className="absolute right-0 top-full z-50 mt-2 w-44 rounded-lg border p-1 shadow-xl"
+                            style={{
+                                backgroundColor: c.cardBg,
+                                borderColor: c.cardBorder,
+                            }}
+                        >
+                            {[
+                                ["ALL", "All Time"],
+                                ["TODAY", "Today"],
+                                ["7_DAYS", "Last 7 Days"],
+                                ["30_DAYS", "Last 30 Days"],
+                            ].map(([value, label]) => (
+                                <button
+                                    key={value}
+                                    type="button"
+                                    onClick={() => {
+                                        setDateFilter(value)
+                                        setOpenFilter(null)
+                                    }}
+                                    className="w-full rounded-md px-3 py-2 text-left text-sm"
+                                    style={{
+                                        color:
+                                            dateFilter === value
+                                                ? c.accent
+                                                : c.textSecondary,
+                                    }}
+                                >
+                                    {label}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* History Table */}

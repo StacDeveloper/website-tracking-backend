@@ -83,10 +83,9 @@ const NewTestView = ({ newTestUrl, setNewTestUrl, newTestType, setNewTestType, s
             toast.error("This website cant be tested")
             return;
         }
-        console.log(checkURL(newTestUrl))
         if (checkURL(newTestUrl)) {
             const StartScan = async (url: string, categories: string[], config?: WebsiteConfigInput) => {
-                toast.info("Please make sure your submitting right url")
+                toast.info("Please make sure you are submitting right url to get right results!")
                 const res = await fetch(`${backendurl}/graphql`, {
                     method: "POST",
                     credentials: "include",

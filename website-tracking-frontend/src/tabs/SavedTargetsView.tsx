@@ -73,7 +73,7 @@ const SavedTargetsView = ({ savedQuery, setSavedQuery, startScan, setNewTestUrl,
         [savedQuery, displayWebsite])
 
     const getSavedUrl = async () => {
-        const websites = await fetch("http://localhost:4000/graphql", {
+        const websites = await fetch(`${backendurl}/graphql`, {
             method: "POST",
             headers: { "Content-type": "application/json" },
             credentials: "include",
@@ -95,7 +95,6 @@ const SavedTargetsView = ({ savedQuery, setSavedQuery, startScan, setNewTestUrl,
             console.error(errors)
             return []
         }
-        console.log(data)
         setSavedWebsite(data.getSavedWebsitesOfUser)
         return data.getSavedWebsitesOfUser
     }
